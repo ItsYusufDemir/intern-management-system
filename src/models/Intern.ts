@@ -16,6 +16,8 @@ export class Intern {
     internshipEndingDate: Date;
     cvUrl: string;
     başarıPuanı: number[];
+    stajSüresi: number;
+    email: string;
 
     constructor(
         photoUrl: string,
@@ -31,6 +33,7 @@ export class Intern {
         internshipStartingDate: Date,
         internshipEndingDate: Date,
         cvUrl: string,
+        email: string
       ) {
         this.photoUrl = photoUrl;
         this.name = name;
@@ -47,6 +50,8 @@ export class Intern {
         this.cvUrl = cvUrl;
         this.fullName = this.name + " " + this.lastName;
         this.başarıPuanı = [];
+        this.stajSüresi = Math.round(((this.internshipEndingDate.getTime() - this.internshipStartingDate.getTime())/(1000 * 60 * 60 * 24 * 7)));
+        this.email = email;
       }
 }
 

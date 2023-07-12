@@ -34,9 +34,12 @@ teams.push(embeddedTeam);
 
 
 let date = new Date(2023, 6, 1);
-let newIntern = new Intern("../assets/jamesbond.jpg", "James", "Bond", "", "", "", "", 3,3, teams[0], date, date, "../documents/cv.pdf");
-let newIntern2 = new Intern("../assets/adele.jpg", "Adele", "Adkins", "", "", "", "", 3,3, teams[0], date, date, "../documents/cv.pdf");
-let newIntern3 = new Intern("../assets/bradpitt.jpg", "Brad", "Pitt", "", "", "", "", 3,3, teams[1], date, date, "../documents/cv.pdf");
+let date1 = new Date(2023, 7,15);
+
+let newIntern = new Intern("../assets/jamesbond.jpg", "James", "Bond", "11111111111", "5555555555", "Oxford",
+ "Computer Engineering", 3,3.52, teams[0], date, date1, "../documents/cv.pdf", "example@gmail.com");
+let newIntern2 = new Intern("../assets/adele.jpg", "Adele", "Adkins", "", "", "", "", 3,3, teams[0], date, date1, "../documents/cv.pdf", "example@gmail.com");
+let newIntern3 = new Intern("../assets/bradpitt.jpg", "Brad", "Pitt", "", "", "", "", 3,3, teams[1], date, date1, "../documents/cv.pdf", "example@gmail.com");
 
 newIntern.başarıPuanı.push(90);
 
@@ -52,6 +55,8 @@ const InternsPage = () => {
 
 
   const [team, setTeam] = useState<any>(teams[0]);
+
+  
 
   const handleTeamSelect = (e: any) => {
 
@@ -99,7 +104,7 @@ const InternsPage = () => {
 
 
   const [form] = Form.useForm();
-
+ 
   const handleUpdateValue = () => {
     form.setFieldsValue({
       internSelectItem: "Select an intern",
@@ -148,8 +153,14 @@ const InternsPage = () => {
       </div>
       <br />
       
+    
       <div className="cv-area">
         <CVComponent intern={selectedIntern}/>
+      </div>
+
+      <br />
+      <div className="internship-area">
+        <h2>Staj Programı</h2>
       </div>
 
 
