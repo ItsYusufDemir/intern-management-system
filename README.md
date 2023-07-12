@@ -1,3 +1,7 @@
+# intern-management-system
+Intern Management System (IMS) is an easy way to follow up interns and see their progress easily.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
