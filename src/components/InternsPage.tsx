@@ -4,6 +4,7 @@ import "../styles.css";
 import {Intern} from "../models/Intern";
 import {Program} from "../models/Program";
 import {Team} from "../models/Team";
+import CVComponent from "./CVComponent"
 
 
 
@@ -33,10 +34,9 @@ teams.push(embeddedTeam);
 
 
 let date = new Date(2023, 6, 1);
-
-let newIntern = new Intern("../img/wp-person-placeholder.png", "Yusuf", "Demir", "", "", "", "", 3,3, teams[0], date, date, "../documents/cv.pdf");
-let newIntern2 = new Intern("../img/wp-person-placeholder.png", "Tarık", "Akdemir", "", "", "", "", 3,3, teams[0], date, date, "../documents/cv.pdf");
-let newIntern3 = new Intern("../img/wp-person-placeholder.png", "John", "Bond", "", "", "", "", 3,3, teams[1], date, date, "../documents/cv.pdf");
+let newIntern = new Intern("../assets/jamesbond.jpg", "James", "Bond", "", "", "", "", 3,3, teams[0], date, date, "../documents/cv.pdf");
+let newIntern2 = new Intern("../assets/adele.jpg", "Adele", "Adkins", "", "", "", "", 3,3, teams[0], date, date, "../documents/cv.pdf");
+let newIntern3 = new Intern("../assets/bradpitt.jpg", "Brad", "Pitt", "", "", "", "", 3,3, teams[1], date, date, "../documents/cv.pdf");
 
 newIntern.başarıPuanı.push(90);
 
@@ -53,29 +53,32 @@ const InternsPage = () => {
 
   const [team, setTeam] = useState<any>(teams[0]);
 
-
   const handleTeamSelect = (e: any) => {
 
-    console.log(e);
     setTeam(teams[e]);
-
+    
+    setSelectedIntern(undefined);
+    handleUpdateValue();
     setSelectDisabled(false);
+    
+    counter = -1;
   }
+
 
   useEffect(() => {
     
   }, [team]);
-
   
 
 
-
-  const [selectDisabled, setSelectDisabled] = useState<boolean>(false);
-
-
+  const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
+  const [selectedIntern, setSelectedIntern] = useState<any>();
+  let counter = -1;
   
 
-  let selectedIntern: Intern;
+ 
+
+  
 
   const renderCv = (e: any) => {
 
@@ -87,12 +90,21 @@ const InternsPage = () => {
         teamInterns.push(interns[i]);
       }
     }
-    selectedIntern = teamInterns[e];
 
-
-
-
+    setSelectedIntern(teamInterns[e]);
+    
   }
+
+
+
+
+  const [form] = Form.useForm();
+
+  const handleUpdateValue = () => {
+    form.setFieldsValue({
+      internSelectItem: "Select an intern",
+    });
+  };
 
 
 
@@ -101,11 +113,11 @@ const InternsPage = () => {
 
 
       <div className="intern-page-selections" style={{display: "flex"}}>
-        <Form layout="vertical">
+        <Form layout="vertical" form={form}>
           <Row gutter={100}>
             <Col span={12}>
               <Form.Item label="Team" name="teamSelectItem" style={{width: 350}}>
-                <Select onChange={handleTeamSelect} defaultValue={0}>
+                <Select onChange={handleTeamSelect} >
                     {teams.map((team,index) => (
                       <Select.Option value={index}>{team.name}</Select.Option>
                     ))}
@@ -113,12 +125,15 @@ const InternsPage = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Week" name="internSelectItem" style={{width: 350, marginLeft: "auto"} }>
-                <Select disabled={selectDisabled} onChange={renderCv} className="internSelect">
+              <Form.Item label="Intern" name="internSelectItem" style={{width: 350, marginLeft: "auto"}}>
+                
+                <Select  disabled={selectDisabled} onChange={renderCv} className="internSelect">
+                
                   {interns.map((intern, index) => {
                       if(intern.team.name === team.name){
+                        counter++;
                         return (
-                          <Select.Option value={index}>{intern.fullName}</Select.Option>
+                          <Select.Option value={counter}>{intern.fullName}</Select.Option>
                         )
                       }
                       
@@ -129,12 +144,16 @@ const InternsPage = () => {
 
           </Row>
         </Form>
+        
       </div>
-      <br /><br />
+      <br />
+      
+      <div className="cv-area">
+        <CVComponent intern={selectedIntern}/>
+      </div>
 
-      
-      
-      
+
+
       
       
       </>  
