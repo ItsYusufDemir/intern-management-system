@@ -10,7 +10,54 @@ import HomePage from "./components/HomePage";
 import InternsPage from './components/InternsPage';
 import AddInternPage from './components/AddInternPage';
 import AddTeamPage from './components/AddTeamPage';
+import {Team} from "./models/Team";
+import {Intern} from "./models/Intern";
+import {Program} from "./models/Program";
 
+
+
+/******************Database************************/
+var teams: Team[] = [];
+var interns: Intern[] = [];
+
+
+let fullStackCurriculum: Program[] = []
+let newMission = new Program(1, "Javasciprt Öğren");
+let newMission2 = new Program(2, "React Öğren");
+fullStackCurriculum.push(newMission);
+fullStackCurriculum.push(newMission2);
+
+let embeddedCurriculum: Program[] = []
+let newMission3 = new Program(1, "Eve git");
+let newMission4 = new Program(2, "Uyu");
+embeddedCurriculum.push(newMission3);
+embeddedCurriculum.push(newMission4);
+
+
+let fullStackTeam = new Team("Full Stack", fullStackCurriculum);
+let embeddedTeam = new Team("Embedded", embeddedCurriculum);
+
+teams.push(fullStackTeam);
+teams.push(embeddedTeam);
+
+
+let date = new Date(2023, 6, 3);
+let date1 = new Date(2023, 7,15);
+
+let newIntern = new Intern("../assets/jamesbond.jpg", "James", "Bond", "11111111111", "5555555555", "Oxford",
+ "Computer Engineering", 3,3.52, teams[0], date, date1, "../documents/cv.pdf", "example@gmail.com");
+let newIntern2 = new Intern("../assets/adele.jpg", "Adele", "Adkins", "", "", "", "", 3,3, teams[0], date, date1, "../documents/cv.pdf", "example@gmail.com");
+let newIntern3 = new Intern("../assets/bradpitt.jpg", "Brad", "Pitt", "", "", "", "", 3,3, teams[1], date, date1, "../documents/cv.pdf", "example@gmail.com");
+
+
+newIntern.başarıPuanı[0] = 50;
+newIntern.computeOverallSuccess();
+
+interns.push(newIntern);
+interns.push(newIntern2);
+interns.push(newIntern3);
+
+/*******************Database***********************/
 
 
 
@@ -86,9 +133,9 @@ const App: React.FC = () => {
             <Breadcrumb.Item>Bill</Breadcrumb.Item>
           </Breadcrumb>*/}
           <div style={{ padding: 24, minHeight: 500, background: colorBgContainer}}>
-            {selectedMenuItem === "1" && <HomePage />}
-            {selectedMenuItem === "2" && <InternsPage/>}
-            {selectedMenuItem === "3" && <AddInternPage />}
+            {selectedMenuItem === "1" && <HomePage teams={teams} interns={interns} />}
+            {selectedMenuItem === "2" && <InternsPage teams={teams} interns={interns} />}
+            {selectedMenuItem === "3" && <AddInternPage isEdit={false}/>}
             {selectedMenuItem === "4" && <AddTeamPage/>}
 
           </div>

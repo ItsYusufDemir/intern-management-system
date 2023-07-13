@@ -1,8 +1,9 @@
 import Form from "./InternAddingForm";
+import {Intern} from "../models/Intern";
 
-const AddInternPage = () => {
+const AddInternPage = (props: {isEdit: boolean, intern?: Intern}) => {
     return ( 
-        <Form />
+        <Form isEdit={props.isEdit} intern={props.intern} />
      );
 }
  
