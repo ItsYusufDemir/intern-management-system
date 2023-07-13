@@ -18,6 +18,7 @@ export class Intern {
     başarıPuanı: number[];
     stajSüresi: number;
     email: string;
+    overallSuccess: number | undefined;
 
     constructor(
         photoUrl: string,
@@ -33,7 +34,7 @@ export class Intern {
         internshipStartingDate: Date,
         internshipEndingDate: Date,
         cvUrl: string,
-        email: string
+        email: string,
       ) {
         this.photoUrl = photoUrl;
         this.name = name;
@@ -52,6 +53,28 @@ export class Intern {
         this.başarıPuanı = [];
         this.stajSüresi = Math.round(((this.internshipEndingDate.getTime() - this.internshipStartingDate.getTime())/(1000 * 60 * 60 * 24 * 7)));
         this.email = email;
+        this.overallSuccess = undefined;
+        this.başarıPuanı = new Array(this.team.curriculum.length);
+      }
+
+
+      //Compute the overall point
+       computeOverallSuccess(): void  {
+        
+        let totalPoint = 0;
+
+        let counter = 0;
+        this.başarıPuanı.forEach(week => {
+          if(this.başarıPuanı[counter] !== undefined){
+            totalPoint = totalPoint + this.başarıPuanı[counter];
+            counter++;
+          }
+        })
+        console.log("totalPoint: " + totalPoint);
+        console.log(this.başarıPuanı);
+
+        this.overallSuccess = totalPoint / counter;
+
       }
 }
 

@@ -15,6 +15,7 @@ import {
   Upload,
 } from 'antd';
 import React, { useState } from 'react';
+import {Intern} from "../models/Intern";
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -28,7 +29,7 @@ const normFile = (e: any) => {
 
 
 
-function InternAddingForm() {
+function InternAddingForm(props: {isEdit: boolean, intern?: Intern}) {
 
   const [form] = Form.useForm();
 
@@ -36,13 +37,23 @@ function InternAddingForm() {
     const value = form.getFieldValue('name');
     console.log(e);
 
-    alert("Intern is added");
+    if(props.isEdit){
+      alert("Intern is edited!");
+    }
+    else{
+      alert("Intern is added!")
+    }
   };
 
   return (
 
     <>
-      <h2>Add Intern</h2>
+      {props.isEdit ? (
+        <h2>Edit Intern</h2>
+      ) : (
+        <h2>Add Intern</h2>
+      )}
+      
       <Form
         layout="horizontal"
         style={{ maxWidth: 400 }}
@@ -50,15 +61,15 @@ function InternAddingForm() {
         form={form}>
           
         
-        <Form.Item label="Name" name="name">
+        <Form.Item label="Name" name="name" rules={[{ required: true }]}>
           <Input required/>
         </Form.Item>
         
-        <Form.Item label="Last Name" name="lastName">
+        <Form.Item label="Last Name" name="lastName" rules={[{ required: true }]}>
           <Input required/>
         </Form.Item>
-        <Form.Item label="Tel" name="tel">
-          <Input required/>
+        <Form.Item label="Tel" name="tel" required>
+          <Input />
         </Form.Item>
         <Form.Item label="University" name="uni">
           <Input />
@@ -77,7 +88,7 @@ function InternAddingForm() {
         <Form.Item label="GPA" name="gpa">
           <InputNumber/>
         </Form.Item>
-        <Form.Item label="Team" name="team">
+        <Form.Item label="Team" name="team" required>
             <Select>
                 <Select.Option value="1">Full Stack</Select.Option>
                 <Select.Option value="2">Embedded</Select.Option>
@@ -87,7 +98,7 @@ function InternAddingForm() {
         <Form.Item label="Birthday" name="birthday">
           <DatePicker format="DD-MM-YYYY" />
         </Form.Item>
-        <Form.Item label="Internship Date" name="internshipDate">
+        <Form.Item label="Internship Date" name="internshipDate" required>
           <RangePicker format="DD-MM-YYYY" />
         </Form.Item>
         
@@ -110,7 +121,7 @@ function InternAddingForm() {
         </Form.Item>
   
         <Form.Item>
-            <div><Button  htmlType='submit' type='primary' block>Add Intern</Button></div>
+            <div><Button  htmlType='submit' type='primary' block>{props.isEdit ? (<>Edit Intern</>) : (<>Add Intern</>)}</Button></div>
         </Form.Item>
       </Form>
     </>
