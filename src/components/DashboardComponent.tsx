@@ -8,10 +8,6 @@ const DashboardComponent = (props: {team: Team, interns: Intern[]}) => {
 
     const team = props.team;
     const interns = props.interns;
-    console.log("rendered again");
-    console.log(team);
-
-
 
     return (
 

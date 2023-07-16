@@ -5,22 +5,18 @@ import {DownloadOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled}
 import AddInternPage from './AddInternPage';
 import { Team } from '../models/Team';
 import { useLocation, useNavigate } from 'react-router-dom';
+import PDFViewer from './PDFViewer';
 
 
-
-
-
-
+// TODO: Handle Download Cv,
 
 
 const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) => {
+    
     const intern = props.intern;
-
-
     const [form] = Form.useForm();
  
     const handleUpdateValue = () => {
-        console.log("bura sıkıntı");
         form.setFieldsValue({
         weekSelect: "Select week",
         });
@@ -29,23 +25,26 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     useEffect(() => {
         setIsHidden(true);
         handleUpdateValue();
-        console.log("intern is changed");
     }, [intern]);
 
     
-
     const handleClick = () =>{
         openPdfInNewTab(intern.cvUrl);
     }
 
     const openPdfInNewTab = (pdfPath: string) => {
+
+        return <PDFViewer pdfUrl={intern.cvUrl} />;
+
+        /*
         fetch(pdfPath)
           .then((response) => response.blob())
           .then((blob) => {
             const pdfUrl = URL.createObjectURL(blob);
             window.open(pdfUrl, '_blank');
           });
-      };
+        */
+    };
 
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
@@ -58,46 +57,31 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
       const location = useLocation();
       const navigate = useNavigate();
 
-      //
+      
 
     
     if(intern === undefined){
-        return (<></>);
+       return (<></>);
     }
-
+    
     
 
 
 
     const handleSelectWeek = (e: number) =>{
         setCurrentWeek(e);
-        console.log("currentWeek: " + currentWeek);
-   
-        
-        
+        console.log("current week: " + e);
+
         setIsHidden(false);
         setCurrentWeeklyGrade(intern.successGrades[e]);
         setCurrentMission(intern.team.curriculum[e].mission);
     }
 
- 
+    //Percentage of complete of internship
     const completePercentage = Math.round(((Date.now() - intern.internshipStartingDate.getTime()) / 
     (intern.internshipEndingDate.getTime() - intern.internshipStartingDate.getTime())) * 100)
     
     
-    const handleAddButton = ((e: any) => {
-        
-    })
-
-    
-    
-
-
-
-
-
-
-
     //Add/Change weekly grade Modal
     const showModal = () => {
         setIsModalOpen(true);
@@ -112,30 +96,19 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         }
 
         intern.successGrades[currentWeek] = Number(form2.getFieldValue("newGrade"));
-        intern.computeOverallSuccess();
+        intern.computeOverallSuccess(); //Update the intern's overall success
 
-        
- 
         setCurrentWeeklyGrade(Number(form2.getFieldValue("newGrade")));
 
         form2.resetFields();
         setIsModalOpen(false);
-
-        
     };
 
     const handleCancel = () => {
         setIsModalOpen(false);
     };
 
-    ;
-
-    const onFinish = () => {
-        form.resetFields();
-        console.log("form is finished");
-    }
-
-
+    
 
     //Edit Intern Modal
     const showModal2 = () => {
@@ -192,22 +165,11 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
 
     const deleteIntern = () => {
         
+        navigate(0); //Refresh the page
 
-
-        navigate(0);
-        
-
-
-        alert("Intern is deleted");
-        
-    }
+        alert("Intern is deleted");  
+    };
    
-
-    
-
-   
-    
-
 
     
     return (
@@ -285,7 +247,6 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
                 <Form
                     layout="horizontal"
                     style={{ maxWidth: 400 }}
-                    onFinish={onFinish}
                     form={form2}>
                     
                     <Form.Item label="Weekly Grade" name="newGrade">

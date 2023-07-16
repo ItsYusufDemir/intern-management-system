@@ -16,12 +16,13 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import {Intern} from "../models/Intern";
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Team } from '../models/Team';
+import dayjs from 'dayjs';
 
 
 const { RangePicker } = DatePicker;
-const { TextArea } = Input;
+
 
 const normFile = (e: any) => {
   if (Array.isArray(e)) {
@@ -30,6 +31,7 @@ const normFile = (e: any) => {
   return e?.fileList;
 };
 
+let isFormUpdated = false;
 
 
 function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[], interns: Intern[], onSave: (intern: Intern | undefined) => void}) {
@@ -43,26 +45,36 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
     props.onSave(intern);
   };
 
+;
+  
 
   useEffect(() => {
-    if (intern) {
+
+    if (intern && !isFormUpdated) {
+
+      const birthday = dayjs(intern.birthday);
+      const internshipStartDate = dayjs(intern.internshipStartingDate);
+      const internshipEndDate = dayjs(intern.internshipEndingDate);
+
       form.setFieldsValue({
         name: intern.name,
         lastName: intern.lastName,
+        id: intern.id,
+        email: intern.email,
         tel: intern.tel,
         uni: intern.uni,
         major: intern.major,
-        grade: intern.grade,
+        grade: (intern.grade + ""),
         gpa: intern.gpa,
-        team: intern.team,
-        //birthday: intern.birthday,
-        //internshipDate: [moment(intern.internshipStartingDate), moment(intern.internshipEndingDate)],
-        
+        team: intern.team.name,
+        birthday: birthday,
+        internshipDate: [internshipStartDate, internshipEndDate],
       });
+      isFormUpdated = true;
     } else {
       form.resetFields(); // Reset the form fields if not in edit mode
     }
-  }, [intern, form]);
+  }, [intern]);
 
 
   
@@ -93,7 +105,15 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         <Form.Item label="Last Name" name="lastName" rules={[{ required: true }]}>
           <Input required/>
         </Form.Item>
-        <Form.Item label="Tel" name="tel" required>
+        <Form.Item label="Personal ID" name="id" >
+          <Input />
+        </Form.Item>
+        <Form.Item label="E-mail" name="email" rules={[
+          { type: 'email', message: 'Please enter a valid email address' },
+        ]} >
+          <Input />
+        </Form.Item>
+        <Form.Item label="Tel" name="tel" >
           <Input />
         </Form.Item>
         <Form.Item label="University" name="uni">
@@ -115,21 +135,24 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         </Form.Item>
         <Form.Item label="Team" name="team" required>
             <Select>
-                <Select.Option value="1">Full Stack</Select.Option>
-                <Select.Option value="2">Embedded</Select.Option>
+                {props.teams.map(team => {
+                  return(
+                    <Select.Option value={team.name}>{team.name}</Select.Option>
+                  )
+                })}
             </Select>
         </Form.Item>
         
         <Form.Item label="Birthday" name="birthday">
           <DatePicker format="DD-MM-YYYY" />
         </Form.Item>
-        <Form.Item label="Internship Date" name="internshipDate" required>
-          <RangePicker format="DD-MM-YYYY" />
+        <Form.Item label="Internship Date" name="internshipDate">
+          <RangePicker format="DD-MM-YYYY"/>
         </Form.Item>
         
         
         <Form.Item valuePropName="fileList" getValueFromEvent={normFile} name="cv">
-          <Upload action="/upload.do" listType="picture-card">
+          <Upload action="/upload.do" listType="picture-card" accept='.pdf,.docx,doc'maxCount={1}>
             <div>
               <PlusOutlined />
               <div style={{ marginTop: 8 }}>Upload CV</div>
@@ -137,7 +160,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
           </Upload>
         </Form.Item>
         <Form.Item valuePropName="fileList" getValueFromEvent={normFile} name="photo">
-          <Upload action="/upload.do" listType="picture-card">
+          <Upload action="/upload.do" listType="picture-card"  accept='.jpg,.png'maxCount={1}>
             <div>
               <PlusOutlined />
               <div style={{ marginTop: 8 }}>Upload Photo</div>
