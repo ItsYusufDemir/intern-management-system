@@ -3,6 +3,8 @@ import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space
 import {Intern} from "../models/Intern";
 import {DownloadOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled} from '@ant-design/icons';
 import AddInternPage from './AddInternPage';
+import { Team } from '../models/Team';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 
 
@@ -10,7 +12,8 @@ import AddInternPage from './AddInternPage';
 
 
 
-const CVComponent = (props: {intern: Intern}) => {
+
+const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) => {
     const intern = props.intern;
 
 
@@ -52,6 +55,8 @@ const CVComponent = (props: {intern: Intern}) => {
       const [form2] = Form.useForm()
       const [editForm] = Form.useForm();
       const [currentWeek, setCurrentWeek] = useState(0);
+      const location = useLocation();
+      const navigate = useNavigate();
 
       //
 
@@ -71,7 +76,7 @@ const CVComponent = (props: {intern: Intern}) => {
         
         
         setIsHidden(false);
-        setCurrentWeeklyGrade(intern.başarıPuanı[e]);
+        setCurrentWeeklyGrade(intern.successGrades[e]);
         setCurrentMission(intern.team.curriculum[e].mission);
     }
 
@@ -106,7 +111,7 @@ const CVComponent = (props: {intern: Intern}) => {
             return;
         }
 
-        intern.başarıPuanı[currentWeek] = Number(form2.getFieldValue("newGrade"));
+        intern.successGrades[currentWeek] = Number(form2.getFieldValue("newGrade"));
         intern.computeOverallSuccess();
 
         
@@ -137,12 +142,19 @@ const CVComponent = (props: {intern: Intern}) => {
         setIsModalOpen2(true);
     };
     
+   
+
     const handleOk2 = (e: any) => {
+
+       
+
         editForm.resetFields();
         setIsModalOpen2(false);
 
         
     };
+
+    
 
     const handleCancel2 = () => {
         setIsModalOpen2(false);
@@ -179,7 +191,12 @@ const CVComponent = (props: {intern: Intern}) => {
 
 
     const deleteIntern = () => {
-        //do sthm
+        
+
+
+        navigate(0);
+        
+
 
         alert("Intern is deleted");
         
@@ -216,7 +233,7 @@ const CVComponent = (props: {intern: Intern}) => {
             <Descriptions.Item label="Team">{intern.team.name}</Descriptions.Item>
             <Descriptions.Item label="Internship Date">
             {intern.internshipStartingDate.toLocaleDateString() + " - " + intern.internshipEndingDate.toLocaleDateString() +
-            " (" + intern.stajSüresi + " Weeks)"}
+            " (" + intern.internshipPeriod + " Weeks)"}
             </Descriptions.Item>
             <Descriptions.Item label="E-mail">{intern.email}</Descriptions.Item>
         </Descriptions>
@@ -278,7 +295,7 @@ const CVComponent = (props: {intern: Intern}) => {
             </Modal>
 
             <Modal title="Edit" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2}>
-                <AddInternPage isEdit={true} intern={intern}></AddInternPage>
+                <AddInternPage isEdit={true} intern={intern} teams={props.teams} interns={props.interns}></AddInternPage>
             </Modal>
         </div>
         

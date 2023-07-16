@@ -124,7 +124,7 @@ const InternsPage = (props: {teams: Team[], interns: Intern[]}) => {
       
     
       <div className="cv-area">
-        <CVComponent intern={selectedIntern}/>
+        <CVComponent intern={selectedIntern} teams={props.teams} interns={props.interns} />
       </div>
 
       <br />
