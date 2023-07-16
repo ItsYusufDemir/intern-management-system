@@ -7,12 +7,7 @@ import {Team} from "../models/Team";
 import CVComponent from "./CVComponent"
 
 
-
-
-
-
-
-const InternsPage = (props: {teams: Team[], interns: Intern[]}) => {
+const InternsPage = (props: {teams: Team[], interns: Intern[] }) => {
 
   const teams = props.teams;
   const interns = props.interns;
@@ -20,11 +15,8 @@ const InternsPage = (props: {teams: Team[], interns: Intern[]}) => {
   const [team, setTeam] = useState<any>(teams[0]);
 
   
-
   const handleTeamSelect = (e: any) => {
-
     setTeam(teams[e]);
-    
     setSelectedIntern(undefined);
     handleUpdateValue();
     setSelectDisabled(false);
@@ -33,27 +25,12 @@ const InternsPage = (props: {teams: Team[], interns: Intern[]}) => {
   }
 
 
-  useEffect(() => {
-    
-  }, [team]);
-
-  
-
 
   const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
   const [selectedIntern, setSelectedIntern] = useState<any>();
   let counter = -1;
 
-  useEffect(() => {
-
-  },[selectedIntern])
   
-  
-
- 
-
-  
-
   const renderCv = (e: any) => {
 
     let teamInterns: Intern[] = []
@@ -66,10 +43,7 @@ const InternsPage = (props: {teams: Team[], interns: Intern[]}) => {
     }
 
     setSelectedIntern(teamInterns[e]);
-    
   }
-
-
 
 
   const [form] = Form.useForm();
@@ -79,7 +53,6 @@ const InternsPage = (props: {teams: Team[], interns: Intern[]}) => {
       internSelectItem: "Select an intern",
     });
   };
-
 
 
     return (
@@ -130,10 +103,6 @@ const InternsPage = (props: {teams: Team[], interns: Intern[]}) => {
       <br />
       
 
-
-
-      
-      
       </>  
       );
 }

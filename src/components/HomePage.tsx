@@ -1,6 +1,7 @@
 import {Team} from "../models/Team";
 import {Intern} from "../models/Intern";
 import DashboardComponent from "./DashboardComponent"
+import { useEffect } from "react";
 
 function HomePage(props: {teams: Team[], interns: Intern[]}) {
 
@@ -9,13 +10,19 @@ function HomePage(props: {teams: Team[], interns: Intern[]}) {
 
     const numberOfInterns: number[] = [];
 
+
+   
+
+
+    /* In the Dashborad, we show each team's team success. 
+       Team success is calculated by overall success of each team member
+    */
     teams.forEach(team => {
         let totalPoint = 0;
         let counter = 0;
         interns.forEach(intern =>{
         if(intern.team.name === team.name)
             if(intern.overallSuccess !== undefined){
-                console.log("burası",intern);
                 totalPoint += intern.overallSuccess;
                 counter++;
             }
@@ -28,7 +35,7 @@ function HomePage(props: {teams: Team[], interns: Intern[]}) {
     return (
 
         <>
-        <h2 style={{margin: "0"}} id="dashboard-titl">Dashboard</h2>
+        <h2 style={{margin: "0"}} id="dashboard-title">Dashboard</h2>
 
         <div style={{marginLeft: "5%", marginTop: "2%"}}>
             {teams.map((team) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   HomeOutlined,
   TeamOutlined,
@@ -13,7 +13,8 @@ import AddTeamPage from './components/AddTeamPage';
 import {Team} from "./models/Team";
 import {Intern} from "./models/Intern";
 import {Program} from "./models/Program";
-import { BrowserRouter as Router, Route, Link, BrowserRouter, Routes, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation } from "react-router-dom";
+import PDFViewer from './components/PDFViewer';
 
 
 
@@ -42,8 +43,9 @@ teams.push(fullStackTeam);
 teams.push(embeddedTeam);
 
 
-let date = new Date(2023, 6, 3);
+let date = new Date(2023, 6, 5);
 let date1 = new Date(2023, 7,15);
+
 
 let newIntern = new Intern("../assets/jamesbond.jpg", "James", "Bond", "11111111111", "5555555555", "Oxford",
  "Computer Engineering", 3,3.52, teams[0],date, date, date1, "../documents/cv.pdf", "example@gmail.com");
@@ -62,10 +64,10 @@ interns.push(newIntern3);
 
 
 
-
-
-
 const { Header, Content, Footer, Sider } = Layout;
+
+
+
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -87,10 +89,40 @@ function getItem(
 
 const App: React.FC = () => {
 
-  const [selectedMenuItem, setSelectedMenuItem] = useState("/");
+const matchInterns = useMatch("/interns");
+const matchAddIntern = useMatch("/add-intern");
+const matchAddTeam = useMatch("/add-team");
+const [seletctedKey, setSelectedKey] = useState("/");
+const location = useLocation();
+
+
+
+const getSelectedkey = () => {
+  if(matchInterns){
+    setSelectedKey("/interns");
+  }
+  else if (matchAddIntern) {
+    setSelectedKey("/add-intern");
+  }
+  else if (matchAddTeam) {
+    setSelectedKey("/add-team");
+  }
+  else {
+    setSelectedKey("/");
+  }
+};
+
+//This renders the menu selected item, when the path changes
+useEffect(() => {
+  getSelectedkey();
+}, [location.pathname]);
+
+
+
   const navigate = useNavigate();
 
 
+  //In the side bar, we have a menu. Those are the navigate items
   const items: MenuItem[] = [
     getItem('Home', '/', <HomeOutlined />),
     getItem('Interns', '/interns', <TeamOutlined />),
@@ -111,36 +143,35 @@ const App: React.FC = () => {
   const footer = "IMS ©2023"
 
 
-
-
   return (
 
 
-    
       <Layout style={{ minHeight: '100vh' }}>
         <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
           <div className="logo-area"><h1 className='logo' style={{color: "white"}}>LOGO</h1></div>
           
-          <Menu theme="dark" defaultSelectedKeys={['/']} mode="inline" items={items}  onClick={({key}) => {
+          <Menu theme="dark" defaultSelectedKeys={['/']} mode="inline" items={items} selectedKeys={[seletctedKey]}  onClick={({key}) => {
             if(key === "signout"){
               //Do signout
             }
             else{
               navigate(key);
+              console.log("clicked");
             }
           }}></Menu>
         </Sider>
         <Layout>
-          {/*<!--<Header style={{ padding: 0, background: colorBgContainer }} />*/}
+          
           <header><h1 className='header-title'>{title}</h1></header><br />
 
 
           <Content style={{ margin: '0 16px', padding: 24, minHeight: 500, background: colorBgContainer}}>
             <Routes>
               <Route path="/" element={ <HomePage teams={teams} interns={interns} />} />
-              <Route path="/interns" element={ <InternsPage teams={teams} interns={interns} />} />
+              <Route path="/interns" element={ <InternsPage teams={teams} interns={interns}/>} />
               <Route path="/add-intern" element={ <AddInternPage isEdit={false} teams={teams} interns={interns} />} />
               <Route path="/add-team" element={ <AddTeamPage teams={teams}/>} />
+              <Route path="/documents/" element={ <PDFViewer pdfUrl='/documents/' />} />
             </Routes>
           </Content>
 
