@@ -14,8 +14,11 @@ import {
   TreeSelect,
   Upload,
 } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {Intern} from "../models/Intern";
+import moment from 'moment';
+import { Team } from '../models/Team';
+
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -29,21 +32,43 @@ const normFile = (e: any) => {
 
 
 
-function InternAddingForm(props: {isEdit: boolean, intern?: Intern}) {
+function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[], interns: Intern[], onSave: (intern: Intern | undefined) => void}) {
 
   const [form] = Form.useForm();
+  const intern = props.intern;
 
   const onFinish = (e: any) => {
-    const value = form.getFieldValue('name');
-    console.log(e);
+    
 
-    if(props.isEdit){
-      alert("Intern is edited!");
-    }
-    else{
-      alert("Intern is added!")
-    }
+    props.onSave(intern);
   };
+
+
+  useEffect(() => {
+    if (intern) {
+      form.setFieldsValue({
+        name: intern.name,
+        lastName: intern.lastName,
+        tel: intern.tel,
+        uni: intern.uni,
+        major: intern.major,
+        grade: intern.grade,
+        gpa: intern.gpa,
+        team: intern.team,
+        //birthday: intern.birthday,
+        //internshipDate: [moment(intern.internshipStartingDate), moment(intern.internshipEndingDate)],
+        
+      });
+    } else {
+      form.resetFields(); // Reset the form fields if not in edit mode
+    }
+  }, [intern, form]);
+
+
+  
+
+
+
 
   return (
 

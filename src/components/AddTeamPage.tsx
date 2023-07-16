@@ -1,7 +1,8 @@
 import {Form, Input, Select, Button} from "antd";
 import {useState} from "react";
+import { Team } from "../models/Team";
 
-const AddTeamPage = () => {
+const AddTeamPage = (props: {teams: Team[]}) => {
 
 
 

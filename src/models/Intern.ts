@@ -12,11 +12,12 @@ export class Intern {
     grade: number;
     gpa: number;
     team: Team;
+    birthday: Date;
     internshipStartingDate: Date;
     internshipEndingDate: Date;
     cvUrl: string;
-    başarıPuanı: number[];
-    stajSüresi: number;
+    successGrades: number[];
+    internshipPeriod: number;
     email: string;
     overallSuccess: number | undefined;
 
@@ -31,6 +32,7 @@ export class Intern {
         grade: number,
         gpa: number,
         team: Team,
+        birthday: Date,
         internshipStartingDate: Date,
         internshipEndingDate: Date,
         cvUrl: string,
@@ -46,15 +48,16 @@ export class Intern {
         this.grade = grade;
         this.gpa = gpa;
         this.team = team;
+        this.birthday = birthday;
         this.internshipStartingDate = internshipStartingDate;
         this.internshipEndingDate = internshipEndingDate;
         this.cvUrl = cvUrl;
         this.fullName = this.name + " " + this.lastName;
-        this.başarıPuanı = [];
-        this.stajSüresi = Math.round(((this.internshipEndingDate.getTime() - this.internshipStartingDate.getTime())/(1000 * 60 * 60 * 24 * 7)));
+        this.successGrades = [];
+        this.internshipPeriod = Math.round(((this.internshipEndingDate.getTime() - this.internshipStartingDate.getTime())/(1000 * 60 * 60 * 24 * 7)));
         this.email = email;
         this.overallSuccess = undefined;
-        this.başarıPuanı = new Array(this.team.curriculum.length);
+        this.successGrades = new Array(this.team.curriculum.length);
       }
 
 
@@ -64,14 +67,14 @@ export class Intern {
         let totalPoint = 0;
 
         let counter = 0;
-        this.başarıPuanı.forEach(week => {
-          if(this.başarıPuanı[counter] !== undefined){
-            totalPoint = totalPoint + this.başarıPuanı[counter];
+        this.successGrades.forEach(week => {
+          if(this.successGrades[counter] !== undefined){
+            totalPoint = totalPoint + this.successGrades[counter];
             counter++;
           }
         })
         console.log("totalPoint: " + totalPoint);
-        console.log(this.başarıPuanı);
+        console.log(this.successGrades);
 
         this.overallSuccess = totalPoint / counter;
 
