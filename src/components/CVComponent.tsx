@@ -6,14 +6,17 @@ import AddInternPage from './AddInternPage';
 import { Team } from '../models/Team';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PDFViewer from './PDFViewer';
+import InternService from '../services/InternService';
 
 
 // TODO: Handle Download Cv,
 
-
 const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) => {
     
     const intern = props.intern;
+    const teams = props.teams;
+    const interns = props.interns;
+
     const [form] = Form.useForm();
  
     const handleUpdateValue = () => {
@@ -28,28 +31,11 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     }, [intern]);
 
     
-    const handleClick = () =>{
-        openPdfInNewTab(intern.cvUrl);
-    }
-
-    const openPdfInNewTab = (pdfPath: string) => {
-
-        return <PDFViewer pdfUrl={intern.cvUrl} />;
-
-        /*
-        fetch(pdfPath)
-          .then((response) => response.blob())
-          .then((blob) => {
-            const pdfUrl = URL.createObjectURL(blob);
-            window.open(pdfUrl, '_blank');
-          });
-        */
-    };
 
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
       const [isHidden, setIsHidden] = useState<boolean>(true);
-      const [currentWeeklyGrade, setCurrentWeeklyGrade] = useState(0);
+      const [currentWeeklyGrade, setCurrentWeeklyGrade] = useState<Number | undefined>(undefined);
       const [currentMission, setCurrentMission] = useState<string>("");
       const [form2] = Form.useForm()
       const [editForm] = Form.useForm();
@@ -58,28 +44,62 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
       const navigate = useNavigate();
 
       
-
-    
     if(intern === undefined){
        return (<></>);
     }
+
+
+    const findTeam = (temp: Intern) => {
+        const team = teams.filter(team => team.team_id === temp.team_id)[0];
+        return team;
+    }
+
+    const findInternshipPeriod = (start: Date, end: Date) => {
+        return Math.round(((end.getTime() - start.getTime())/(1000 * 60 * 60 * 24 * 7)));
+    }
+
+    const computeOverallSuccess = () => {
+        let totalPoint = 0;
+
+        let counter = 0;
+        intern.assignment_grades.forEach(assignment_grade => {
+          if(assignment_grade !== null){
+            totalPoint += assignment_grade;
+            counter++;
+          }
+        })
+       
+        intern.overall_success = totalPoint / counter;
+        InternService.updateIntern(intern); //Update the intern in database
+    }
     
     
-
-
-
     const handleSelectWeek = (e: number) =>{
         setCurrentWeek(e);
-        console.log("current week: " + e);
 
         setIsHidden(false);
-        setCurrentWeeklyGrade(intern.successGrades[e]);
-        setCurrentMission(intern.team.curriculum[e].mission);
+
+        if(intern.assignment_grades !== undefined) {
+            if(intern.assignment_grades[e] !== undefined){
+                setCurrentWeeklyGrade(intern.assignment_grades[e]);
+                setCurrentMission(findTeam(intern).assignments[e]);
+            }
+            else{
+                setCurrentWeeklyGrade(undefined);
+                setCurrentMission(findTeam(intern).assignments[e]);
+            }
+        }
+        else{
+            setCurrentWeeklyGrade(undefined);
+            setCurrentMission(findTeam(intern).assignments[e]);
+        }
+
+        
     }
 
     //Percentage of complete of internship
-    const completePercentage = Math.round(((Date.now() - intern.internshipStartingDate.getTime()) / 
-    (intern.internshipEndingDate.getTime() - intern.internshipStartingDate.getTime())) * 100)
+    const completePercentage = Math.round(((Date.now() - intern.internship_starting_date.getTime()) / 
+    (intern.internship_ending_date.getTime() - intern.internship_starting_date.getTime())) * 100);
     
     
     //Add/Change weekly grade Modal
@@ -95,8 +115,9 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
             return;
         }
 
-        intern.successGrades[currentWeek] = Number(form2.getFieldValue("newGrade"));
-        intern.computeOverallSuccess(); //Update the intern's overall success
+        intern.assignment_grades[currentWeek] = Number(form2.getFieldValue("newGrade"));
+        computeOverallSuccess(); //Update the intern's overall success
+        InternService.updateIntern(intern);
 
         setCurrentWeeklyGrade(Number(form2.getFieldValue("newGrade")));
 
@@ -137,7 +158,6 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
 
     const onFinish2 = () => {
         form.resetFields();
-        console.log("form is finished");
     }
 
 
@@ -163,24 +183,34 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     };
 
 
-    const deleteIntern = () => {
-        
+    const deleteIntern = async () =>  {
+
+        const index = interns.indexOf(intern);
+        if (index > -1) { // only splice array when item is found
+            interns.splice(index, 1); // 2nd parameter means remove one item only
+        };
+
+        await InternService.deleteIntern(intern);
+
         navigate(0); //Refresh the page
 
         alert("Intern is deleted");  
     };
    
-
+    const openCv = () => {
+        window.open("C:/Users/james/Documents/GitHub/intern-management-system/src/documents/cv.pdf")
+    }
     
     return (
 
         <>
+        
         <Image width={150} height={200} style={{border: "2px solid black", borderRadius: "10px"}}
-        src={intern.photoUrl}/>
+        src={intern.photo_url}/>
 
         <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  
-            <Progress type="circle" percent={intern.overallSuccess} format={(percent) => `${percent}% Success`} size={100}></Progress>
+            <Progress type="circle" percent={intern.overall_success} format={(percent) => `${percent}% Success`} size={100}></Progress>
         </Space>
 
         <br /><br />
@@ -188,20 +218,20 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         
 
         <Descriptions>
-            <Descriptions.Item label="Name">{intern.fullName}</Descriptions.Item>
+            <Descriptions.Item label="Name">{intern.first_name + " " + intern.last_name}</Descriptions.Item>
             <Descriptions.Item label="University">{intern.uni}</Descriptions.Item>
             <Descriptions.Item label="Major">{intern.major + " (GPA: " + intern.gpa + ")"}</Descriptions.Item>
             <Descriptions.Item label="Grade">{intern.grade + ". Grade"}</Descriptions.Item>
-            <Descriptions.Item label="Team">{intern.team.name}</Descriptions.Item>
+            <Descriptions.Item label="Team">{findTeam(intern).team_name}</Descriptions.Item>
             <Descriptions.Item label="Internship Date">
-            {intern.internshipStartingDate.toLocaleDateString() + " - " + intern.internshipEndingDate.toLocaleDateString() +
-            " (" + intern.internshipPeriod + " Weeks)"}
+            {intern.internship_starting_date.toLocaleDateString() + " - " + intern.internship_ending_date.toLocaleDateString() +
+            " (" + findInternshipPeriod(intern.internship_starting_date, intern.internship_ending_date) + " Weeks)"}
             </Descriptions.Item>
             <Descriptions.Item label="E-mail">{intern.email}</Descriptions.Item>
         </Descriptions>
 
         <div className='Buttons' style={{display: 'flex'}}>
-            <Button  href={intern.cvUrl} type="primary" shape="round" icon={<DownloadOutlined />} size={"large"}>Download CV</Button>
+            <Button  onClick={openCv} type="primary" shape="round" icon={<DownloadOutlined />} size={"large"}>Download CV</Button>
             <Button  onClick={showModal2} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit Intern</Button>
             <Button  onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete Intern</Button>
         </div>
@@ -214,7 +244,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
             <Form layout="horizontal" form={form}>
                 <Form.Item label="Week" name="weekSelect" style={{width: 200}}>
                     <Select onChange={handleSelectWeek}>
-                        {intern.team.curriculum.map((program, index) => {
+                        {findTeam(intern).assignments.map((assignment, index) => {
                             return(
                             <Select.Option value={index}>{(index + 1) + ". week"}</Select.Option>
                             )
@@ -241,7 +271,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         </div>
 
 
-        {/*Modals Here**/}
+        {/*Modals Here*/}
         <div>
             <Modal title="Add/Change" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Form
@@ -256,7 +286,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
             </Modal>
 
             <Modal title="Edit" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2}>
-                <AddInternPage isEdit={true} intern={intern} teams={props.teams} interns={props.interns}></AddInternPage>
+                 <AddInternPage isEdit={true} intern={intern} ></AddInternPage>
             </Modal>
         </div>
         
@@ -265,5 +295,6 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         </>
       );
 }
+
  
 export default CVComponent;

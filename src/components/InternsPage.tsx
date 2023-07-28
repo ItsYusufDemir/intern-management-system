@@ -1,18 +1,37 @@
 import {Form, Select, Row, Col} from "antd";
-import {useEffect, useState} from "react";
+import {useEffect, useState, createContext} from "react";
 import "../styles.css";
 import {Intern} from "../models/Intern";
-import {Program} from "../models/Program";
 import {Team} from "../models/Team";
 import CVComponent from "./CVComponent"
+import InternService from "../services/InternService";
+import TeamService from "../services/TeamService";
+import { useDataContext } from "../App";
 
 
-const InternsPage = (props: {teams: Team[], interns: Intern[] }) => {
+const InternsPage = () => {
 
-  const teams = props.teams;
-  const interns = props.interns;
 
-  const [team, setTeam] = useState<any>(teams[0]);
+const {interns, teams, isLoading} = useDataContext();
+const [team, setTeam] = useState<Team>();
+const [shouldRender, setShouldRender] = useState<boolean>(false);
+
+
+useEffect(() => {
+  if (teams) {
+    setTeam(teams[0]);
+  }
+},[teams])
+
+
+useEffect(() => {
+  if(team){
+    setShouldRender(true);
+  }
+},[team])
+
+
+  
 
   
   const handleTeamSelect = (e: any) => {
@@ -37,7 +56,7 @@ const InternsPage = (props: {teams: Team[], interns: Intern[] }) => {
     
     //Find the selected intern
     for(let i = 0; i < interns.length; i++){
-      if(interns[i].team.name === team.name){
+      if(teams.filter(team => team.team_id === interns[i].team_id)[0].team_name === team!.team_name){
         teamInterns.push(interns[i]);
       }
     }
@@ -58,15 +77,14 @@ const InternsPage = (props: {teams: Team[], interns: Intern[] }) => {
     return (
       <>
 
-
       <div className="intern-page-selections" style={{display: "flex"}}>
-        <Form layout="vertical" form={form}>
+      {shouldRender && <Form layout="vertical" form={form}>
           <Row gutter={100}>
             <Col span={12}>
               <Form.Item label="Team" name="teamSelectItem" style={{width: 350}}>
                 <Select onChange={handleTeamSelect} >
                     {teams.map((team,index) => (
-                      <Select.Option value={index}>{team.name}</Select.Option>
+                      <Select.Option key={index} value={index}>{team.team_name}</Select.Option>
                     ))}
                 </Select>
               </Form.Item>
@@ -77,10 +95,10 @@ const InternsPage = (props: {teams: Team[], interns: Intern[] }) => {
                 <Select  disabled={selectDisabled} onChange={renderCv} className="internSelect">
                 
                   {interns.map((intern, index) => {
-                      if(intern.team.name === team.name){
+                      if(teams.filter(team => team.team_id === intern.team_id)[0].team_name === team!.team_name){
                         counter++;
                         return (
-                          <Select.Option value={counter}>{intern.fullName}</Select.Option>
+                          <Select.Option key={index} value={counter}>{intern.first_name + " " + intern.last_name}</Select.Option>
                         )
                       }
                       
@@ -91,16 +109,18 @@ const InternsPage = (props: {teams: Team[], interns: Intern[] }) => {
 
           </Row>
         </Form>
-        
+        }
       </div>
       <br />
       
     
-      <div className="cv-area">
-        <CVComponent intern={selectedIntern} teams={props.teams} interns={props.interns} />
+     {shouldRender && <div className="cv-area">
+        <CVComponent intern={selectedIntern} teams={teams} interns={interns} />
       </div>
-
+}
       <br />
+
+      {!shouldRender && <div><h1>Loading...</h1></div>}
       
 
       </>  
