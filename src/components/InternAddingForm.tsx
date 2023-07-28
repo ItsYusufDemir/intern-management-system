@@ -19,6 +19,8 @@ import {Intern} from "../models/Intern";
 import moment, { Moment } from 'moment';
 import { Team } from '../models/Team';
 import dayjs from 'dayjs';
+import InternService from '../services/InternService';
+import { useNavigate } from 'react-router-dom';
 
 
 const { RangePicker } = DatePicker;
@@ -34,53 +36,91 @@ const normFile = (e: any) => {
 let isFormUpdated = false;
 
 
-function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[], interns: Intern[], onSave: (intern: Intern | undefined) => void}) {
+function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[], interns: Intern[]}) {
 
   const [form] = Form.useForm();
   const intern = props.intern;
+  const navigate = useNavigate();
 
   const onFinish = (e: any) => {
-    
 
-    props.onSave(intern);
+    if(props.isEdit){
+      //Handle update
+    }
+    else{
+      const formValues = form.getFieldsValue();
+
+      
+      
+      const newIntern: Intern = {
+        first_name: formValues.first_name,
+        last_name: formValues.last_name,
+        id_no: formValues.id_no,
+        phone_number: formValues.phone_number,
+        email: formValues.email,
+        uni: formValues.uni,
+        major: formValues.major,
+        grade: formValues.grade,
+        gpa: formValues.gpa,
+        team_id: formValues.team_id,
+        birthday: formValues.birthday ? formValues.birthday.toISOString() : undefined,
+        internship_starting_date: formValues.internshipDate[0].toISOString(),
+        internship_ending_date: formValues.internshipDate[1].toISOString(),
+        cv_url: "",
+        photo_url: "",
+        overall_success: undefined,
+        assignment_grades: [],
+      }
+
+      console.log(newIntern);
+      InternService.addIntern(newIntern);
+    }
+
+
+    if(props.isEdit){
+      alert("Intern is updated!");
+    }
+    else {
+      alert("Intern is added!");
+      form.resetFields();
+   }
+
+   navigate(0);
+  
   };
 
 ;
   
 
   useEffect(() => {
+    console.log("hey");
 
-    if (intern && !isFormUpdated) {
+    if (props.isEdit && intern) {
 
       const birthday = dayjs(intern.birthday);
-      const internshipStartDate = dayjs(intern.internshipStartingDate);
-      const internshipEndDate = dayjs(intern.internshipEndingDate);
+      const internshipStartDate = dayjs(intern.internship_starting_date);
+      const internshipEndDate = dayjs(intern.internship_ending_date);
 
       form.setFieldsValue({
-        name: intern.name,
-        lastName: intern.lastName,
-        id: intern.id,
+        first_name: intern.first_name,
+        last_name: intern.last_name,
+        id_no: intern.id_no,
         email: intern.email,
-        tel: intern.tel,
+        phone_number: intern.phone_number,
         uni: intern.uni,
         major: intern.major,
         grade: (intern.grade + ""),
         gpa: intern.gpa,
-        team: intern.team.name,
+        team: intern.team_id,
         birthday: birthday,
         internshipDate: [internshipStartDate, internshipEndDate],
       });
       isFormUpdated = true;
-    } else {
-      form.resetFields(); // Reset the form fields if not in edit mode
-    }
+    } 
   }, [intern]);
 
 
   
-
-
-
 
   return (
 
@@ -98,22 +138,22 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         form={form}>
           
         
-        <Form.Item label="Name" name="name" rules={[{ required: true }]}>
+        <Form.Item label="Name" name="first_name" rules={[{ required: true }]}>
           <Input required/>
         </Form.Item>
         
-        <Form.Item label="Last Name" name="lastName" rules={[{ required: true }]}>
+        <Form.Item label="Last Name" name="last_name" rules={[{ required: true }]}>
           <Input required/>
         </Form.Item>
-        <Form.Item label="Personal ID" name="id" >
+        <Form.Item label="Personal ID" name="id_no" rules={[{ required: true }]} >
           <Input />
         </Form.Item>
         <Form.Item label="E-mail" name="email" rules={[
-          { type: 'email', message: 'Please enter a valid email address' },
+          { type: 'email', message: 'Please enter a valid email address', required: true },
         ]} >
           <Input />
         </Form.Item>
-        <Form.Item label="Tel" name="tel" >
+        <Form.Item label="Tel" name="phone_number" rules={[{ required: true }]} >
           <Input />
         </Form.Item>
         <Form.Item label="University" name="uni">
@@ -133,11 +173,11 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         <Form.Item label="GPA" name="gpa">
           <InputNumber/>
         </Form.Item>
-        <Form.Item label="Team" name="team" required>
+        <Form.Item label="Team" name="team_id" required>
             <Select>
                 {props.teams.map(team => {
                   return(
-                    <Select.Option value={team.name}>{team.name}</Select.Option>
+                    <Select.Option value={team.team_id}>{team.team_name}</Select.Option>
                   )
                 })}
             </Select>
@@ -146,7 +186,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         <Form.Item label="Birthday" name="birthday">
           <DatePicker format="DD-MM-YYYY" />
         </Form.Item>
-        <Form.Item label="Internship Date" name="internshipDate">
+        <Form.Item label="Internship Date" name="internshipDate" rules={[{ required: true }]}>
           <RangePicker format="DD-MM-YYYY"/>
         </Form.Item>
         

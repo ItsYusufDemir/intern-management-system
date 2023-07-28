@@ -1,17 +1,19 @@
 import {Team} from "../models/Team";
 import {Intern} from "../models/Intern";
 import DashboardComponent from "./DashboardComponent"
-import { useEffect } from "react";
+import {  useEffect } from "react";
+import { useDataContext } from "../App";
 
-function HomePage(props: {teams: Team[], interns: Intern[]}) {
 
-    const teams = props.teams;
-    const interns = props.interns;
+
+
+function HomePage() {
+
+    
+    const {interns, teams} = useDataContext();
 
     const numberOfInterns: number[] = [];
 
-
-   
 
 
     /* In the Dashborad, we show each team's team success. 
@@ -21,15 +23,15 @@ function HomePage(props: {teams: Team[], interns: Intern[]}) {
         let totalPoint = 0;
         let counter = 0;
         interns.forEach(intern =>{
-        if(intern.team.name === team.name)
-            if(intern.overallSuccess !== undefined){
-                totalPoint += intern.overallSuccess;
+        if(intern.team_id === team.team_id)
+            if(intern.overall_success !== undefined){
+                totalPoint += intern.overall_success;
                 counter++;
             }
 
         })
         numberOfInterns.push(counter);
-        team.teamSuccess = (totalPoint / counter);
+        team.team_success = (totalPoint / counter); //TODO: update team
     })
 
     return (
@@ -41,7 +43,7 @@ function HomePage(props: {teams: Team[], interns: Intern[]}) {
             {teams.map((team) => {
                 let currentInterns: Intern[] = [];
                 interns.forEach(intern =>{
-                    if(intern.team.name === team.name)
+                    if(intern.team_id === team.team_id)
                         currentInterns.push(intern);
                 })
                 return(
