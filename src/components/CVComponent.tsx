@@ -7,6 +7,7 @@ import { Team } from '../models/Team';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PDFViewer from './PDFViewer';
 import InternService from '../services/InternService';
+import UploadService from '../services/UploadService';
 
 
 // TODO: Handle Download Cv,
@@ -190,15 +191,23 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
             interns.splice(index, 1); // 2nd parameter means remove one item only
         };
 
+        if(intern.cv_url !== undefined){
+           await UploadService.deleteCv(intern.cv_url.split("/").pop()!);
+        }
+
+        if(intern.photo_url !== undefined) {
+            await UploadService.deletePhoto(intern.photo_url.split("/").pop()!);
+        }
+
         await InternService.deleteIntern(intern);
 
-        navigate(0); //Refresh the page
-
-        alert("Intern is deleted");  
+        navigate(0); //Refresh the page  
     };
    
-    const openCv = () => {
-        window.open("C:/Users/james/Documents/GitHub/intern-management-system/src/documents/cv.pdf")
+    const downloadCv = (event: any) => {
+        if(intern.cv_url){
+            window.open(intern.cv_url, "_blank");
+        }
     }
     
     return (
@@ -231,7 +240,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         </Descriptions>
 
         <div className='Buttons' style={{display: 'flex'}}>
-            <Button  onClick={openCv} type="primary" shape="round" icon={<DownloadOutlined />} size={"large"}>Download CV</Button>
+            <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} size={"large"}>Download CV</Button>
             <Button  onClick={showModal2} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit Intern</Button>
             <Button  onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete Intern</Button>
         </div>

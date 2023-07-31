@@ -3,6 +3,7 @@ import {Intern} from "../models/Intern";
 import DashboardComponent from "./DashboardComponent"
 import {  useEffect } from "react";
 import { useDataContext } from "../App";
+import TeamService from "../services/TeamService";
 
 
 
@@ -19,20 +20,33 @@ function HomePage() {
     /* In the Dashborad, we show each team's team success. 
        Team success is calculated by overall success of each team member
     */
-    teams.forEach(team => {
-        let totalPoint = 0;
-        let counter = 0;
-        interns.forEach(intern =>{
-        if(intern.team_id === team.team_id)
-            if(intern.overall_success !== undefined){
-                totalPoint += intern.overall_success;
-                counter++;
-            }
 
-        })
-        numberOfInterns.push(counter);
-        team.team_success = (totalPoint / counter); //TODO: update team
-    })
+    useEffect(() => {
+        teams.forEach(team => {
+            let totalPoint = 0;
+            let counter = 0;
+            interns.forEach(intern =>{
+            if(intern.team_id === team.team_id) {
+                console.log("Intern:", intern);
+                if(intern.overall_success !== undefined){
+                    console.log(intern.overall_success);
+                    totalPoint += intern.overall_success;
+                    counter++;
+                }
+                console.log("total and counter: ", totalPoint, counter);
+            }
+                
+    
+            })
+            numberOfInterns.push(counter);
+            team.team_success = (totalPoint / counter);
+             
+            TeamService.updateTeam(team);
+        });
+
+    }, []);
+
+    
 
     return (
 
