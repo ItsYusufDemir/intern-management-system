@@ -20,6 +20,7 @@ import moment, { Moment } from 'moment';
 import { Team } from '../models/Team';
 import dayjs from 'dayjs';
 import InternService from '../services/InternService';
+import UploadService from "../services/UploadService";
 import { useNavigate } from 'react-router-dom';
 
 
@@ -41,8 +42,12 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
   const [form] = Form.useForm();
   const intern = props.intern;
   const navigate = useNavigate();
+  let photo_url: string | undefined = undefined;
+  let cv_url: string | undefined  = undefined;
 
   const onFinish = (e: any) => {
+
+    form.submit();
 
     if(props.isEdit){
       //Handle update
@@ -66,13 +71,13 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         birthday: formValues.birthday ? formValues.birthday.toISOString() : undefined,
         internship_starting_date: formValues.internshipDate[0].toISOString(),
         internship_ending_date: formValues.internshipDate[1].toISOString(),
-        cv_url: "",
-        photo_url: "",
+        cv_url: cv_url,
+        photo_url: photo_url,
         overall_success: undefined,
         assignment_grades: [],
       }
 
-      console.log(newIntern);
+      
       InternService.addIntern(newIntern);
     }
 
@@ -93,7 +98,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
   
 
   useEffect(() => {
-    console.log("hey");
+    ;
 
     if (props.isEdit && intern) {
 
@@ -111,13 +116,39 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         major: intern.major,
         grade: (intern.grade + ""),
         gpa: intern.gpa,
-        team: intern.team_id,
+        team_id: intern.team_id,
         birthday: birthday,
         internshipDate: [internshipStartDate, internshipEndDate],
       });
       isFormUpdated = true;
+     
     } 
   }, [intern]);
+
+ 
+
+  const handlePhotoUpload = async (options: any) => {
+    console.log(options);
+
+    photo_url = await UploadService.uploadPhoto(options);
+    console.log("burası:", photo_url);
+  }
+
+  const handleCvUpload = async (options: any) => {
+
+    cv_url = await UploadService.uploadCv(options);
+    console.log("burası:", cv_url);
+  }
+
+  const handleCancelCvUpload = async (file: any) => {
+    UploadService.deleteCv(cv_url!.split("/").pop()!);
+  }
+
+  const handleCancelPhotoUpload = async (file: any) => {
+    UploadService.deletePhoto(photo_url!.split("/").pop()!);
+  }
+
+
 
 
   
@@ -192,7 +223,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         
         
         <Form.Item valuePropName="fileList" getValueFromEvent={normFile} name="cv">
-          <Upload action="/upload.do" listType="picture-card" accept='.pdf,.docx,doc'maxCount={1}>
+          <Upload customRequest={handleCvUpload} listType="picture-card" accept='.pdf,.docx,doc'maxCount={1} onRemove={handleCancelCvUpload}>
             <div>
               <PlusOutlined />
               <div style={{ marginTop: 8 }}>Upload CV</div>
@@ -200,7 +231,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
           </Upload>
         </Form.Item>
         <Form.Item valuePropName="fileList" getValueFromEvent={normFile} name="photo">
-          <Upload action="/upload.do" listType="picture-card"  accept='.jpg,.png'maxCount={1}>
+          <Upload customRequest={handlePhotoUpload} listType="picture-card"  accept='.jpg,.png'maxCount={1} onRemove={handleCancelPhotoUpload}>
             <div>
               <PlusOutlined />
               <div style={{ marginTop: 8 }}>Upload Photo</div>
