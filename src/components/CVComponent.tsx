@@ -191,11 +191,12 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
             interns.splice(index, 1); // 2nd parameter means remove one item only
         };
 
-        if(intern.cv_url !== undefined){
+        if(intern.cv_url !== null){
+            console.log("tam burası", intern.cv_url);
            await UploadService.deleteCv(intern.cv_url.split("/").pop()!);
         }
 
-        if(intern.photo_url !== undefined) {
+        if(intern.photo_url !== null) {
             await UploadService.deletePhoto(intern.photo_url.split("/").pop()!);
         }
 
@@ -215,11 +216,11 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         <>
         
         <Image width={150} height={200} style={{border: "2px solid black", borderRadius: "10px"}}
-        src={intern.photo_url}/>
+        src={intern.photo_url ? intern.photo_url : undefined}/>
 
         <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  
-            <Progress type="circle" percent={intern.overall_success} format={(percent) => `${percent}% Success`} size={100}></Progress>
+            <Progress type="circle" percent={intern.overall_success ? intern.overall_success : 0} format={(percent) => `${percent}% Success`} size={100}></Progress>
         </Space>
 
         <br /><br />

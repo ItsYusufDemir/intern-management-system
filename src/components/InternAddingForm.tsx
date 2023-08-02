@@ -42,8 +42,8 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
   const [form] = Form.useForm();
   const intern = props.intern;
   const navigate = useNavigate();
-  let photo_url: string | undefined = undefined;
-  let cv_url: string | undefined  = undefined;
+  let photo_url: string | null = null;
+  let cv_url: string | null  = null;
 
   const onFinish = (e: any) => {
 
@@ -73,7 +73,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         internship_ending_date: formValues.internshipDate[1].toISOString(),
         cv_url: cv_url,
         photo_url: photo_url,
-        overall_success: undefined,
+        overall_success: null,
         assignment_grades: [],
       }
 
@@ -94,7 +94,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
   
   };
 
-;
+
   
 
   useEffect(() => {

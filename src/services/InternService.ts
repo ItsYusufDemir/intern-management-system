@@ -11,13 +11,11 @@ const getInterns = async (): Promise<Intern[]> => {
           grade: parseInt(intern.grade),
           gpa: parseFloat(intern.gpa),
           team_id: parseInt(intern.team_id),
-          overall_success: parseFloat(intern.overall_success),
+          overall_success: intern.overall_success ? parseFloat(intern.overall_success) : undefined,
           birthday: new Date(intern.birthday),
-          //          internship_starting_date: new Date( new Date(intern.internship_starting_date).getTime() - new Date(intern.internship_starting_date).getTimezoneOffset()*60000),
           internship_starting_date: new Date(intern.internship_starting_date),
           internship_ending_date: new Date(intern.internship_ending_date),
         }));
-
 
         return internsData;
       } catch (error) {

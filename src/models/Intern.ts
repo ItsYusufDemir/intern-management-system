@@ -5,16 +5,16 @@ export interface Intern {
   id_no: string;
   phone_number: string;
   email: string;
-  uni: string | undefined;
-  major: string | undefined;
-  grade: number | undefined;
-  gpa: number | undefined;
+  uni: string | null;
+  major: string | null;
+  grade: number | null;
+  gpa: number | null;
   team_id: number;
-  birthday: Date | undefined;
+  birthday: Date | null;
   internship_starting_date: Date;
   internship_ending_date: Date;
-  cv_url: string | undefined;
-  photo_url: string |undefined;
-  overall_success: number | undefined;
+  cv_url: string | null;
+  photo_url: string | null;
+  overall_success: number | null;
   assignment_grades: number[];
 }

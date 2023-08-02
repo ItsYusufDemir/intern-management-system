@@ -26,14 +26,12 @@ function HomePage() {
             let totalPoint = 0;
             let counter = 0;
             interns.forEach(intern =>{
+                console.log(intern.overall_success);
             if(intern.team_id === team.team_id) {
-                console.log("Intern:", intern);
-                if(intern.overall_success !== undefined){
-                    console.log(intern.overall_success);
+                if(intern.overall_success !== null){
                     totalPoint += intern.overall_success;
                     counter++;
                 }
-                console.log("total and counter: ", totalPoint, counter);
             }
                 
     
