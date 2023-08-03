@@ -30,9 +30,9 @@ const AddUserPage = () => {
 
 
 
-    const onFinish = async  (e: any) => {
+    const onFinish = async () => {
 
-        e.preventDefault();
+        
 
         const formData = form.getFieldsValue();
 
@@ -40,8 +40,8 @@ const AddUserPage = () => {
         //form.resetFields();
 
         const newUser: User = {
-            name: user,
-            pwd: pwd,
+            username: user,
+            password: pwd,
             role: formData.role,
         }
 
@@ -49,14 +49,14 @@ const AddUserPage = () => {
 
         const result = await UserService.addUser(newUser);
 
+        console.log("burası:", result);
         if(result){
             alert("User added");
         }
         else{
             alert("User is aldready exists");
         }
-        
-        
+
         
     }
 

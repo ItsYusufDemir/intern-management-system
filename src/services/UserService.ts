@@ -1,70 +1,64 @@
+import axios from '../axios';
 import { User } from "../models/User";
 
 const addUser = async (user: User): Promise<boolean> => {
 
-    try{
-        const response = await fetch("/api/users", {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json; charset=UTF-8"
-          },
-          body: JSON.stringify(user),
-        });
+    try {
+        const response = await axios.post('/api/users',
+            JSON.stringify(user),
+             {
+                headers: {'Content-Type': 'application/json'},
+                withCredentials: true,
+             }
+        )
 
-        console.log(response);
-
-        if(response.ok){
-            console.log(response.ok);
-            return true;
+        return true;
+    } catch (error: any) {
+        if(!error?.response){
+            console.log("No server response");
+        }
+        else if (error.response?.status === 409) {
+            console.log("User is already exists");
         }
         else{
-            console.log(response.ok);
-            return false;
+            console.log("Error while adding user");
         }
-    
-      }
-      catch (error) {
-        console.log("Error: ", error);
-        throw new Error("Error");
-      }
-
+        return false;
+    }
 
 }
 
 
 const login = async (user: User) => {
 
-    const name = user.name;
-    try{
-        const response = await fetch("/login/" + name, {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json; charset=UTF-8"
-          },
-          body: JSON.stringify(user),
-        });
+    try {
+        const response = await axios.post('/auth',
+            JSON.stringify(user),
+             {
+                headers: {'Content-Type': 'application/json'},
+                withCredentials: true,
+             }
+        )
 
-        console.log(response);
-
-        if(response.ok){
-            console.log(response.ok);
-            return true;
+        return response.data;
+    } catch (error: any) {
+        if(!error?.response){
+            console.log("No server response");
+        }
+        else if (error.response?.status === 401) {
+            console.log("Unauthorized");
         }
         else{
-            console.log(response.ok);
-            return false;
+            console.log("Error while login");
         }
-    
-      }
-      catch (error) {
-        console.log("Error: ", error);
-        throw new Error("Error");
-      }
+        return false;
+    }
 
 }
 
 
 const UserServie = {
     addUser: addUser,
+    login: login,
 }
 export default UserServie;

@@ -1,11 +1,11 @@
 import {Form, Input, Select, Button} from "antd";
 import {useState} from "react";
 import { Team } from "../models/Team";
-import { useDataContext } from "../App";
+
 
 const AddTeamPage = () => {
 
-  const { teams } = useDataContext();
+  
 
 
 

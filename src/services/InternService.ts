@@ -94,8 +94,6 @@ const deleteIntern = async (deletedIntern: Intern) => {
 
 
 
-
-
 const InternService = {
     getInterns: getInterns,
     addIntern: addIntern,

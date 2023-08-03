@@ -1,26 +1,51 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import useAuth from '../utils/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
+import AuthContext from "../utils/AuthProvider";
+import UserService from '../services/UserService';
+import { User } from '../models/User';
 
 function Login() {
 
-    //const { setAuth } = useAuth();
+    const { setAuth }:any = useAuth();
 
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || "/";
     const [form] = Form.useForm();
 
+    const [userName, setUserName] = useState("");
+    const [pwd, setPwd] = useState("");
+
 
     const [user, setUser] = useState("");
     
 
-    const onFinish = () => {
+    const onFinish = async () => {
 
         const formValues = form.getFieldsValue();
 
         console.log(formValues.username, formValues.password);
+        const user: User = {
+            username:formValues.username,
+            password: formValues.password,
+        }
+
+        //Check auth
+
+        const response = await UserService.login(user);
+
+        if(response.accessToken !== undefined) {
+            const roles = response.roles;
+            const accessToken = response.accessToken;
+
+            setAuth({user, pwd, roles, accessToken});
+            navigate("/");
+        }
+        else{
+            alert("Invalid Username or Password!");
+        }
 
         form.resetFields();
     }

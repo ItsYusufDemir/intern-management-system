@@ -37,7 +37,7 @@ const normFile = (e: any) => {
 let isFormUpdated = false;
 
 
-function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[], interns: Intern[]}) {
+function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[]}) {
 
   const [form] = Form.useForm();
   const intern = props.intern;
