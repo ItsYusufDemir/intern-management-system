@@ -8,11 +8,13 @@ import { User } from '../models/User';
 
 function Login() {
 
-    const { setAuth }:any = useAuth();
+    const { auth, setAuth }:any = useAuth();
 
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || "/";
+
+
     const [form] = Form.useForm();
 
     const [userName, setUserName] = useState("");
@@ -20,8 +22,6 @@ function Login() {
 
 
     const [user, setUser] = useState("");
-    
-
     const onFinish = async () => {
 
         const formValues = form.getFieldsValue();
@@ -32,16 +32,15 @@ function Login() {
             password: formValues.password,
         }
 
-        //Check auth
-
         const response = await UserService.login(user);
 
         if(response.accessToken !== undefined) {
-            const roles = response.roles;
+            const role = response.role;
             const accessToken = response.accessToken;
 
-            setAuth({user, pwd, roles, accessToken});
-            navigate("/");
+            console.log("role:", role,"access: ", accessToken);
+            setAuth({user, pwd, role, accessToken});
+            navigate(from, {replace: true});
         }
         else{
             alert("Invalid Username or Password!");

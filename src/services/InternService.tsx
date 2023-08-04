@@ -1,9 +1,23 @@
 import { Intern } from "../models/Intern";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
-const getInterns = async (): Promise<Intern[]> => {
+
+
+export const getInterns = async (): Promise<Intern[]> => {
+
+  const axiosPrivate = useAxiosPrivate();
+  const controller = new AbortController();
+
     try {
+        /*  
         const response = await fetch("/api/interns");
         const data: Intern[] = await response.json();
+        */
+        const response = await axiosPrivate.get("/api/interns", {
+          signal: controller.signal
+        })
+
+        const data: Intern[] = response.data
 
         const internsData: Intern[] = data.map((intern: any) => ({
           ...intern,
@@ -25,7 +39,7 @@ const getInterns = async (): Promise<Intern[]> => {
 }
 
 
-const addIntern = async (newIntern: Intern): Promise<Intern> => {
+export const addIntern = async (newIntern: Intern): Promise<Intern> => {
   try{
     const response = await fetch("/api/interns", {
       method: "POST",
@@ -92,8 +106,14 @@ const deleteIntern = async (deletedIntern: Intern) => {
   }
 }
 
+const InternService = () => {
+return(<></>)
 
 
+}
+
+
+/*
 const InternService = {
     getInterns: getInterns,
     addIntern: addIntern,
@@ -101,3 +121,4 @@ const InternService = {
     deleteIntern: deleteIntern,
 }
 export default InternService;
+*/

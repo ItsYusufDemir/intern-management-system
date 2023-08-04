@@ -4,7 +4,9 @@ import DashboardComponent from "./DashboardComponent"
 import {  useEffect, useState } from "react";
 import TeamService from "../services/TeamService";
 import InternService from "../services/InternService";
-
+import useRefreshToken from "../utils/useRefreshToken";
+import { useFetcher } from "react-router-dom";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
  
 
@@ -13,11 +15,32 @@ import InternService from "../services/InternService";
 
 function HomePage() {
 
+    const axiosPrivate = useAxiosPrivate();
+    const controller = new AbortController();
+
+    const getInterns = async () => {
+        try {
+            const response = await axiosPrivate.get("/api/interns", {
+                signal: controller.signal
+            })
+            console.log(response.data);
+        } catch (error) {
+            console.log("couldnt fetch interns");
+        }
+        
+    }
+
+    useEffect(() => {
+        getInterns();
+    })
+
+
+
     const [interns, setInterns] = useState<Intern []>();
     const [teams, setTeams] = useState<Team []>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-
+/*
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
         const internData = await InternService.getInterns();
@@ -34,7 +57,7 @@ function HomePage() {
             getData();
         }
     }, [isLoading]);
-
+*/
 
 
 

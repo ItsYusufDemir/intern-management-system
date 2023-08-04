@@ -49,7 +49,7 @@ const login = async (user: User) => {
             console.log("Unauthorized");
         }
         else{
-            console.log("Error while login");
+            console.log("Login failed!");
         }
         return false;
     }

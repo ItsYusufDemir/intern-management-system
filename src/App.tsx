@@ -15,14 +15,20 @@ import AddUserPage from './components/AddUserPage';
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation } from "react-router-dom";
 import {Team} from "./models/Team";
 import {Intern} from "./models/Intern";
-import InternService from './services/InternService';
 import TeamService from './services/TeamService';
 import RequireAuth from './utils/RequireAuth';
 import LayoutComponent from './components/LayoutComponent';
 import useAuth from './utils/useAuth';
+import Unauthorized from './components/Unauthorized';
 
 
 const App: React.FC = () => {
+
+  const ROLES = {
+    "Admin": 5150,
+    "Supervisor": 1984,
+    "Intern": 2001,
+  }
 
   return (
     
@@ -34,28 +40,29 @@ const App: React.FC = () => {
           
           {/* Protected routes*/}
           <Route path='/' element={<LayoutComponent />}>
-              <Route element={<RequireAuth allowedRoles={["Admin", "Supervisor"]} />}>
+              <Route element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
                 <Route path='/' element={ <HomePage />} />
               </Route>
 
-              <Route element={<RequireAuth  allowedRoles={["Admin", "Supervisor"]} />}>
+              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
                 <Route path="interns" element={ <InternsPage />} />
               </Route>
 
-              <Route element={<RequireAuth  allowedRoles={["Admin"]} />}>
+              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
                 <Route path="add-intern" element={ <AddInternPage isEdit={false}/>} />
               </Route> 
 
-              <Route element={<RequireAuth  allowedRoles={["Admin"]}/>}>
+              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]}/>}>
                 <Route path="add-team" element={ <AddTeamPage />} />
               </Route>
 
-              <Route element={<RequireAuth  allowedRoles={["Admin"]} />}>
+              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
                 <Route path="add-user" element={<AddUserPage />} />
               </Route>
           </Route>
             
           {/*All other routes*/}
+          <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path='*' element={<NotFound />} />
               
           

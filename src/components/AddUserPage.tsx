@@ -123,9 +123,9 @@ const AddUserPage = () => {
 
             <Form.Item label="Role" name="role" rules={[{required: true, message: "Role is required!"}]}>
                 <Select>
-                    <Select.Option value="Intern">Intern</Select.Option>
-                    <Select.Option value="Supervisor">Supervisor</Select.Option>
-                    <Select.Option value="Admin">Admin</Select.Option>
+                    <Select.Option value="2001">Intern</Select.Option>
+                    <Select.Option value="1984">Supervisor</Select.Option>
+                    <Select.Option value="5150">Admin</Select.Option>
                 </Select>
             </Form.Item>
             

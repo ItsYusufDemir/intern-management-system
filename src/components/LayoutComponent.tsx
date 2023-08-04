@@ -5,28 +5,10 @@ import {
   SettingOutlined
 } from '@ant-design/icons';
 import "../styles.css";
-import HomePage from "./HomePage";
-import InternsPage from './InternsPage';
-import AddInternPage from './AddInternPage';
-import AddTeamPage from './AddTeamPage';
-import NotFound from './Notfound';
-import Login from "./Login";
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation, Outlet } from "react-router-dom";
 import {Team} from "../models/Team";
-import {Intern} from "../models/Intern";
 import { Menu, theme, type MenuProps, Layout } from 'antd';
-import InternService from '../services/InternService';
-import TeamService from '../services/TeamService';
-import RequireAuth from '../utils/RequireAuth';
 
-
-
-const DataContext = createContext<{interns: Intern[]; teams: Team[], isLoading: boolean;}>({interns: [], teams: [], isLoading: true});
-export const useDataContext = () => {
-  const context = useContext(DataContext);
-
-  return context;
-}
 
 var teams: Team[] = [];
 
@@ -49,14 +31,7 @@ function getItem(
 }
 
 
-const USER_TYPES = {
-  PUBLIC: "Public User",
-  INTERN_USER: "Normal User",
-  SUPERVISOR_USER: "Supervisor User",
-  ADMIN_USER: "Admin User",
-};
 
-const CURRENT_USER_TYPE = USER_TYPES.ADMIN_USER;
 
 const LayoutComponent = () => {
     
@@ -132,7 +107,6 @@ useEffect(() => {
             }
             else{
               navigate(key);
-              console.log("clicked");
             }
           }}></Menu>
         </Sider>

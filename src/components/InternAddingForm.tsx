@@ -16,7 +16,6 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import {Intern} from "../models/Intern";
-import moment, { Moment } from 'moment';
 import { Team } from '../models/Team';
 import dayjs from 'dayjs';
 import InternService from '../services/InternService';
