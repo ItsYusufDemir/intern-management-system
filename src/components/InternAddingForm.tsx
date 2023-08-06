@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 import InternService from '../services/InternService';
 import UploadService from "../services/UploadService";
 import { useNavigate } from 'react-router-dom';
+import useAxiosPrivate from '../utils/useAxiosPrivate';
 
 
 const { RangePicker } = DatePicker;
@@ -39,6 +40,7 @@ let isFormUpdated = false;
 function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[]}) {
 
   const [form] = Form.useForm();
+  const axiosPrivate = useAxiosPrivate();
   const intern = props.intern;
   const navigate = useNavigate();
   let photo_url: string | null = null;
@@ -77,7 +79,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
       }
 
       
-      InternService.addIntern(newIntern);
+      InternService.addIntern(axiosPrivate, newIntern);
     }
 
 

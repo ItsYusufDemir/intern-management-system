@@ -3,17 +3,19 @@ import {Intern} from "../models/Intern";
 import { Team } from "../models/Team";
 import { useEffect, useState } from "react";
 import TeamService from "../services/TeamService";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
 const AddInternPage = (props: {isEdit: boolean, intern?: Intern}) => {
 
 
     const [teams, setTeams] = useState<Team []>();
+    const axiosPrivate = useAxiosPrivate();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
-        const teamData = await TeamService.getTeams();
+        const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
     };
     

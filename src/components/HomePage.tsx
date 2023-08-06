@@ -18,21 +18,11 @@ function HomePage() {
     const axiosPrivate = useAxiosPrivate();
     const controller = new AbortController();
 
-    const getInterns = async () => {
-        try {
-            const response = await axiosPrivate.get("/api/interns", {
-                signal: controller.signal
-            })
-            console.log(response.data);
-        } catch (error) {
-            console.log("couldnt fetch interns");
-        }
-        
-    }
+    
 
-    useEffect(() => {
-        getInterns();
-    })
+   
+
+
 
 
 
@@ -40,16 +30,14 @@ function HomePage() {
     const [teams, setTeams] = useState<Team []>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-/*
+
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
-        const internData = await InternService.getInterns();
+        const internData = await InternService.getInterns(axiosPrivate);
         setInterns(internData);
 
-        const teamData = await TeamService.getTeams();
+        const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
-
-        setIsLoading(false);
     };
     
     useEffect(() => {
@@ -57,7 +45,19 @@ function HomePage() {
             getData();
         }
     }, [isLoading]);
-*/
+
+    useEffect(() => {
+      if(interns && teams)
+        console.log(interns, teams);
+    }, [interns, teams])
+
+    
+    useEffect(() => {
+      if(teams && interns) {
+        setIsLoading(false);
+      }
+    }, [teams, interns])
+
 
 
 
@@ -90,7 +90,7 @@ function HomePage() {
                 numberOfInterns.push(counter);
                 team.team_success = (totalPoint / counter);
                 
-                TeamService.updateTeam(team);
+                TeamService.updateTeam(axiosPrivate, team);
             });
         }
 

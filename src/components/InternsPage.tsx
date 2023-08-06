@@ -6,6 +6,7 @@ import {Team} from "../models/Team";
 import CVComponent from "./CVComponent"
 import InternService from "../services/InternService";
 import TeamService from "../services/TeamService";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
 
 const InternsPage = () => {
@@ -17,14 +18,15 @@ const InternsPage = () => {
     const [interns, setInterns] = useState<Intern []>();
     const [teams, setTeams] = useState<Team []>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const axiosPrivate = useAxiosPrivate();
 
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
-        const internData = await InternService.getInterns();
+        const internData = await InternService.getInterns(axiosPrivate);
         setInterns(internData);
 
-        const teamData = await TeamService.getTeams();
+        const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
     };
     
@@ -35,11 +37,17 @@ const InternsPage = () => {
     }, [isLoading]);
 
     useEffect(() => {
+      if(interns && teams)
+        console.log(interns, teams);
+    }, [interns, teams])
+
+    
+    useEffect(() => {
       if(teams && interns) {
         setIsLoading(false);
       }
     }, [teams, interns])
-
+    
 
   
 

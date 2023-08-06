@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserService from "../services/UserService";
 import { User } from "../models/User"
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -23,6 +24,7 @@ const AddUserPage = () => {
     const [matchPwd, setMatchPwd] = useState("");
 
     const [role, setRole] = useState("");
+    const axiosPrivate = useAxiosPrivate();
 
     const userNameErrorMessage = "Username must start with a letter and be 3 to 23 characters long, containing only letters, digits, underscores, and hyphens.";
     const passwordErrorMessage = "Password must contain at least one lowercase letter, at least one uppercase letter, at least one digit (0-9), at least one special character (!@#$%), and be 8 to 24 characters in length.";
@@ -47,7 +49,7 @@ const AddUserPage = () => {
 
         console.log(newUser);
 
-        const result = await UserService.addUser(newUser);
+        const result = await UserService.addUser(axiosPrivate, newUser);
 
         console.log("burası:", result);
         if(result){

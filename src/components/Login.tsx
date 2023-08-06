@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import AuthContext from "../utils/AuthProvider";
 import UserService from '../services/UserService';
 import { User } from '../models/User';
+import useAxiosPrivate from '../utils/useAxiosPrivate';
 
 function Login() {
 
@@ -22,6 +23,8 @@ function Login() {
 
 
     const [user, setUser] = useState("");
+    const axiosPrivate = useAxiosPrivate();
+
     const onFinish = async () => {
 
         const formValues = form.getFieldsValue();
@@ -32,7 +35,7 @@ function Login() {
             password: formValues.password,
         }
 
-        const response = await UserService.login(user);
+        const response = await UserService.login(axiosPrivate, user);
 
         if(response.accessToken !== undefined) {
             const role = response.role;

@@ -32,7 +32,6 @@ const useAxiosPrivate = () => {
             }
            
         )
-        console.log(requestIntercept, responseIntercept);
 
         return () => {
             axiosPrivate.interceptors.request.eject(requestIntercept);
