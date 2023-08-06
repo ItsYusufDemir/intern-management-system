@@ -198,11 +198,11 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
 
         if(intern.cv_url !== null){
             console.log("tam burası", intern.cv_url);
-           await UploadService.deleteCv(intern.cv_url.split("/").pop()!);
+           await UploadService.deleteCv(axiosPrivate, intern.cv_url.split("/").pop()!);
         }
 
         if(intern.photo_url !== null) {
-            await UploadService.deletePhoto(intern.photo_url.split("/").pop()!);
+            await UploadService.deletePhoto(axiosPrivate, intern.photo_url.split("/").pop()!);
         }
 
         await InternService.deleteIntern(axiosPrivate, intern);
