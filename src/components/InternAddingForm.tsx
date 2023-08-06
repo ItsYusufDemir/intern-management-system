@@ -131,22 +131,22 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
   const handlePhotoUpload = async (options: any) => {
     console.log(options);
 
-    photo_url = await UploadService.uploadPhoto(options);
+    photo_url = await UploadService.uploadPhoto(axiosPrivate, options);
     console.log("burası:", photo_url);
   }
 
   const handleCvUpload = async (options: any) => {
 
-    cv_url = await UploadService.uploadCv(options);
+    cv_url = await UploadService.uploadCv(axiosPrivate, options);
     console.log("burası:", cv_url);
   }
 
   const handleCancelCvUpload = async (file: any) => {
-    UploadService.deleteCv(cv_url!.split("/").pop()!);
+    UploadService.deleteCv(axiosPrivate, cv_url!.split("/").pop()!);
   }
 
   const handleCancelPhotoUpload = async (file: any) => {
-    UploadService.deletePhoto(photo_url!.split("/").pop()!);
+    UploadService.deletePhoto(axiosPrivate, photo_url!.split("/").pop()!);
   }
 
 

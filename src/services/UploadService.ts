@@ -1,122 +1,106 @@
 
-const uploadPhoto = async (options: any): Promise<string | null> => {
+const uploadPhoto = async (axiosInstance: any, options: any): Promise<string | null> => {
 
     const { file, onSuccess, onError } = options; 
 
-    try{
-
+    try {
       const formData = new FormData();
       formData.append("file", file);
-
-      const response = await fetch("/uploads/photos", {
-        method: "POST",
-        body: formData,
+  
+      const response = await axiosInstance.post("/uploads/photos", formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
-      if (response.ok) {
+  
+      if (response.status === 200) {
         // File uploaded successfully
         onSuccess();
         console.log('Photo uploaded successfully');
-
-        const photo_url = await response.json();
-
-        return photo_url.photo_url;
+  
+        const photo_url = response.data.photo_url;
+  
+        return photo_url;
       } else {
         // File upload failed
         onError(new Error('Upload failed'));
         console.log('Failed to upload Photo');
-
+  
         return null;
       }
-  
-    }
-    catch (error) {
+    } catch (error) {
       console.log("Error: ", error);
-      throw new Error("Error");
+      return null;
     }
   }
 
   
-const uploadCv = async (options: any): Promise<string | null> => {
+const uploadCv = async (axiosInstance: any, options: any): Promise<string | null> => {
 
     const { file, onSuccess, onError } = options; 
 
-    try{
-
+    try {
       const formData = new FormData();
       formData.append("file", file);
-
-      const response = await fetch("/uploads/cv", {
-        method: "POST",
-        body: formData,
+  
+      const response = await axiosInstance.post("/uploads/cv", formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      
-      if (response.ok) {
+  
+      if (response.status === 200) {
         // File uploaded successfully
         onSuccess();
         console.log('CV uploaded successfully');
-
-        const cv_url = await response.json();
-
-        return cv_url.cv_url;
-
+  
+        const cv_url = response.data.cv_url;
+  
+        return cv_url;
       } else {
         // File upload failed
         onError(new Error('Upload failed'));
         console.log('Failed to upload CV');
-
+  
         return null;
       }
-  
-    }
-    catch (error) {
+    } catch (error) {
       console.log("Error: ", error);
-      throw new Error("Error");
+      return null;
     }
   }
 
 
-const deleteCv = async (uid: string) => {
-  try{
-    const response = await fetch(('/uploads/garbage/' + uid), {
-      method: "DELETE",
+const deleteCv = async (axiosInstance: any, uid: string) => {
+  try {
+    const response = await axiosInstance.delete(`/uploads/garbage/${uid}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
     });
-    if(response.ok){
+
+    if (response.status === 200) {
       console.log("CV is deleted");
+    } else {
+      console.log("CV could NOT be deleted!");
     }
-    else{
-      console.log("CV could NOT deleted!");
-    }
-  }
-  catch (error) {
+  } catch (error) {
     console.log("Error: ", error);
-    throw new Error("Error");
   }
 }
 
 
-const deletePhoto = async (uid: string) => {
-  try{
-    const response = await fetch(('/uploads/garbage/' + uid), {
-      method: "DELETE",
+const deletePhoto = async (axiosInstance: any, uid: string) => {
+  try {
+    const response = await axiosInstance.delete(`/uploads/garbage/${uid}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
     });
-    if(response.ok){
+
+    if (response.status === 200) {
       console.log("Photo is deleted");
+    } else {
+      console.log("Photo could NOT be deleted!");
     }
-    else{
-      console.log("Photo could NOT deleted!");
-    }
-  }
-  catch (error) {
+  } catch (error) {
     console.log("Error: ", error);
-    throw new Error("Error");
   }
 }
 
