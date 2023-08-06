@@ -8,6 +8,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import PDFViewer from './PDFViewer';
 import InternService from '../services/InternService';
 import UploadService from '../services/UploadService';
+import useAuth from '../utils/useAuth';
+import useRefreshToken from '../utils/useRefreshToken';
+import useAxiosPrivate from '../utils/useAxiosPrivate';
 
 
 // TODO: Handle Download Cv,
@@ -19,6 +22,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     const interns = props.interns;
 
     const [form] = Form.useForm();
+    const { auth }: any = useAuth();
  
     const handleUpdateValue = () => {
         form.setFieldsValue({
@@ -43,6 +47,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
       const [currentWeek, setCurrentWeek] = useState(0);
       const location = useLocation();
       const navigate = useNavigate();
+      const axiosPrivate = useAxiosPrivate();
 
       
     if(intern === undefined){
@@ -71,7 +76,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         })
        
         intern.overall_success = totalPoint / counter;
-        InternService.updateIntern(intern); //Update the intern in database
+        InternService.updateIntern(axiosPrivate, intern); //Update the intern in database
     }
     
     
@@ -118,7 +123,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
 
         intern.assignment_grades[currentWeek] = Number(form2.getFieldValue("newGrade"));
         computeOverallSuccess(); //Update the intern's overall success
-        InternService.updateIntern(intern);
+        InternService.updateIntern(axiosPrivate, intern);
 
         setCurrentWeeklyGrade(Number(form2.getFieldValue("newGrade")));
 
@@ -191,23 +196,29 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
             interns.splice(index, 1); // 2nd parameter means remove one item only
         };
 
-        if(intern.cv_url !== undefined){
+        if(intern.cv_url !== null){
+            console.log("tam burası", intern.cv_url);
            await UploadService.deleteCv(intern.cv_url.split("/").pop()!);
         }
 
-        if(intern.photo_url !== undefined) {
+        if(intern.photo_url !== null) {
             await UploadService.deletePhoto(intern.photo_url.split("/").pop()!);
         }
 
-        await InternService.deleteIntern(intern);
+        await InternService.deleteIntern(axiosPrivate, intern);
 
         navigate(0); //Refresh the page  
     };
    
-    const downloadCv = (event: any) => {
-        if(intern.cv_url){
-            window.open(intern.cv_url, "_blank");
-        }
+    const downloadCv =  (event: any) => {
+        if(intern.cv_url !== null){   
+             window.open(addAccessToken(intern.cv_url), "_blank");
+        }    
+    }   
+
+    const addAccessToken = (url: string) => {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}access_token=${auth.accessToken}`;
     }
     
     return (
@@ -215,11 +226,11 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         <>
         
         <Image width={150} height={200} style={{border: "2px solid black", borderRadius: "10px"}}
-        src={intern.photo_url}/>
+        src={intern.photo_url ? addAccessToken(intern.photo_url) : undefined}/>
 
         <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  
-            <Progress type="circle" percent={intern.overall_success} format={(percent) => `${percent}% Success`} size={100}></Progress>
+            <Progress type="circle" percent={intern.overall_success ? intern.overall_success : 0} format={(percent) => `${percent}% Success`} size={100}></Progress>
         </Space>
 
         <br /><br />

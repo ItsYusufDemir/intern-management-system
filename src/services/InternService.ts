@@ -1,96 +1,92 @@
+import { useEffect } from "react";
+import axios from "../axios";
 import { Intern } from "../models/Intern";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
+const controller = new AbortController();
 
-const getInterns = async (): Promise<Intern[]> => {
+
+const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => {
+
     try {
-        const response = await fetch("/api/interns");
-        const data: Intern[] = await response.json();
-
+        const response = await axiosInstance.get("/api/interns", {
+          signal: controller.signal
+        })
+        const data: Intern[] = response.data
         const internsData: Intern[] = data.map((intern: any) => ({
           ...intern,
           intern_id: parseInt(intern.intern_id),
           grade: parseInt(intern.grade),
           gpa: parseFloat(intern.gpa),
           team_id: parseInt(intern.team_id),
-          overall_success: parseFloat(intern.overall_success),
+          overall_success: intern.overall_success ? parseFloat(intern.overall_success) : undefined,
           birthday: new Date(intern.birthday),
-          //          internship_starting_date: new Date( new Date(intern.internship_starting_date).getTime() - new Date(intern.internship_starting_date).getTimezoneOffset()*60000),
           internship_starting_date: new Date(intern.internship_starting_date),
           internship_ending_date: new Date(intern.internship_ending_date),
         }));
-
-
         return internsData;
       } catch (error) {
-        console.error("Error fetching intern data:", error);
-        throw new Error("Failed to fetch intern data.");
+          console.error("Error fetching intern data:", error);
+          return undefined;
       }
 }
 
 
-const addIntern = async (newIntern: Intern): Promise<Intern> => {
-  try{
-    const response = await fetch("/api/interns", {
-      method: "POST",
+const addIntern = async (axiosInstance: any, newIntern: Intern): Promise<Intern | undefined> => {
+  try {
+    const response = await axiosInstance.post("/api/interns", newIntern, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"
-      },
-      body: JSON.stringify(newIntern),
+      }
     });
 
-
-    const addedIntern: Intern = await response.json();
+    const addedIntern: Intern = response.data;
 
     return addedIntern;
+  } catch (error) {
+      console.error("Error adding intern:", error);
+      return undefined;
   }
-  catch (error) {
-    console.log("Error: ", error);
-    throw new Error("Error");
-  }
+
 }
 
 
-const updateIntern = async (updatedIntern: Intern) => {
-
-  try{
-    const response = await fetch(("/api/interns/" + updatedIntern.intern_id), {
-      method: "PUT",
+const updateIntern = async (axiosInstance: any, updatedIntern: Intern) => {
+  try {
+    const response = await axiosInstance.put(`/api/interns/${updatedIntern.intern_id}`, updatedIntern, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"
-      },
-      body: JSON.stringify(updatedIntern),
+      }
     });
-    if(response.ok){
+
+    if (response.status === 200) {
       console.log("Intern is updated");
+    } else {
+      console.log("Intern could NOT be updated!");
     }
-    else{
-      console.log("Intern could NOT updtated!");
-    }
-  }
-  catch (error) {
+  } catch (error) {
     console.log("Error: ", error);
-    throw new Error("Error");
   }
 }
 
-const deleteIntern = async (deletedIntern: Intern) => {
-  try{
+
+
+const deleteIntern = async (axiosInstance: any, deletedIntern: Intern) => {
+  try {
     const id = deletedIntern.intern_id;
-    const response = await fetch(('/api/interns/' + id), {
-      method: "DELETE",
+    const response = await axiosInstance.delete(`/api/interns/${id}`, {
       headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
+        "Content-type": "application/json; charset=UTF-8"
+      }
     });
-    if(response.ok){
+
+    if (response.status === 200) {
       console.log("Intern is deleted");
+    } else {
+      console.log("Intern could NOT be deleted!");
     }
-    else{
-      console.log("Intern could NOT deleted!");
-    }
-  }
-  catch (error) {
+  } catch (error) {
     console.log("Error: ", error);
-    throw new Error("Error");
+    throw new Error("Error deleting intern.");
   }
 }
 
@@ -98,10 +94,12 @@ const deleteIntern = async (deletedIntern: Intern) => {
 
 
 
-const InternService = {
-    getInterns: getInterns,
-    addIntern: addIntern,
-    updateIntern: updateIntern,
-    deleteIntern: deleteIntern,
+const InternService  = {
+  getInterns: getInterns,
+  addIntern: addIntern,
+  deleteIntern: deleteIntern,
+  updateIntern: updateIntern,
 }
+
 export default InternService;
+

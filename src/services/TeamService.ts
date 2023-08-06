@@ -1,9 +1,13 @@
 import { Team } from "../models/Team";
+const controller = new AbortController();
 
-const getTeams = async (): Promise<Team[]> => {
+const getTeams = async (axiosInstance: any): Promise<Team[]> => {
     try {
-        const response = await fetch("/api/teams");
-        const data: Team[] = await response.json();
+        const response = await axiosInstance.get("/api/teams", {
+        signal: controller.signal
+      })
+        
+        const data: Team[] = response.data;
 
         const teamsData: Team[] = data.map((team: any) => ({
           ...team,
@@ -20,70 +24,59 @@ const getTeams = async (): Promise<Team[]> => {
 }
 
 
-const addTeam= async (newTeam: Team): Promise<Team> => {
-  try{
-    const response = await fetch("/api/teams", {
-      method: "POST",
+const addTeam= async (axiosInstance: any, newTeam: Team): Promise<Team | undefined> => {
+  try {
+    const response = await axiosInstance.post("/api/teams", newTeam, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"
-      },
-      body: JSON.stringify(newTeam),
+      }
     });
 
-
-    const addedTeam: Team = await response.json();
+    const addedTeam: Team = response.data;
 
     return addedTeam;
-  }
-  catch (error) {
-    console.log("Error: ", error);
-    throw new Error("Error");
+  } catch (error) {
+    console.error("Error adding team:", error);
+    return undefined;
   }
 }
 
 
-const updateTeam = async (updatedTeam: Team) => {
+const updateTeam = async (axiosInstance: any, updatedTeam: Team) => {
 
-  try{
-    const response = await fetch(("/api/teams/" + updatedTeam.team_id), {
-      method: "PUT",
+  try {
+    const response = await axiosInstance.put(`/api/teams/${updatedTeam.team_id}`, updatedTeam, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"
-      },
-      body: JSON.stringify(updatedTeam),
+      }
     });
-    if(response.ok){
+
+    if (response.status === 200) {
       console.log("Team is updated");
+    } else {
+      console.log("Team could NOT be updated!");
     }
-    else{
-      console.log("Team could NOT updated!");
-    }
-  }
-  catch (error) {
+  } catch (error) {
     console.log("Error: ", error);
-    throw new Error("Error");
   }
 }
 
-const deleteTeam = async (deletedTeam: Team) => {
-  try{
+const deleteTeam = async (axiosInstance: any, deletedTeam: Team) => {
+  try {
     const id = deletedTeam.team_id;
-    const response = await fetch(('/api/teams/' + id), {
-      method: "DELETE",
+    const response = await axiosInstance.delete(`/api/teams/${id}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
-      },
+      }
     });
-    if(response.ok){
+
+    if (response.status === 200) {
       console.log("Team is deleted");
+    } else {
+      console.log("Team could NOT be deleted!");
     }
-    else{
-      console.log("Team could NOT deleted!");
-    }
-  }
-  catch (error) {
+  } catch (error) {
     console.log("Error: ", error);
-    throw new Error("Error");
   }
 }
 

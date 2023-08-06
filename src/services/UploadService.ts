@@ -1,5 +1,5 @@
 
-const uploadPhoto = async (options: any): Promise<string | undefined> => {
+const uploadPhoto = async (options: any): Promise<string | null> => {
 
     const { file, onSuccess, onError } = options; 
 
@@ -26,7 +26,7 @@ const uploadPhoto = async (options: any): Promise<string | undefined> => {
         onError(new Error('Upload failed'));
         console.log('Failed to upload Photo');
 
-        return undefined;
+        return null;
       }
   
     }
@@ -37,7 +37,7 @@ const uploadPhoto = async (options: any): Promise<string | undefined> => {
   }
 
   
-const uploadCv = async (options: any): Promise<string | undefined> => {
+const uploadCv = async (options: any): Promise<string | null> => {
 
     const { file, onSuccess, onError } = options; 
 
@@ -66,7 +66,7 @@ const uploadCv = async (options: any): Promise<string | undefined> => {
         onError(new Error('Upload failed'));
         console.log('Failed to upload CV');
 
-        return undefined;
+        return null;
       }
   
     }
@@ -79,7 +79,7 @@ const uploadCv = async (options: any): Promise<string | undefined> => {
 
 const deleteCv = async (uid: string) => {
   try{
-    const response = await fetch(('/uploads/cv/' + uid), {
+    const response = await fetch(('/uploads/garbage/' + uid), {
       method: "DELETE",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
@@ -101,7 +101,7 @@ const deleteCv = async (uid: string) => {
 
 const deletePhoto = async (uid: string) => {
   try{
-    const response = await fetch(('/uploads/photos/' + uid), {
+    const response = await fetch(('/uploads/garbage/' + uid), {
       method: "DELETE",
       headers: {
         "Content-type": "application/json; charset=UTF-8",

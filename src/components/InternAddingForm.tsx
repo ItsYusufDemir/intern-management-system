@@ -16,12 +16,12 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import {Intern} from "../models/Intern";
-import moment, { Moment } from 'moment';
 import { Team } from '../models/Team';
 import dayjs from 'dayjs';
 import InternService from '../services/InternService';
 import UploadService from "../services/UploadService";
 import { useNavigate } from 'react-router-dom';
+import useAxiosPrivate from '../utils/useAxiosPrivate';
 
 
 const { RangePicker } = DatePicker;
@@ -37,13 +37,14 @@ const normFile = (e: any) => {
 let isFormUpdated = false;
 
 
-function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[], interns: Intern[]}) {
+function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[]}) {
 
   const [form] = Form.useForm();
+  const axiosPrivate = useAxiosPrivate();
   const intern = props.intern;
   const navigate = useNavigate();
-  let photo_url: string | undefined = undefined;
-  let cv_url: string | undefined  = undefined;
+  let photo_url: string | null = null;
+  let cv_url: string | null  = null;
 
   const onFinish = (e: any) => {
 
@@ -73,12 +74,12 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         internship_ending_date: formValues.internshipDate[1].toISOString(),
         cv_url: cv_url,
         photo_url: photo_url,
-        overall_success: undefined,
+        overall_success: null,
         assignment_grades: [],
       }
 
       
-      InternService.addIntern(newIntern);
+      InternService.addIntern(axiosPrivate, newIntern);
     }
 
 
@@ -94,7 +95,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
   
   };
 
-;
+
   
 
   useEffect(() => {

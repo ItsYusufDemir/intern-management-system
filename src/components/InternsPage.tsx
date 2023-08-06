@@ -6,36 +6,54 @@ import {Team} from "../models/Team";
 import CVComponent from "./CVComponent"
 import InternService from "../services/InternService";
 import TeamService from "../services/TeamService";
-import { useDataContext } from "../App";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
 
 const InternsPage = () => {
 
 
-const {interns, teams, isLoading} = useDataContext();
-const [team, setTeam] = useState<Team>();
-const [shouldRender, setShouldRender] = useState<boolean>(false);
+
+    const [team, setTeam] = useState<Team>();
+    const [shouldRender, setShouldRender] = useState<boolean>(false);
+    const [interns, setInterns] = useState<Intern []>();
+    const [teams, setTeams] = useState<Team []>();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const axiosPrivate = useAxiosPrivate();
 
 
-useEffect(() => {
-  if (teams) {
-    setTeam(teams[0]);
-  }
-},[teams])
+    // GET ALL DATA FROM DATABASE
+    const getData = async () => {
+        const internData = await InternService.getInterns(axiosPrivate);
+        setInterns(internData);
 
+        const teamData = await TeamService.getTeams(axiosPrivate);
+        setTeams(teamData);
+    };
+    
+    useEffect(() => {
+        if(isLoading){
+            getData();
+        }
+    }, [isLoading]);
 
-useEffect(() => {
-  if(team){
-    setShouldRender(true);
-  }
-},[team])
+    useEffect(() => {
+      if(interns && teams)
+        console.log(interns, teams);
+    }, [interns, teams])
 
+    
+    useEffect(() => {
+      if(teams && interns) {
+        setIsLoading(false);
+      }
+    }, [teams, interns])
+    
 
   
 
   
   const handleTeamSelect = (e: any) => {
-    setTeam(teams[e]);
+    setTeam(teams![e]);
     setSelectedIntern(undefined);
     handleUpdateValue();
     setSelectDisabled(false);
@@ -55,9 +73,9 @@ useEffect(() => {
     let teamInterns: Intern[] = []
     
     //Find the selected intern
-    for(let i = 0; i < interns.length; i++){
-      if(teams.filter(team => team.team_id === interns[i].team_id)[0].team_name === team!.team_name){
-        teamInterns.push(interns[i]);
+    for(let i = 0; i < interns!.length; i++){
+      if(teams!.filter(team => team.team_id === interns![i].team_id)[0].team_name === team!.team_name){
+        teamInterns.push(interns![i]);
       }
     }
 
@@ -76,14 +94,15 @@ useEffect(() => {
 
     return (
       <>
-
+      {isLoading ? <h2>Loading</h2> :
+      <>
       <div className="intern-page-selections" style={{display: "flex"}}>
-      {shouldRender && <Form layout="vertical" form={form}>
+      <Form layout="vertical" form={form}>
           <Row gutter={100}>
             <Col span={12}>
               <Form.Item label="Team" name="teamSelectItem" style={{width: 350}}>
                 <Select onChange={handleTeamSelect} >
-                    {teams.map((team,index) => (
+                    {teams!.map((team,index) => (
                       <Select.Option key={index} value={index}>{team.team_name}</Select.Option>
                     ))}
                 </Select>
@@ -94,8 +113,8 @@ useEffect(() => {
                 
                 <Select  disabled={selectDisabled} onChange={renderCv} className="internSelect">
                 
-                  {interns.map((intern, index) => {
-                      if(teams.filter(team => team.team_id === intern.team_id)[0].team_name === team!.team_name){
+                  {team && interns!.map((intern, index) => {
+                      if(teams!.filter(team => team.team_id === intern.team_id)[0].team_name === team!.team_name){
                         counter++;
                         return (
                           <Select.Option key={index} value={counter}>{intern.first_name + " " + intern.last_name}</Select.Option>
@@ -109,21 +128,21 @@ useEffect(() => {
 
           </Row>
         </Form>
-        }
+        
       </div>
       <br />
       
     
-     {shouldRender && <div className="cv-area">
-        <CVComponent intern={selectedIntern} teams={teams} interns={interns} />
+      <div className="cv-area">
+        <CVComponent intern={selectedIntern} teams={teams!} interns={interns!} />
       </div>
-}
-      <br />
 
-      {!shouldRender && <div><h1>Loading...</h1></div>}
+      <br />
       
 
-      </>  
+      </>} 
+      
+      </> 
       );
 }
  
