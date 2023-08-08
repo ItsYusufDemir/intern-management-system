@@ -2,12 +2,18 @@ import React, {createContext, useContext, useEffect, useState } from 'react';
 import {
   HomeOutlined,
   TeamOutlined,
-  SettingOutlined
+  SettingOutlined,
+  PoweroffOutlined,
 } from '@ant-design/icons';
 import "../styles.css";
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation, Outlet } from "react-router-dom";
 import {Team} from "../models/Team";
-import { Menu, theme, type MenuProps, Layout } from 'antd';
+import { Menu, theme, type MenuProps, Layout, Space, Button, message } from 'antd';
+import UserService from '../services/UserService';
+import { axiosPrivate } from '../axios';
+import { NoticeType } from 'antd/es/message/interface';
+import useAuth from '../utils/useAuth';
+import useAxiosPrivate from '../utils/useAxiosPrivate';
 
 
 var teams: Team[] = [];
@@ -41,7 +47,10 @@ const matchAddIntern = useMatch("/add-intern");
 const matchAddTeam = useMatch("/add-team");
 const matchAddUser = useMatch("/add-user");
 const [seletctedKey, setSelectedKey] = useState("/");
+const [items, setItems] = useState<MenuItem []>();
 const location = useLocation();
+const {auth}: any = useAuth();
+const [username, setUsername] = useState("");
 
 
 const getSelectedkey = () => {
@@ -72,19 +81,44 @@ useEffect(() => {
 
 
   //In the side bar, we have a menu. Those are the navigate items
-  const items: MenuItem[] = [
+  const adminItems: MenuItem[] = [
     getItem('Home', '/', <HomeOutlined />),
     getItem('Interns', '/interns', <TeamOutlined />),
+    getItem('Intern Applications', '/intern-applications', <TeamOutlined />),
     getItem('Tools', 'sub1', <SettingOutlined />, [
-      getItem('Add Intern', '/add-intern'),
       getItem('Add Team', '/add-team'),
       getItem("Add User", "/add-user"),
     ]),
-    
+    getItem('Change Password', '/change-password', <TeamOutlined />),
+  ];
+
+  const supervisorItems: MenuItem[] = [
+    getItem('Home', '/', <HomeOutlined />),
+    getItem('Interns', '/interns', <TeamOutlined />),
+    getItem('Change Password', '/change-password', <TeamOutlined />),
+  ];
+
+  const internItems: MenuItem[] = [
+    getItem('My Profile', '/', <HomeOutlined />),
+    getItem('Change Password', '/change-password', <TeamOutlined />),
   ];
 
 
-  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    if(auth) {
+      if(auth.role === 5150) {
+        setItems(adminItems);
+      }
+      else if(auth.role === 1984) {
+        setItems(supervisorItems);
+      }
+      else {
+        setItems(internItems);
+      }
+    }
+  }, [auth])
+
+
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -93,22 +127,54 @@ useEffect(() => {
   const title = "Intern Management System";
   const footer = "IMS ©2023"
 
+  const logout = async () => {
+    UserService.logout();
+  }
+
+  const onClick = () => {
+    logout();
+
+    giveMessage("success", "Log out successfull");
+    navigate("/login");
+  }
+
+  const giveMessage = (type: NoticeType, mssge: string) => {
+    message.open({
+      type: type,
+      content: mssge,
+    });
+  };
+
+
 
   return (
 
-
-      <Layout style={{ minHeight: '100vh' }}>
-        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+      <>
+      <Layout style={{ minHeight: '98vh' }}>
+        <Sider >
           <div className="logo-area"><h1 className='logo' style={{color: "white"}}>LOGO</h1></div>
           
           <Menu theme="dark" defaultSelectedKeys={['/']} mode="inline" items={items} selectedKeys={[seletctedKey]}  onClick={({key}) => {
-            if(key === "signout"){
-              //Do signout
-            }
-            else{
               navigate(key);
-            }
           }}></Menu>
+
+
+          
+
+          <div className='logout-area' style={{backgroundColor:"#163851", height: "50px", position: "absolute", bottom: "0%", width: "200px", zIndex: 99, display: "inline-block"}}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "5px" }}>
+              <span style={{fontSize: "25px", fontWeight: "initial", color: "white", marginLeft: "5px"}}>{auth.username}</span>
+              <Button
+                type="primary"
+                icon={<PoweroffOutlined />}
+                style={{marginLeft: "30px"}}
+                size='large'
+                onClick={onClick}
+                danger
+                />
+            </div>
+          </div>
+
         </Sider>
         <Layout>
           
@@ -123,6 +189,7 @@ useEffect(() => {
           <Footer style={{ textAlign: 'center' }}>{footer}</Footer>
         </Layout>
       </Layout>
+      </>
       
   );
 

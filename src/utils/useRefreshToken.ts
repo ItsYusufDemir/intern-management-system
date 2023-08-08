@@ -3,7 +3,7 @@ import axios from "../axios";
 import useAuth from "./useAuth";
  
 const useRefreshToken = () => {
-    const { setAuth }: any = useAuth();
+    const { auth, setAuth }: any = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -12,9 +12,14 @@ const useRefreshToken = () => {
             const response = await axios.get("/refresh", {
                 withCredentials: true,
             });
-            setAuth((prev: any) => {
-                return {...prev, accessToken: response.data.accessToken}
-            })
+
+            setAuth(
+                {
+                    username: response.data.username,
+                    accessToken:response.data.accessToken,
+                    role: response.data.role,
+
+                 })
             return response.data.accessToken; 
         } catch (error) {
             console.log(error);

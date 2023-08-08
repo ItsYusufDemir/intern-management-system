@@ -20,6 +20,7 @@ import RequireAuth from './utils/RequireAuth';
 import LayoutComponent from './components/LayoutComponent';
 import useAuth from './utils/useAuth';
 import Unauthorized from './components/Unauthorized';
+import PersistLogin from './components/PersistLogin';
 
 
 const App: React.FC = () => {
@@ -39,27 +40,31 @@ const App: React.FC = () => {
           
           
           {/* Protected routes*/}
-          <Route path='/' element={<LayoutComponent />}>
-              <Route element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
-                <Route path='/' element={ <HomePage />} />
-              </Route>
+          
+          <Route path='/' element={<PersistLogin />}>
+              <Route element={<LayoutComponent />}>
+                <Route element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Supervisor, ROLES.Intern]} />}>
+                  <Route path='/' element={ <HomePage />} />
+                </Route>
 
-              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
-                <Route path="interns" element={ <InternsPage />} />
-              </Route>
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Supervisor, ROLES.Intern]} />}>
+                  <Route path="interns" element={ <InternsPage />} />
+                </Route>
 
-              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
-                <Route path="add-intern" element={ <AddInternPage isEdit={false}/>} />
-              </Route> 
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin,ROLES.Supervisor, ROLES.Intern]} />}>
+                  <Route path="add-intern" element={ <AddInternPage isEdit={false}/>} />
+                </Route> 
 
-              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]}/>}>
-                <Route path="add-team" element={ <AddTeamPage />} />
-              </Route>
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]}/>}>
+                  <Route path="add-team" element={ <AddTeamPage />} />
+                </Route>
 
-              <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Intern]} />}>
-                <Route path="add-user" element={<AddUserPage />} />
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]} />}>
+                  <Route path="add-user" element={<AddUserPage />} />
+                </Route>
               </Route>
           </Route>
+          
             
           {/*All other routes*/}
           <Route path="/unauthorized" element={<Unauthorized />} />
