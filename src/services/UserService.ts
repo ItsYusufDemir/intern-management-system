@@ -1,27 +1,34 @@
 import axios from '../axios';
 import { User } from "../models/User";
 
-const addUser = async (axiosInstance: any, user: User): Promise<boolean> => {
-
+const addUser = async (axiosInstance: any, user: User) => {
     try {
         const response = await axiosInstance.post('/api/users', user, {
           headers: {'Content-Type': 'application/json'},
           withCredentials: true,
         });
     
-        return true;
       } catch (error: any) {
-        if (!error?.response) {
-          console.log("No server response");
-        } else if (error.response?.status === 409) {
-          console.log("User already exists");
-        } else {
-          console.log("Error while adding user");
-        }
-        return false;
+        throw error;
       }
 
 }
+
+const getUsers = async (axiosInstance: any) => {
+  try {
+      const response = await axiosInstance.get('/api/users', {
+        headers: {'Content-Type': 'application/json'},
+        withCredentials: true,
+      });
+      
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+
+}
+
+
 
 
 const login = async (axiosInstance: any, user: User) => {
@@ -34,21 +41,41 @@ const login = async (axiosInstance: any, user: User) => {
     
         return response.data;
       } catch (error: any) {
-        if (!error?.response) {
-          console.log("No server response");
-        } else if (error.response?.status === 401) {
-          console.log("Unauthorized");
-        } else {
-          console.log("Login failed!");
-        }
-        return false;
+        throw error;
       }
 
 }
 
+const logout = async () => {
 
-const UserServie = {
+  try {
+      const response = await axios.get('/logout', {
+        headers: {'Content-Type': 'application/json'},
+        withCredentials: true,
+      });
+    } catch (error: any) {
+      throw error;
+    }
+}
+
+const deleteUser = async (axiosInstance: any, username: string) => {
+  try {
+    const response = await axiosInstance.delete(`/api/users/${username}`, {
+      headers: {'Content-Type': 'application/json'},
+      withCredentials: true,
+    });
+    return;
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+
+const UserService = {
     addUser: addUser,
     login: login,
+    logout: logout,
+    getUsers: getUsers,
+    deleteUser: deleteUser,
 }
-export default UserServie;
+export default UserService;

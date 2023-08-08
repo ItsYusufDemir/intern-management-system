@@ -18,7 +18,7 @@ const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => 
           grade: parseInt(intern.grade),
           gpa: parseFloat(intern.gpa),
           team_id: parseInt(intern.team_id),
-          overall_success: intern.overall_success ? parseFloat(intern.overall_success) : undefined,
+          overall_success: intern.overall_success ? parseFloat(intern.overall_success) : null,
           birthday: new Date(intern.birthday),
           internship_starting_date: new Date(intern.internship_starting_date),
           internship_ending_date: new Date(intern.internship_ending_date),
@@ -39,12 +39,13 @@ const addIntern = async (axiosInstance: any, newIntern: Intern): Promise<Intern 
       }
     });
 
+
     const addedIntern: Intern = response.data;
+    console.log("added intern: ", addedIntern);
 
     return addedIntern;
-  } catch (error) {
-      console.error("Error adding intern:", error);
-      return undefined;
+  } catch (error: any) {
+      throw error;
   }
 
 }

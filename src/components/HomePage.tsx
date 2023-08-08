@@ -7,6 +7,7 @@ import InternService from "../services/InternService";
 import useRefreshToken from "../utils/useRefreshToken";
 import { useFetcher } from "react-router-dom";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
+import Loading from "./Loading";
 
  
 
@@ -17,15 +18,6 @@ function HomePage() {
 
     const axiosPrivate = useAxiosPrivate();
     const controller = new AbortController();
-
-    
-
-   
-
-
-
-
-
     const [interns, setInterns] = useState<Intern []>();
     const [teams, setTeams] = useState<Team []>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -77,14 +69,12 @@ function HomePage() {
                 let totalPoint = 0;
                 let counter = 0;
                 interns?.forEach(intern =>{
-                    console.log(intern.overall_success);
                 if(intern.team_id === team.team_id) {
                     if(intern.overall_success !== null){
-                        totalPoint += intern.overall_success;
+                        totalPoint += intern.overall_success!;
                         counter++;
                     }
                 }
-                    
         
                 })
                 numberOfInterns.push(counter);
@@ -99,7 +89,7 @@ function HomePage() {
     
     if(isLoading){
         return (
-            <><h2>Loading...</h2></>
+            <Loading />
         )
     }
     else{

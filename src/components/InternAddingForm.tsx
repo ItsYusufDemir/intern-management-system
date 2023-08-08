@@ -13,6 +13,7 @@ import {
   Switch,
   TreeSelect,
   Upload,
+  message,
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import {Intern} from "../models/Intern";
@@ -22,6 +23,7 @@ import InternService from '../services/InternService';
 import UploadService from "../services/UploadService";
 import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../utils/useAxiosPrivate';
+import { NoticeType } from 'antd/es/message/interface';
 
 
 const { RangePicker } = DatePicker;
@@ -40,6 +42,7 @@ let isFormUpdated = false;
 function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[]}) {
 
   const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
   const axiosPrivate = useAxiosPrivate();
   const intern = props.intern;
   const navigate = useNavigate();
@@ -48,7 +51,6 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
 
   const onFinish = (e: any) => {
 
-    form.submit();
 
     if(props.isEdit){
       //Handle update
@@ -56,8 +58,6 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
     else{
       const formValues = form.getFieldsValue();
 
-      
-      
       const newIntern: Intern = {
         first_name: formValues.first_name,
         last_name: formValues.last_name,
@@ -78,22 +78,29 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         assignment_grades: [],
       }
 
-      
-      InternService.addIntern(axiosPrivate, newIntern);
+      addIntern(newIntern);
     }
-
-
-    if(props.isEdit){
-      alert("Intern is updated!");
-    }
-    else {
-      alert("Intern is added!");
-      form.resetFields();
-   }
-
-   navigate(0);
   
   };
+
+
+  const addIntern = async (newIntern: Intern) => {
+    try {
+      await InternService.addIntern(axiosPrivate, newIntern);
+      
+      giveMessage("success", "Intern is added");
+      form.resetFields();
+    } catch (error: any) {
+      if (!error?.response) {
+        giveMessage("error","No server response");
+      } else if (error.response?.status === 409) {
+        giveMessage("error", "Intern with given email is already exists");
+      } else {
+        giveMessage("error", "Error happened while adding intern");
+      }
+    }
+
+  }
 
 
   
@@ -149,6 +156,14 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
     UploadService.deletePhoto(axiosPrivate, photo_url!.split("/").pop()!);
   }
 
+  const giveMessage = (type: NoticeType, mssge: string) => {
+    message.open({
+      type: type,
+      content: mssge,
+    });
+  };
+
+  
 
 
 
@@ -157,6 +172,7 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
   return (
 
     <>
+      {contextHolder}
       {props.isEdit ? (
         <h2>Edit Intern</h2>
       ) : (

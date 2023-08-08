@@ -1,11 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { Button, Checkbox, Form, Input } from 'antd';
+import { Button, Checkbox, Form, Input, message } from 'antd';
 import useAuth from '../utils/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AuthContext from "../utils/AuthProvider";
 import UserService from '../services/UserService';
 import { User } from '../models/User';
 import useAxiosPrivate from '../utils/useAxiosPrivate';
+import { NoticeType } from 'antd/es/message/interface';
 
 function Login() {
 
@@ -24,9 +25,15 @@ function Login() {
 
     const [user, setUser] = useState("");
     const axiosPrivate = useAxiosPrivate();
+    const [messageApi, contextHolder] = message.useMessage();
 
-    const onFinish = async () => {
+    const onFinish = () => {
+        login();    
+    }
 
+
+
+    const login = async () => {
         const formValues = form.getFieldsValue();
 
         console.log(formValues.username, formValues.password);
@@ -35,22 +42,38 @@ function Login() {
             password: formValues.password,
         }
 
-        const response = await UserService.login(axiosPrivate, user);
+        try {
+            const response = await UserService.login(axiosPrivate, user);
 
-        if(response.accessToken !== undefined) {
-            const role = response.role;
-            const accessToken = response.accessToken;
+            if(response.accessToken !== undefined) {
+                const role = response.role;
+                const accessToken = response.accessToken;
+                const username = user.username;
+    
+                console.log("role:", role,"access: ", accessToken);
+                setAuth({username, pwd, role, accessToken});
+                giveMessage("success", "Login successfull");
+                navigate(from, {replace: true});
 
-            console.log("role:", role,"access: ", accessToken);
-            setAuth({user, pwd, role, accessToken});
-            navigate(from, {replace: true});
+                form.resetFields();
+            }
+        } catch (error:any ) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              } else if (error.response?.status === 401) {
+                giveMessage("error", "Invalid Username or Password!");
+              } else {
+                giveMessage("error", "Login failed!");
+              }
         }
-        else{
-            alert("Invalid Username or Password!");
-        }
-
-        form.resetFields();
     }
+
+    const giveMessage = (type: NoticeType, mssge: string) => {
+        message.open({
+          type: type,
+          content: mssge,
+        });
+      };
 
 
 
@@ -84,13 +107,7 @@ function Login() {
                         <Input.Password />
                     </Form.Item>
 
-                    <Form.Item
-                        name="remember"
-                        valuePropName="checked"
-                        wrapperCol={{ offset: 8, span: 16 }}
-                        >
-                        <Checkbox>Remember me</Checkbox>
-                    </Form.Item>
+                    
 
                     <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                         <Button type="primary" htmlType="submit">

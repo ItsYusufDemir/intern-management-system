@@ -226,7 +226,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         <>
         
         <Image width={150} height={200} style={{border: "2px solid black", borderRadius: "10px"}}
-        src={intern.photo_url ? addAccessToken(intern.photo_url) : undefined}/>
+        src={intern.photo_url !== null ? addAccessToken(intern.photo_url) : addAccessToken("http://localhost:5000/uploads/photos/no-photo.jpg")}/>
 
         <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  
