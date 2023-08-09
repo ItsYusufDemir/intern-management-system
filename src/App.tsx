@@ -8,10 +8,9 @@ import "./styles.css";
 import HomePage from "./components/HomePage";
 import InternsPage from './components/InternsPage';
 import AddInternPage from './components/AddInternPage';
-import AddTeamPage from './components/AddTeamPage';
 import NotFound from './components/Notfound';
 import Login from "./components/Login";
-import AddUserPage from './components/AddUserPage';
+import AddPage from './components/AddPage';
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation } from "react-router-dom";
 import {Team} from "./models/Team";
 import {Intern} from "./models/Intern";
@@ -55,12 +54,8 @@ const App: React.FC = () => {
                   <Route path="add-intern" element={ <AddInternPage isEdit={false}/>} />
                 </Route> 
 
-                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]}/>}>
-                  <Route path="add-team" element={ <AddTeamPage />} />
-                </Route>
-
                 <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]} />}>
-                  <Route path="add-user" element={<AddUserPage />} />
+                  <Route path="add" element={<AddPage />} />
                 </Route>
               </Route>
           </Route>

@@ -14,6 +14,19 @@ const addUser = async (axiosInstance: any, user: User) => {
 
 }
 
+const updateUser = async (axiosInstance: any, user: User) => {
+  try {
+      const response = await axiosInstance.put('/api/users', user, {
+        headers: {'Content-Type': 'application/json'},
+        withCredentials: true,
+      });
+  
+    } catch (error: any) {
+      throw error;
+    }
+
+}
+
 const getUsers = async (axiosInstance: any) => {
   try {
       const response = await axiosInstance.get('/api/users', {
@@ -58,9 +71,9 @@ const logout = async () => {
     }
 }
 
-const deleteUser = async (axiosInstance: any, username: string) => {
+const deleteUser = async (axiosInstance: any, user_id: number) => {
   try {
-    const response = await axiosInstance.delete(`/api/users/${username}`, {
+    const response = await axiosInstance.delete(`/api/users/${user_id}`, {
       headers: {'Content-Type': 'application/json'},
       withCredentials: true,
     });
@@ -77,5 +90,6 @@ const UserService = {
     logout: logout,
     getUsers: getUsers,
     deleteUser: deleteUser,
+    updateUser: updateUser,
 }
 export default UserService;

@@ -24,7 +24,7 @@ const getTeams = async (axiosInstance: any): Promise<Team[]> => {
 }
 
 
-const addTeam= async (axiosInstance: any, newTeam: Team): Promise<Team | undefined> => {
+const addTeam= async (axiosInstance: any, newTeam: Team) => {
   try {
     const response = await axiosInstance.post("/api/teams", newTeam, {
       headers: {
@@ -32,12 +32,9 @@ const addTeam= async (axiosInstance: any, newTeam: Team): Promise<Team | undefin
       }
     });
 
-    const addedTeam: Team = response.data;
-
-    return addedTeam;
   } catch (error) {
     console.error("Error adding team:", error);
-    return undefined;
+    throw error;
   }
 }
 
@@ -51,20 +48,17 @@ const updateTeam = async (axiosInstance: any, updatedTeam: Team) => {
       }
     });
 
-    if (response.status === 200) {
-      console.log("Team is updated");
-    } else {
-      console.log("Team could NOT be updated!");
-    }
+    
   } catch (error) {
     console.log("Error: ", error);
+    throw error;
   }
 }
 
-const deleteTeam = async (axiosInstance: any, deletedTeam: Team) => {
+const deleteTeam = async (axiosInstance: any, teamName: string) => {
   try {
-    const id = deletedTeam.team_id;
-    const response = await axiosInstance.delete(`/api/teams/${id}`, {
+
+    const response = await axiosInstance.delete(`/api/teams/${teamName}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       }
@@ -77,6 +71,7 @@ const deleteTeam = async (axiosInstance: any, deletedTeam: Team) => {
     }
   } catch (error) {
     console.log("Error: ", error);
+    throw error;
   }
 }
 
