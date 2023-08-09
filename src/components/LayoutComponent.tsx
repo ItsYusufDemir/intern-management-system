@@ -86,8 +86,7 @@ useEffect(() => {
     getItem('Interns', '/interns', <TeamOutlined />),
     getItem('Intern Applications', '/intern-applications', <TeamOutlined />),
     getItem('Tools', 'sub1', <SettingOutlined />, [
-      getItem('Add Team', '/add-team'),
-      getItem("Add User", "/add-user"),
+      getItem("Add User/Team", "/add"),
     ]),
     getItem('Change Password', '/change-password', <TeamOutlined />),
   ];

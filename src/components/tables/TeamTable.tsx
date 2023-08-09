@@ -1,44 +1,39 @@
 import { SearchOutlined, QuestionCircleOutlined  } from '@ant-design/icons';
 import React, { useRef, useState } from 'react';
 import type { InputRef } from 'antd';
-import { Button, Input, Popconfirm, Space, Table, message } from 'antd';
+import { Button, Input, Modal, Popconfirm, Space, Table, message } from 'antd';
 import type { ColumnType, ColumnsType } from 'antd/es/table';
 import type { FilterConfirmProps, SorterResult } from 'antd/es/table/interface';
-import { User } from '../models/User';
+import { User } from '../../models/User';
 import Highlighter from 'react-highlight-words';
-import UserService from '../services/UserService';
+import UserService from '../../services/UserService';
 import { useNavigate } from 'react-router-dom';
-import useAxiosPrivate from '../utils/useAxiosPrivate';
+import useAxiosPrivate from '../../utils/useAxiosPrivate';
 import { NoticeType } from 'antd/es/message/interface';
+import { Team } from '../../models/Team';
+import TeamService from '../../services/TeamService';
+import AddTeamForm from '../forms/AddTeamForm';
 
 interface ChildProps {
-    users: DataType [];
+    teams: Team [];
 }
 
 
-interface DataType {
-    user_id: string;
-    username: string;
-    role: number;
-  }
 
-type DataIndex = keyof DataType;
 
-const UserTable: React.FC<ChildProps> = ({users}) => {
+type DataIndex = keyof Team;
+
+const TeamTable: React.FC<ChildProps> = ({teams}) => {
 
 
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
-    const [sortedInfo, setSortedInfo] = useState<SorterResult<DataType>>({});
+    const [sortedInfo, setSortedInfo] = useState<SorterResult<Team>>({});
     const navigate = useNavigate();
     const axiosPrivate = useAxiosPrivate();
-
-
-    
-    
-      
-      
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [team, setTeam] = useState<Team>();
 
       const handleSearch = (
         selectedKeys: string[],
@@ -55,7 +50,7 @@ const UserTable: React.FC<ChildProps> = ({users}) => {
         setSearchText('');
       };
 
-      const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<DataType> => ({
+      const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<Team> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
           <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
             <Input
@@ -110,7 +105,7 @@ const UserTable: React.FC<ChildProps> = ({users}) => {
           <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
         ),
         onFilter: (value, record) =>
-          record[dataIndex]
+          record[dataIndex]!
             .toString()
             .toLowerCase()
             .includes((value as string).toLowerCase()),
@@ -134,22 +129,16 @@ const UserTable: React.FC<ChildProps> = ({users}) => {
 
 
       
-      const columns: ColumnsType<DataType> = [
+      const columns: ColumnsType<Team> = [
         {
-          title: 'Username',
-          dataIndex: 'username',
-          key: 'username',
+          title: 'Team Name',
+          dataIndex: 'team_name',
+          key: 'team_name',
           width: '30%',
-          ...getColumnSearchProps('username'),
-          sorter: (a, b) => a.username.localeCompare(b.username), // Corrected sorting function
+          ...getColumnSearchProps('team_name'),
+          sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
           sortDirections: ['descend', 'ascend'],
           ellipsis: true
-        },
-        {
-          title: 'Role',
-          dataIndex: 'role',
-          key: 'role',
-          width: '10%',
         },
         {
           title: 'Action',
@@ -158,12 +147,12 @@ const UserTable: React.FC<ChildProps> = ({users}) => {
           width: '20%',
           render: (_, record) => (
             <Space size="middle">
-              <Button onClick={() => handleUpdateUser(record.username)} type="primary">Update</Button>
+              <Button onClick={() => handleUpdateTeam(record)} type="primary">Update</Button>
 
               <Popconfirm
-              title="Are you sure to delete this user?"
+              title="Are you sure to delete this team?"
               icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
-              onConfirm={() => handleDeleteUser(record.username)}
+              onConfirm={() => handleDeleteTeam(record.team_name)}
               >
                 <Button type="primary" danger>Delete</Button>
               </Popconfirm>
@@ -172,17 +161,14 @@ const UserTable: React.FC<ChildProps> = ({users}) => {
         },
       ];
 
-      const confirm = (username: string) => {
-        //deleteUser(username);
-      }
+      
 
 
-      const handleDeleteUser = async (username: string) => {
+      const handleDeleteTeam = async (teamName: string) => {
         try {
-          const response = await UserService.deleteUser(axiosPrivate, username);
+          const response = await TeamService.deleteTeam(axiosPrivate, teamName);
 
-  
-          giveMessage("success", "User deleted");
+          giveMessage("success", "Team deleted");
           
           setTimeout(() => {
             navigate(0); // Navigate after the timeout
@@ -204,20 +190,40 @@ const UserTable: React.FC<ChildProps> = ({users}) => {
         });
       };
 
-  
-      const handleUpdateUser = (username: string) => {
-
+      const handleUpdateTeam = (team: Team) => {
+          setTeam(team);
+          showModal();
       }
+
+      
+  
       
 
+      const showModal = () => {
+        setIsModalOpen(true);
+      };
+    
+      const handleOk = () => {
+        setIsModalOpen(false);
+      };
+    
+      const handleCancel = () => {
+        setIsModalOpen(false);
+      };
+    
 
 
     return (
-        
-            <Table columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
-       
+        <>
+            <Table columns={columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
+
+            <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
+              <AddTeamForm team={team} />
+            </Modal>
+
+        </>
     )
 }
 
 
-export default UserTable;
+export default TeamTable;

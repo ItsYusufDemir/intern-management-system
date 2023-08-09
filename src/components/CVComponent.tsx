@@ -80,28 +80,6 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     }
     
     
-    const handleSelectWeek = (e: number) =>{
-        setCurrentWeek(e);
-
-        setIsHidden(false);
-
-        if(intern.assignment_grades !== undefined) {
-            if(intern.assignment_grades[e] !== undefined){
-                setCurrentWeeklyGrade(intern.assignment_grades[e]);
-                setCurrentMission(findTeam(intern).assignments[e]);
-            }
-            else{
-                setCurrentWeeklyGrade(undefined);
-                setCurrentMission(findTeam(intern).assignments[e]);
-            }
-        }
-        else{
-            setCurrentWeeklyGrade(undefined);
-            setCurrentMission(findTeam(intern).assignments[e]);
-        }
-
-        
-    }
 
     //Percentage of complete of internship
     const completePercentage = Math.round(((Date.now() - intern.internship_starting_date.getTime()) / 
@@ -258,37 +236,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
 
         <br /><br />
 
-        <div className='internship-programme'>
-            <h2>Internship Programme</h2>
-            
-            <Form layout="horizontal" form={form}>
-                <Form.Item label="Week" name="weekSelect" style={{width: 200}}>
-                    <Select onChange={handleSelectWeek}>
-                        {findTeam(intern).assignments.map((assignment, index) => {
-                            return(
-                            <Select.Option value={index}>{(index + 1) + ". week"}</Select.Option>
-                            )
-                        })}
-                    </Select>
-                </Form.Item>
-
-
-                
-            </Form>
-
-            <Card title={ "Grade: " + currentWeeklyGrade} style={{width: 800, height: 100}} hidden={isHidden}>{currentMission}
-                <Button style={{position: "absolute", left:'85%', top: "10px"}} onClick={showModal}>Add/Change</Button>
-            </Card>
-
-
-            
-
-            
-            
-
-
-
-        </div>
+        
 
 
         {/*Modals Here*/}
