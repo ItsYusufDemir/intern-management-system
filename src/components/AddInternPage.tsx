@@ -1,4 +1,4 @@
-import InternAddingForm from "./InternAddingForm";
+import InternAddingForm from "./forms/InternAddingForm";
 import {Intern} from "../models/Intern";
 import { Team } from "../models/Team";
 import { useEffect, useState } from "react";

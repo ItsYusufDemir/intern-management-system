@@ -44,8 +44,7 @@ const LayoutComponent = () => {
 
 const matchInterns = useMatch("/interns");
 const matchAddIntern = useMatch("/add-intern");
-const matchAddTeam = useMatch("/add-team");
-const matchAddUser = useMatch("/add-user");
+const matchAddPage = useMatch("/add");
 const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
 const location = useLocation();
@@ -60,11 +59,9 @@ const getSelectedkey = () => {
   else if (matchAddIntern) {
     setSelectedKey("/add-intern");
   }
-  else if (matchAddTeam) {
-    setSelectedKey("/add-team");
-  }
-  else if (matchAddUser) {
-    setSelectedKey("/add-user");
+  else if (matchAddPage) {
+    setSelectedKey("/add");
+    
   }
   else {
     setSelectedKey("/");

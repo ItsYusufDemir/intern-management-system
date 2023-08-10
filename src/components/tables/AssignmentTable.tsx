@@ -13,18 +13,19 @@ import { NoticeType } from 'antd/es/message/interface';
 import { Team } from '../../models/Team';
 import TeamService from '../../services/TeamService';
 import AddTeamForm from '../forms/AddTeamForm';
+import { Assignment } from '../../models/Assignment';
 
 interface ChildProps {
-    teams: Team [];
+    assignments: Assignment[];
     getData: () => void;
 }
 
 
 
 
-type DataIndex = keyof Team;
+type DataIndex = keyof Assignment;
 
-const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
+const AssignmentTable: React.FC<ChildProps> = ({assignments, getData}) => {
 
 
     const [searchText, setSearchText] = useState('');
@@ -51,7 +52,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
         setSearchText('');
       };
 
-      const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<Team> => ({
+      const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<Assignment> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
           <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
             <Input
@@ -130,30 +131,52 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
 
 
       
-      const columns: ColumnsType<Team> = [
+      const columns: ColumnsType<Assignment> = [
         {
-          title: 'Team Name',
-          dataIndex: 'team_name',
-          key: 'team_name',
-          width: '30%',
-          ...getColumnSearchProps('team_name'),
-          sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
-          sortDirections: ['descend', 'ascend'],
+          title: 'Description',
+          dataIndex: 'description',
+          key: 'description',
+          width: '40%',
+          ...getColumnSearchProps('description'),
           ellipsis: true
+        },
+        {
+            title: 'Deadline',
+            dataIndex: 'deadline',
+            key: 'deadline',
+            width: '15%',
+            //add sorting
+            ellipsis: true
+        },
+        {
+            title: 'Weight',
+            dataIndex: 'weight',
+            key: 'weight',
+            width: '5%',
+            //add sorting
+            ellipsis: true
+        },
+        {
+            title: 'Grade',
+            dataIndex: 'grade',
+            key: 'grade',
+            width: '5%',
+            // add sorting
+            ellipsis: true
         },
         {
           title: 'Action',
           dataIndex: '',
           key: 'x',
-          width: '20%',
+          width: '10%',
           render: (_, record) => (
             <Space size="middle">
-              <Button onClick={() => handleUpdateTeam(record)} type="primary">Update</Button>
+              <Button onClick={() => handleUpdateAssignment(record)} type="primary">Update</Button>
 
               <Popconfirm
               title="Are you sure to delete this team?"
               icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
-              onConfirm={() => handleDeleteTeam(record.team_name)}
+              onConfirm={() => handleDeleteAssignment(record)}
               >
                 <Button type="primary" danger>Delete</Button>
               </Popconfirm>
@@ -165,9 +188,9 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
       
 
 
-      const handleDeleteTeam = async (teamName: string) => {
+      const handleDeleteAssignment = async (assignment: Assignment) => {
         try {
-          const response = await TeamService.deleteTeam(axiosPrivate, teamName);
+          //const response = await TeamService.deleteTeam(axiosPrivate, teamName);
 
           giveMessage("success", "Team deleted");
           
@@ -189,7 +212,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
         });
       };
 
-      const handleUpdateTeam = (team: Team) => {
+      const handleUpdateAssignment = (assignment: Assignment) => {
           setTeam(team);
           showModal();
       }
@@ -214,7 +237,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
 
     return (
         <>
-            <Table columns={columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
+            <Table columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
 
             <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
               <AddTeamForm team={team} getData={getData} />
@@ -225,4 +248,4 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
 }
 
 
-export default TeamTable;
+export default AssignmentTable;

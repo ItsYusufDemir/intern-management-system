@@ -46,6 +46,7 @@ const AddPage = () => {
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
+        setIsLoading(true);
         const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
 
@@ -75,10 +76,10 @@ const AddPage = () => {
         {/*Add User*/}
         <Space align="start">
            
-            <AddUserForm teams={teams} />
+            <AddUserForm teams={teams} getData={getData}/>
                     
             <div style={{marginLeft: 100}}>
-                <UserTable users={users} teams={teams} />
+                <UserTable users={users} teams={teams} getData={getData} />
             </div>
         </Space>
 
@@ -86,10 +87,10 @@ const AddPage = () => {
         {/*Add Team*/}
         <h2>Add Team</h2>
         <Space align="start">
-            <AddTeamForm/>
+            <AddTeamForm getData={getData}/>
           
             <div style={{marginLeft: "100px"}}>
-                <TeamTable teams={teams} />
+                <TeamTable teams={teams} getData={getData}/>
             </div>
         </Space>
 

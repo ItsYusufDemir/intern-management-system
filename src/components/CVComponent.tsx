@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal } from 'antd';
+import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs } from 'antd';
 import {Intern} from "../models/Intern";
 import {DownloadOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled} from '@ant-design/icons';
 import AddInternPage from './AddInternPage';
@@ -11,18 +11,30 @@ import UploadService from '../services/UploadService';
 import useAuth from '../utils/useAuth';
 import useRefreshToken from '../utils/useRefreshToken';
 import useAxiosPrivate from '../utils/useAxiosPrivate';
+import TabPane from 'antd/es/tabs/TabPane';
+import UserTable from './tables/UserTable';
+import Loading from './Loading';
+import AssignmentTable from './tables/AssignmentTable';
+import { Assignment } from '../models/Assignment';
+import AddAssignmentForm from './forms/AddAssignmentForm';
 
 
 // TODO: Handle Download Cv,
 
-const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) => {
+interface PropType {
+    intern: Intern,
+    teams: Team [],
+    interns: Intern [],
+    getData: () => void,
+}
+
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
     
-    const intern = props.intern;
-    const teams = props.teams;
-    const interns = props.interns;
 
     const [form] = Form.useForm();
     const { auth }: any = useAuth();
+    const [isDone, setIsDone] = useState(false);
+    const [doesPressed, setDoesPressed] = useState(false);
  
     const handleUpdateValue = () => {
         form.setFieldsValue({
@@ -35,10 +47,22 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         handleUpdateValue();
     }, [intern]);
 
+    useEffect(()=> {
+       if(isDone) {
+            setIsModalOpen3(false);
+            getData();
+            setIsDone(false);
+       }
+    }, [isDone])
+
+
+
     
 
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
+      const [isModalOpen3, setIsModalOpen3] = useState(false)
+      
       const [isHidden, setIsHidden] = useState<boolean>(true);
       const [currentWeeklyGrade, setCurrentWeeklyGrade] = useState<Number | undefined>(undefined);
       const [currentMission, setCurrentMission] = useState<string>("");
@@ -48,6 +72,7 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
       const location = useLocation();
       const navigate = useNavigate();
       const axiosPrivate = useAxiosPrivate();
+      ;
 
       
     if(intern === undefined){
@@ -123,13 +148,8 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
    
 
     const handleOk2 = (e: any) => {
-
-       
-
         editForm.resetFields();
-        setIsModalOpen2(false);
-
-        
+        setIsModalOpen2(false); 
     };
 
     
@@ -138,11 +158,9 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         setIsModalOpen2(false);
     };
 
-    ;
+    
 
-    const onFinish2 = () => {
-        form.resetFields();
-    }
+    
 
 
 
@@ -198,6 +216,31 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         const separator = url.includes('?') ? '&' : '?';
         return `${url}${separator}access_token=${auth.accessToken}`;
     }
+
+    const assignments: Assignment [] = [];
+
+    const handleNewAssignment = () => {
+        showModal3();
+    }
+
+    const showModal3 = () => {
+        setIsModalOpen3(true);
+    };
+    
+   
+
+    const handleOk3 = (e: any) => {
+        setDoesPressed(true);
+    };
+
+    
+
+
+    const handleCancel3 = () => {
+        setIsModalOpen3(false);
+    };
+
+    
     
     return (
 
@@ -236,7 +279,18 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
 
         <br /><br />
 
-        
+        <h2>Assignments</h2>
+
+        <div className='assignment-table'>
+            <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={<Button type='primary' onClick={handleNewAssignment}>New Assignment</Button>}>
+                <TabPane tab="Assignments" key="1">
+                    <AssignmentTable getData={getData} assignments={assignments}/>
+                </TabPane>
+                <TabPane tab="Done" key="2">
+                    <AssignmentTable getData={getData} assignments={assignments}/>
+                </TabPane>
+            </Tabs>
+        </div>
 
 
         {/*Modals Here*/}
@@ -256,7 +310,17 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
             <Modal title="Edit" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2}>
                  <AddInternPage isEdit={true} intern={intern} ></AddInternPage>
             </Modal>
+
+            <Modal title="New Assignment" open={isModalOpen3} onOk={handleOk3} onCancel={handleCancel3} width={600}>
+                 <AddAssignmentForm doesPressed={doesPressed} setDoesPressed={setDoesPressed} isDone={isDone} setIsDone={setIsDone}/>
+                 
+            </Modal>
+
+
         </div>
+
+
+
         
 
 

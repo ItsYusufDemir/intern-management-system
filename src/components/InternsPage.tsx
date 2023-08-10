@@ -144,7 +144,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        <CVComponent intern={selectedIntern} teams={teams!} interns={interns!} />
+        <CVComponent intern={selectedIntern} teams={teams!} interns={interns!} getData={getData} />
       </div>
 
       <br />
