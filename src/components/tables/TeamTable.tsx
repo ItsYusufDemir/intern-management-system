@@ -20,8 +20,6 @@ interface ChildProps {
 }
 
 
-
-
 type DataIndex = keyof Team;
 
 const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
@@ -139,6 +137,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
           ...getColumnSearchProps('team_name'),
           sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
           sortDirections: ['descend', 'ascend'],
+          defaultSortOrder: "descend",
           ellipsis: true
         },
         {

@@ -17,6 +17,7 @@ import Loading from './Loading';
 import AssignmentTable from './tables/AssignmentTable';
 import { Assignment } from '../models/Assignment';
 import AddAssignmentForm from './forms/AddAssignmentForm';
+import LoadingContainer from './LoadingContainer';
 
 
 // TODO: Handle Download Cv,
@@ -26,9 +27,11 @@ interface PropType {
     teams: Team [],
     interns: Intern [],
     getData: () => void,
+    getAssignments: () => void,
+    assignments: Assignment [] | undefined; 
 }
 
-const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assignments, getAssignments}) => {
     
 
     const [form] = Form.useForm();
@@ -47,28 +50,31 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
         handleUpdateValue();
     }, [intern]);
 
+    
     useEffect(()=> {
        if(isDone) {
             setIsModalOpen3(false);
-            getData();
+            getAssignments(); 
             setIsDone(false);
        }
     }, [isDone])
-
-
-
     
+    /*
+    useEffect(() => {
+        if(!doesPressed) {
+            setIsModalOpen3(false);
+            getAssignments();
+        }
+    }, [doesPressed])
+    */
 
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
       const [isModalOpen3, setIsModalOpen3] = useState(false)
       
       const [isHidden, setIsHidden] = useState<boolean>(true);
-      const [currentWeeklyGrade, setCurrentWeeklyGrade] = useState<Number | undefined>(undefined);
-      const [currentMission, setCurrentMission] = useState<string>("");
       const [form2] = Form.useForm()
       const [editForm] = Form.useForm();
-      const [currentWeek, setCurrentWeek] = useState(0);
       const location = useLocation();
       const navigate = useNavigate();
       const axiosPrivate = useAxiosPrivate();
@@ -88,58 +94,13 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
     const findInternshipPeriod = (start: Date, end: Date) => {
         return Math.round(((end.getTime() - start.getTime())/(1000 * 60 * 60 * 24 * 7)));
     }
-
-    const computeOverallSuccess = () => {
-        let totalPoint = 0;
-
-        let counter = 0;
-        intern.assignment_grades.forEach(assignment_grade => {
-          if(assignment_grade !== null){
-            totalPoint += assignment_grade;
-            counter++;
-          }
-        })
-       
-        intern.overall_success = totalPoint / counter;
-        InternService.updateIntern(axiosPrivate, intern); //Update the intern in database
-    }
     
     
-
     //Percentage of complete of internship
     const completePercentage = Math.round(((Date.now() - intern.internship_starting_date.getTime()) / 
     (intern.internship_ending_date.getTime() - intern.internship_starting_date.getTime())) * 100);
     
     
-    //Add/Change weekly grade Modal
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const handleOk = (e: any) => {
-        form2.submit();
-
-        if(form2.getFieldValue("newGrade") === undefined){
-            setIsModalOpen(false);
-            return;
-        }
-
-        intern.assignment_grades[currentWeek] = Number(form2.getFieldValue("newGrade"));
-        computeOverallSuccess(); //Update the intern's overall success
-        InternService.updateIntern(axiosPrivate, intern);
-
-        setCurrentWeeklyGrade(Number(form2.getFieldValue("newGrade")));
-
-        form2.resetFields();
-        setIsModalOpen(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
-
-    
-
     //Edit Intern Modal
     const showModal2 = () => {
         setIsModalOpen2(true);
@@ -157,12 +118,6 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
     const handleCancel2 = () => {
         setIsModalOpen2(false);
     };
-
-    
-
-    
-
-
 
     //Delete Modal
     const {confirm} = Modal;
@@ -217,7 +172,6 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
         return `${url}${separator}access_token=${auth.accessToken}`;
     }
 
-    const assignments: Assignment [] = [];
 
     const handleNewAssignment = () => {
         showModal3();
@@ -240,7 +194,6 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
         setIsModalOpen3(false);
     };
 
-    
     
     return (
 
@@ -284,10 +237,10 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
         <div className='assignment-table'>
             <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={<Button type='primary' onClick={handleNewAssignment}>New Assignment</Button>}>
                 <TabPane tab="Assignments" key="1">
-                    <AssignmentTable getData={getData} assignments={assignments}/>
+                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} getData={getData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
                 </TabPane>
                 <TabPane tab="Done" key="2">
-                    <AssignmentTable getData={getData} assignments={assignments}/>
+                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} getData={getData} assignments={assignments.filter(assignment => assignment.complete)}/>}
                 </TabPane>
             </Tabs>
         </div>
@@ -295,25 +248,13 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData}) => {
 
         {/*Modals Here*/}
         <div>
-            <Modal title="Add/Change" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Form
-                    layout="horizontal"
-                    style={{ maxWidth: 400 }}
-                    form={form2}>
-                    
-                    <Form.Item label="Weekly Grade" name="newGrade">
-                        <Input type='number'></Input>
-                    </Form.Item>  
-                </Form> 
-            </Modal>
-
             <Modal title="Edit" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2}>
                  <AddInternPage isEdit={true} intern={intern} ></AddInternPage>
             </Modal>
 
             <Modal title="New Assignment" open={isModalOpen3} onOk={handleOk3} onCancel={handleCancel3} width={600}>
-                 <AddAssignmentForm doesPressed={doesPressed} setDoesPressed={setDoesPressed} isDone={isDone} setIsDone={setIsDone}/>
-                 
+                 <AddAssignmentForm intern_id={intern.intern_id!} doesPressed={doesPressed} setDoesPressed={setDoesPressed} setIsDone={setIsDone}/>
+                 {doesPressed && <LoadingContainer />}
             </Modal>
 
 

@@ -16,5 +16,4 @@ export interface Intern {
   cv_url: string | null;
   photo_url: string | null;
   overall_success: number | null;
-  assignment_grades: number[];
 }

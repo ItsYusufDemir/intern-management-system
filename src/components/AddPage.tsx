@@ -46,7 +46,6 @@ const AddPage = () => {
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
-        setIsLoading(true);
         const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
 

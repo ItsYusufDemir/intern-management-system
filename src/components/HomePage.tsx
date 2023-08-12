@@ -8,6 +8,8 @@ import useRefreshToken from "../utils/useRefreshToken";
 import { useFetcher } from "react-router-dom";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import Loading from "./Loading";
+import { message } from "antd";
+import { NoticeType } from "antd/es/message/interface";
 
  
 
@@ -25,11 +27,22 @@ function HomePage() {
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
-        const internData = await InternService.getInterns(axiosPrivate);
+        try {
+            const internData = await InternService.getInterns(axiosPrivate);
         setInterns(internData);
 
         const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
+        } catch (error: any) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              }  else {
+                giveMessage("error", "Error while fetchind data");
+              }
+        } finally{
+            setIsLoading(false);
+        }
+        
     };
     
     useEffect(() => {
@@ -50,7 +63,12 @@ function HomePage() {
       }
     }, [teams, interns])
 
-
+    const giveMessage = (type: NoticeType, mssge: string) => {
+        message.open({
+          type: type,
+          content: mssge,
+        });
+    };
 
 
     const numberOfInterns: number[] = [];
@@ -110,7 +128,6 @@ function HomePage() {
                     )
                 })}
             </div>
-            
             </>
         );
     }

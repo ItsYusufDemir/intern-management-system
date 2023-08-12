@@ -145,6 +145,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
           ...getColumnSearchProps('username'),
           sorter: (a, b) => a.username.localeCompare(b.username), // Corrected sorting function
           sortDirections: ['descend', 'ascend'],
+          defaultSortOrder: "descend",
           ellipsis: true
         },
         {
@@ -227,7 +228,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
           <>
             <Table columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
        
-            <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
+            <Modal title="Edit User" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
               <AddUserForm teams={teams} userToUpdate={user} getData={getData}/>
             </Modal>
 

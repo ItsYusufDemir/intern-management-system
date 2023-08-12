@@ -1,7 +1,7 @@
 import { SearchOutlined, QuestionCircleOutlined  } from '@ant-design/icons';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { InputRef } from 'antd';
-import { Button, Input, Modal, Popconfirm, Space, Table, message } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Table, message } from 'antd';
 import type { ColumnType, ColumnsType } from 'antd/es/table';
 import type { FilterConfirmProps, SorterResult } from 'antd/es/table/interface';
 import { User } from '../../models/User';
@@ -14,29 +14,46 @@ import { Team } from '../../models/Team';
 import TeamService from '../../services/TeamService';
 import AddTeamForm from '../forms/AddTeamForm';
 import { Assignment } from '../../models/Assignment';
+import AddAssignmentForm from '../forms/AddAssignmentForm';
+import LoadingContainer from '../LoadingContainer';
+import AssignmentService from '../../services/AssignmentService';
+import { useForm } from 'antd/es/form/Form';
 
 interface ChildProps {
     assignments: Assignment[];
+    getAssignments: () => void;
     getData: () => void;
 }
 
 
-
-
 type DataIndex = keyof Assignment;
 
-const AssignmentTable: React.FC<ChildProps> = ({assignments, getData}) => {
-
+const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignments}) => {
 
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
-    const [sortedInfo, setSortedInfo] = useState<SorterResult<Team>>({});
-    const navigate = useNavigate();
     const axiosPrivate = useAxiosPrivate();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [team, setTeam] = useState<Team>();
+    const [isModalOpen2, setIsModalOpen2] = useState(false);
+    const [form] = useForm();
 
+    const [doesPressed, setDoesPressed] = useState(false);
+    const [isDone, setIsDone] = useState(false);
+    const [assignment, setAssignment] = useState<Assignment>();
+
+    
+    useEffect(() => {
+        if(isDone){
+          setIsModalOpen(false);
+          getAssignments();
+          getData();
+          setIsDone(false);
+        }
+    }, [isDone])
+    
+
+    
       const handleSearch = (
         selectedKeys: string[],
         confirm: (param?: FilterConfirmProps) => void,
@@ -136,23 +153,53 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData}) => {
           title: 'Description',
           dataIndex: 'description',
           key: 'description',
-          width: '40%',
+          width: '50%',
           ...getColumnSearchProps('description'),
-          ellipsis: true
         },
         {
             title: 'Deadline',
             dataIndex: 'deadline',
             key: 'deadline',
             width: '15%',
-            //add sorting
-            ellipsis: true
+            sorter: (a, b) => {
+              if (a.deadline === null && b.deadline === null) {
+                return 0; // Both records have no deadline, so they are equal
+              }
+              if (a.deadline === null) {
+                return 1; // Null deadline should come after non-null deadline
+              }
+              if (b.deadline === null) {
+                return -1; // Non-null deadline should come before null deadline
+              }
+              return a.deadline! - b.deadline!; // Compare timestamps
+            }, 
+            sortDirections: ['descend', 'ascend'],
+            defaultSortOrder: "descend",
+            ellipsis: true,
+            render: (deadline: number | null, record) => {
+              if (deadline) {
+                const formattedDeadline = new Date(deadline * 1000).toLocaleString(undefined, {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
+                var color = (deadline * 1000 < new Date().valueOf()) ? "red" : "green";
+                if(record.grade) {
+                  color = "black";
+                }
+                return <span style={{color: color}}>{formattedDeadline}</span>;
+              } else {
+                return <span>No Deadline</span>;
+              }
+            }
         },
         {
             title: 'Weight',
             dataIndex: 'weight',
             key: 'weight',
-            width: '5%',
+            width: '10%',
             //add sorting
             ellipsis: true
         },
@@ -160,25 +207,32 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData}) => {
             title: 'Grade',
             dataIndex: 'grade',
             key: 'grade',
-            width: '5%',
+            width: '10%',
             // add sorting
-            ellipsis: true
+            ellipsis: true,
+            render: (grade: number | null, record) => {
+              if (grade) {
+                return <span >{grade}</span>;
+              } else {
+                return <Button onClick={ () => handleGrade(record)}>Grade</Button> ;
+              }
+            }
         },
         {
           title: 'Action',
           dataIndex: '',
           key: 'x',
-          width: '10%',
+          width: '15%',
           render: (_, record) => (
             <Space size="middle">
-              <Button onClick={() => handleUpdateAssignment(record)} type="primary">Update</Button>
+              <Button onClick={() => handleUpdateAssignment(record)}>Update</Button>
 
               <Popconfirm
               title="Are you sure to delete this team?"
               icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
               onConfirm={() => handleDeleteAssignment(record)}
               >
-                <Button type="primary" danger>Delete</Button>
+                <Button type="primary" danger ghost>Delete</Button>
               </Popconfirm>
              </Space>
           ),
@@ -186,21 +240,27 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData}) => {
       ];
 
       
+      const handleGrade = (assignment: Assignment) => {
+        setAssignment(assignment);
+        showModal2();
+      }
 
-
+      
       const handleDeleteAssignment = async (assignment: Assignment) => {
+        
         try {
-          //const response = await TeamService.deleteTeam(axiosPrivate, teamName);
+          await AssignmentService.deleteAssignment(axiosPrivate, assignment.assignment_id!);
 
-          giveMessage("success", "Team deleted");
           
-          getData();
+          giveMessage("success", "Assignment deleted");
         } catch (error: any) {
           if (!error?.response) {
             giveMessage("error", "No server response");
           } else {
-            giveMessage("error", "Login failed!");
+            giveMessage("error", "Error while deleting assignment!");
           }
+        } finally {
+            setIsDone(true);
         }
       
       }
@@ -213,34 +273,81 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData}) => {
       };
 
       const handleUpdateAssignment = (assignment: Assignment) => {
-          setTeam(team);
+          setAssignment(assignment);
           showModal();
       }
 
-      
-  
-      
 
       const showModal = () => {
         setIsModalOpen(true);
       };
     
       const handleOk = () => {
-        setIsModalOpen(false);
+        setDoesPressed(true);
       };
     
       const handleCancel = () => {
         setIsModalOpen(false);
       };
+
+
+
+
+      const showModal2 = () => {
+        setIsModalOpen2(true);
+      };
+    
+      const handleOk2 = () => {
+        form.submit();
+      };
+    
+      const handleCancel2 = () => {
+        setIsModalOpen2(false);
+      };
+
+      const onFinish = () => {
+        grade();
+      }
+
+      const grade = async () => {
+        const grade = form.getFieldsValue().grade;
+        assignment!.grade = grade;
+        assignment!.complete = true;
+        try {
+          await AssignmentService.updateAssignment(axiosPrivate, assignment!);
+
+          giveMessage("success", "Assignment graded");
+        } catch (error: any) {
+          
+        } finally {
+          getAssignments();
+          getData();
+          setIsModalOpen2(false);
+        }
+        
+      }
     
 
 
     return (
         <>
-            <Table columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
+            <Table columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 400}} pagination={{hideOnSinglePage: true}}/>
 
-            <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddTeamForm team={team} getData={getData} />
+            <Modal title="Edit Assignment" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={600}>
+              <AddAssignmentForm doesPressed={doesPressed} setDoesPressed={setDoesPressed} assignment={assignment} setIsDone={setIsDone} />
+              {doesPressed && <LoadingContainer />}
+            </Modal>
+
+            <Modal title="Grade" open={isModalOpen2} onCancel={handleCancel2} onOk={handleOk2}>
+              <div>
+                <Form 
+                form={form}
+                onFinish={onFinish} >
+                  <Form.Item label="Grade" name="grade" rules={[{type: "integer", min: 0, max: 100, required: true, message: "Please enter a valid integer between 0 and 100" },]}>
+                    <InputNumber />
+                  </Form.Item>
+                </Form>
+              </div>
             </Modal>
 
         </>

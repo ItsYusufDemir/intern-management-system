@@ -75,7 +75,6 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         cv_url: cv_url,
         photo_url: photo_url,
         overall_success: null,
-        assignment_grades: [],
       }
 
       addIntern(newIntern);

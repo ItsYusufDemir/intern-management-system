@@ -1,32 +1,69 @@
-import { DatePicker, Form, Input, InputNumber } from "antd";
+import { DatePicker, Form, Input, InputNumber, message } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { Assignment } from "../../models/Assignment";
 import { useEffect } from "react";
+import AssignmentService from "../../services/AssignmentService";
+import useAxiosPrivate from "../../utils/useAxiosPrivate";
+import dayjs, { Dayjs } from "dayjs";
+import { Intern } from "../../models/Intern";
+import InternService from "../../services/InternService";
+import { NoticeType } from "antd/es/message/interface";
+import moment from "moment";
 
 interface PropType {
     assignment?: Assignment,
-    isDone?: boolean,
     setIsDone: React.Dispatch<React.SetStateAction<boolean>>
     doesPressed: boolean
     setDoesPressed: React.Dispatch<React.SetStateAction<boolean>>
+    intern_id?: number,
 }
 
-const AddAssignmentForm: React.FC<PropType> = ({assignment, isDone, setIsDone, doesPressed, setDoesPressed}) => {
+const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPressed, setDoesPressed, intern_id}) => {
 
 
     const [form] = useForm();
+    const axiosPrivate = useAxiosPrivate();
+
+    useEffect(() => {
+        if(assignment) {
+            
+            const deadline = dayjs(assignment.deadline! * 1000);
+
+            form.setFieldsValue({
+                description: assignment.description,
+                deadline: assignment.deadline ? deadline : undefined,
+                weight: assignment.weight,
+                grade: assignment.grade,
+            })
+        }
+    }, [assignment])
 
     const onFinish = () => {
-        console.log("finished");
-        if(assignment) { //Do the update
 
+        const formValues = form.getFieldsValue();  
+
+        if(assignment) { //Do the update
+            const newAssignement: Assignment = {
+                assignment_id: assignment.assignment_id,
+                intern_id:  assignment.intern_id,
+                description: formValues.description,
+                deadline: formValues.deadline ? formValues.deadline.unix() : undefined,
+                weight: formValues.weight,
+                complete: assignment.complete,
+            }
+
+            if(assignment.grade) {
+                newAssignement.grade =  formValues.grade;
+            }
+            
+            
+            updateAssignment(newAssignement);
         }
         else{
-            const formValues = form.getFieldsValue();
-
             const newAssignemnt: Assignment = {
+                intern_id: intern_id!,
                 description: formValues.description,
-                deadline: formValues.deadline,
+                deadline: formValues.deadline ? formValues.deadline.unix() : undefined,
                 weight: formValues.weight,
                 complete: false,
             }
@@ -36,11 +73,17 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, isDone, setIsDone, d
         }
     }
 
-    const addAssignment = (newAssignemnt: Assignment) => {
+    const addAssignment = async (newAssignment: Assignment) => {
         try {
-            //add assignemnt
-        } catch (error) {
-            
+            await AssignmentService.addAssignment(axiosPrivate, newAssignment);
+
+            giveMessage("success", "Assignment added");
+        } catch (error: any) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              }  else {
+                giveMessage("error", "Error while adding assignment");
+              }
         }
         finally {
             setIsDone(true);
@@ -48,18 +91,45 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, isDone, setIsDone, d
         }
     }
 
+    const updateAssignment = async (newAssignment: Assignment) => {
+        try {
+            await AssignmentService.updateAssignment(axiosPrivate, newAssignment);
+
+            giveMessage("success", "Assignment updated");
+        } catch (error: any) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              }  else {
+                giveMessage("error", "Error while updating assignment");
+              }
+        }
+        finally {
+            setIsDone(true);
+            setDoesPressed(false);
+        }
+    }
+
+
+
     useEffect(() => {
         if(doesPressed) {
             form.submit();
         }
     }, [doesPressed])
 
+    const giveMessage = (type: NoticeType, mssge: string) => {
+        message.open({
+          type: type,
+          content: mssge,
+        });
+    };
+
     return (
         <>
         <Form
             style={{width: 400}}
             onFinish={onFinish}
-            labelCol={{span: 5}}
+            labelCol={{span: 6}}
             wrapperCol={{span: 14}}
             form={form}>
 
@@ -69,13 +139,17 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, isDone, setIsDone, d
                     style={{ height: 200, marginBottom: 10, width: 400}}/>
             </Form.Item>
 
-            <Form.Item label="Deadline" name="Deadline">
-                <DatePicker format="DD-MM-YYYY" />
+            <Form.Item label="Deadline" name="deadline">
+                <DatePicker showTime format="DD-MM-YYYY HH:mm" />
             </Form.Item>
 
-            <Form.Item label="Weight" name="weight">
+            <Form.Item label="Weight" name="weight" required>
                 <InputNumber/>
             </Form.Item>
+
+            {assignment?.grade && <Form.Item label="Grade" name="grade" rules={[{type: "integer", min: 0, max: 100, message: "Please enter a valid integer between 0 and 100" },]}>
+                <InputNumber />
+            </Form.Item>}
 
 
 
@@ -86,3 +160,4 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, isDone, setIsDone, d
 }
  
 export default AddAssignmentForm;
+

@@ -12,7 +12,7 @@ import { useEffect } from "react";
 interface Prop {
     team?: Team
     getData: () => void;
-}   
+}
 
 const AddTeamForm: React.FC<Prop> = ({team, getData}) => {
 
@@ -31,6 +31,8 @@ const onFinish = () => {
 
     
 }
+
+
 
 useEffect(() => {
     if(team) {
