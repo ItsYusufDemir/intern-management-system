@@ -44,8 +44,7 @@ const LayoutComponent = () => {
 
 const matchInterns = useMatch("/interns");
 const matchAddIntern = useMatch("/add-intern");
-const matchAddTeam = useMatch("/add-team");
-const matchAddUser = useMatch("/add-user");
+const matchAddPage = useMatch("/add");
 const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
 const location = useLocation();
@@ -60,11 +59,9 @@ const getSelectedkey = () => {
   else if (matchAddIntern) {
     setSelectedKey("/add-intern");
   }
-  else if (matchAddTeam) {
-    setSelectedKey("/add-team");
-  }
-  else if (matchAddUser) {
-    setSelectedKey("/add-user");
+  else if (matchAddPage) {
+    setSelectedKey("/add");
+    
   }
   else {
     setSelectedKey("/");
@@ -150,7 +147,7 @@ useEffect(() => {
 
       <>
       <Layout style={{ minHeight: '98vh' }}>
-        <Sider >
+        <Sider style={{ height: '100vh', position: 'fixed', left: 0, top: 0 }}>
           <div className="logo-area"><h1 className='logo' style={{color: "white"}}>LOGO</h1></div>
           
           <Menu theme="dark" defaultSelectedKeys={['/']} mode="inline" items={items} selectedKeys={[seletctedKey]}  onClick={({key}) => {
@@ -170,17 +167,18 @@ useEffect(() => {
                 size='large'
                 onClick={onClick}
                 danger
+                ghost
                 />
             </div>
           </div>
 
         </Sider>
-        <Layout>
+        <Layout style={{marginLeft: 200, marginTop: 0,}}>
           
-          <header><h1 className='header-title'>{title}</h1></header><br />
+          <header className='header'><h1 className='header-title'>{title}</h1></header><br />
 
 
-          <Content style={{ margin: '0 16px', padding: 24, minHeight: 500, background: colorBgContainer}}>
+          <Content className='content'>
             <Outlet />
           </Content>
 

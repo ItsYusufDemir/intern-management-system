@@ -42,15 +42,15 @@ const App: React.FC = () => {
           
           <Route path='/' element={<PersistLogin />}>
               <Route element={<LayoutComponent />}>
-                <Route element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Supervisor, ROLES.Intern]} />}>
+                <Route element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Supervisor]} />}>
                   <Route path='/' element={ <HomePage />} />
                 </Route>
 
-                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Supervisor, ROLES.Intern]} />}>
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Supervisor]} />}>
                   <Route path="interns" element={ <InternsPage />} />
                 </Route>
 
-                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin,ROLES.Supervisor, ROLES.Intern]} />}>
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin,ROLES.Supervisor]} />}>
                   <Route path="add-intern" element={ <AddInternPage isEdit={false}/>} />
                 </Route> 
 

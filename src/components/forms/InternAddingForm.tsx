@@ -16,13 +16,13 @@ import {
   message,
 } from 'antd';
 import React, { useEffect, useState } from 'react';
-import {Intern} from "../models/Intern";
-import { Team } from '../models/Team';
+import {Intern} from "../../models/Intern";
+import { Team } from '../../models/Team';
 import dayjs from 'dayjs';
-import InternService from '../services/InternService';
-import UploadService from "../services/UploadService";
+import InternService from '../../services/InternService';
+import UploadService from "../../services/UploadService";
 import { useNavigate } from 'react-router-dom';
-import useAxiosPrivate from '../utils/useAxiosPrivate';
+import useAxiosPrivate from '../../utils/useAxiosPrivate';
 import { NoticeType } from 'antd/es/message/interface';
 
 
@@ -75,7 +75,6 @@ function InternAddingForm(props: {isEdit: boolean, intern?: Intern, teams: Team[
         cv_url: cv_url,
         photo_url: photo_url,
         overall_success: null,
-        assignment_grades: [],
       }
 
       addIntern(newIntern);

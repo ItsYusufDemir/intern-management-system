@@ -16,6 +16,7 @@ import { Team } from '../../models/Team';
 interface ChildProps {
     users: DataType [];
     teams: Team [],
+    getData: () => void;
 }
 
 
@@ -27,7 +28,7 @@ interface DataType {
 
 type DataIndex = keyof DataType;
 
-const UserTable: React.FC<ChildProps> = ({users, teams}) => {
+const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
 
 
     const [searchText, setSearchText] = useState('');
@@ -144,6 +145,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams}) => {
           ...getColumnSearchProps('username'),
           sorter: (a, b) => a.username.localeCompare(b.username), // Corrected sorting function
           sortDirections: ['descend', 'ascend'],
+          defaultSortOrder: "descend",
           ellipsis: true
         },
         {
@@ -183,9 +185,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams}) => {
   
           giveMessage("success", "User deleted");
           
-          setTimeout(() => {
-            navigate(0); // Navigate after the timeout
-          }, 700);
+          getData();
         } catch (error: any) {
           if (!error?.response) {
             giveMessage("error", "No server response");
@@ -228,8 +228,8 @@ const UserTable: React.FC<ChildProps> = ({users, teams}) => {
           <>
             <Table columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
        
-            <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddUserForm teams={teams} userToUpdate={user} />
+            <Modal title="Edit User" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
+              <AddUserForm teams={teams} userToUpdate={user} getData={getData}/>
             </Modal>
 
           </>

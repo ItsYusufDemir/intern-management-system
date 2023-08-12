@@ -1,6 +1,8 @@
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "../axios";
 import useAuth from "./useAuth";
+import { NoticeType } from "antd/es/message/interface";
+import { message } from "antd";
  
 const useRefreshToken = () => {
     const { auth, setAuth }: any = useAuth();
@@ -25,10 +27,18 @@ const useRefreshToken = () => {
             console.log(error);
             setAuth(null);
             navigate("/login", { state: { from: location}, replace: true})
+            giveMessage("error", "Session expired, please login")
             
         }
         
     }
+
+    const giveMessage = (type: NoticeType, mssge: string) => {
+        message.open({
+          type: type,
+          content: mssge,
+        });
+      };
 
     return refresh;
 

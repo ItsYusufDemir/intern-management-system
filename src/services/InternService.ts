@@ -53,6 +53,7 @@ const addIntern = async (axiosInstance: any, newIntern: Intern): Promise<Intern 
 
 const updateIntern = async (axiosInstance: any, updatedIntern: Intern) => {
   try {
+    console.log("buraya girdik mi")
     const response = await axiosInstance.put(`/api/interns/${updatedIntern.intern_id}`, updatedIntern, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"

@@ -11,9 +11,10 @@ import { useEffect } from "react";
 
 interface Prop {
     team?: Team
-}   
+    getData: () => void;
+}
 
-const AddTeamForm: React.FC<Prop> = ({team}) => {
+const AddTeamForm: React.FC<Prop> = ({team, getData}) => {
 
     const [form] = Form.useForm();
     const axiosPrivate = useAxiosPrivate();
@@ -31,6 +32,8 @@ const onFinish = () => {
     
 }
 
+
+
 useEffect(() => {
     if(team) {
         form.setFieldsValue(
@@ -45,9 +48,7 @@ const updateTeam = async (team: Team) => {
 
         giveMessage("success", "Team updated");
         
-        setTimeout(() => {
-          navigate(0); // Navigate after the timeout
-        }, 700);
+        getData();
       } catch (error: any) {
         if (!error?.response) {
           giveMessage("error", "No server response");
@@ -69,6 +70,7 @@ const addTeam = async () => {
 
        form.resetFields();
        giveMessage("success", "Team added");
+       getData();
        
     } catch (error: any) {
         if (!error?.response) {
@@ -78,11 +80,7 @@ const addTeam = async () => {
           } else {
             giveMessage("error", "Error while adding team");
           }
-    } finally {
-        setTimeout(() => {
-            navigate(0);
-        }, 700)
-    }
+    } 
 }
 
 

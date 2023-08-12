@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal } from 'antd';
+import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs } from 'antd';
 import {Intern} from "../models/Intern";
 import {DownloadOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled} from '@ant-design/icons';
 import AddInternPage from './AddInternPage';
@@ -11,18 +11,33 @@ import UploadService from '../services/UploadService';
 import useAuth from '../utils/useAuth';
 import useRefreshToken from '../utils/useRefreshToken';
 import useAxiosPrivate from '../utils/useAxiosPrivate';
+import TabPane from 'antd/es/tabs/TabPane';
+import UserTable from './tables/UserTable';
+import Loading from './Loading';
+import AssignmentTable from './tables/AssignmentTable';
+import { Assignment } from '../models/Assignment';
+import AddAssignmentForm from './forms/AddAssignmentForm';
+import LoadingContainer from './LoadingContainer';
 
 
 // TODO: Handle Download Cv,
 
-const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) => {
+interface PropType {
+    intern: Intern,
+    teams: Team [],
+    interns: Intern [],
+    getData: () => void,
+    getAssignments: () => void,
+    assignments: Assignment [] | undefined; 
+}
+
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assignments, getAssignments}) => {
     
-    const intern = props.intern;
-    const teams = props.teams;
-    const interns = props.interns;
 
     const [form] = Form.useForm();
     const { auth }: any = useAuth();
+    const [isDone, setIsDone] = useState(false);
+    const [doesPressed, setDoesPressed] = useState(false);
  
     const handleUpdateValue = () => {
         form.setFieldsValue({
@@ -36,18 +51,34 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     }, [intern]);
 
     
+    useEffect(()=> {
+       if(isDone) {
+            setIsModalOpen3(false);
+            getAssignments(); 
+            setIsDone(false);
+       }
+    }, [isDone])
+    
+    /*
+    useEffect(() => {
+        if(!doesPressed) {
+            setIsModalOpen3(false);
+            getAssignments();
+        }
+    }, [doesPressed])
+    */
 
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
+      const [isModalOpen3, setIsModalOpen3] = useState(false)
+      
       const [isHidden, setIsHidden] = useState<boolean>(true);
-      const [currentWeeklyGrade, setCurrentWeeklyGrade] = useState<Number | undefined>(undefined);
-      const [currentMission, setCurrentMission] = useState<string>("");
       const [form2] = Form.useForm()
       const [editForm] = Form.useForm();
-      const [currentWeek, setCurrentWeek] = useState(0);
       const location = useLocation();
       const navigate = useNavigate();
       const axiosPrivate = useAxiosPrivate();
+      ;
 
       
     if(intern === undefined){
@@ -63,58 +94,13 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     const findInternshipPeriod = (start: Date, end: Date) => {
         return Math.round(((end.getTime() - start.getTime())/(1000 * 60 * 60 * 24 * 7)));
     }
-
-    const computeOverallSuccess = () => {
-        let totalPoint = 0;
-
-        let counter = 0;
-        intern.assignment_grades.forEach(assignment_grade => {
-          if(assignment_grade !== null){
-            totalPoint += assignment_grade;
-            counter++;
-          }
-        })
-       
-        intern.overall_success = totalPoint / counter;
-        InternService.updateIntern(axiosPrivate, intern); //Update the intern in database
-    }
     
     
-
     //Percentage of complete of internship
     const completePercentage = Math.round(((Date.now() - intern.internship_starting_date.getTime()) / 
     (intern.internship_ending_date.getTime() - intern.internship_starting_date.getTime())) * 100);
     
     
-    //Add/Change weekly grade Modal
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const handleOk = (e: any) => {
-        form2.submit();
-
-        if(form2.getFieldValue("newGrade") === undefined){
-            setIsModalOpen(false);
-            return;
-        }
-
-        intern.assignment_grades[currentWeek] = Number(form2.getFieldValue("newGrade"));
-        computeOverallSuccess(); //Update the intern's overall success
-        InternService.updateIntern(axiosPrivate, intern);
-
-        setCurrentWeeklyGrade(Number(form2.getFieldValue("newGrade")));
-
-        form2.resetFields();
-        setIsModalOpen(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
-
-    
-
     //Edit Intern Modal
     const showModal2 = () => {
         setIsModalOpen2(true);
@@ -123,13 +109,8 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
    
 
     const handleOk2 = (e: any) => {
-
-       
-
         editForm.resetFields();
-        setIsModalOpen2(false);
-
-        
+        setIsModalOpen2(false); 
     };
 
     
@@ -137,14 +118,6 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
     const handleCancel2 = () => {
         setIsModalOpen2(false);
     };
-
-    ;
-
-    const onFinish2 = () => {
-        form.resetFields();
-    }
-
-
 
     //Delete Modal
     const {confirm} = Modal;
@@ -198,6 +171,29 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
         const separator = url.includes('?') ? '&' : '?';
         return `${url}${separator}access_token=${auth.accessToken}`;
     }
+
+
+    const handleNewAssignment = () => {
+        showModal3();
+    }
+
+    const showModal3 = () => {
+        setIsModalOpen3(true);
+    };
+    
+   
+
+    const handleOk3 = (e: any) => {
+        setDoesPressed(true);
+    };
+
+    
+
+
+    const handleCancel3 = () => {
+        setIsModalOpen3(false);
+    };
+
     
     return (
 
@@ -236,27 +232,36 @@ const CVComponent = (props: {intern: Intern, teams: Team[], interns: Intern[]}) 
 
         <br /><br />
 
-        
+        <h2>Assignments</h2>
+
+        <div className='assignment-table'>
+            <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={<Button type='primary' onClick={handleNewAssignment}>New Assignment</Button>}>
+                <TabPane tab="Assignments" key="1">
+                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} getData={getData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
+                </TabPane>
+                <TabPane tab="Done" key="2">
+                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} getData={getData} assignments={assignments.filter(assignment => assignment.complete)}/>}
+                </TabPane>
+            </Tabs>
+        </div>
 
 
         {/*Modals Here*/}
         <div>
-            <Modal title="Add/Change" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Form
-                    layout="horizontal"
-                    style={{ maxWidth: 400 }}
-                    form={form2}>
-                    
-                    <Form.Item label="Weekly Grade" name="newGrade">
-                        <Input type='number'></Input>
-                    </Form.Item>  
-                </Form> 
-            </Modal>
-
             <Modal title="Edit" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2}>
                  <AddInternPage isEdit={true} intern={intern} ></AddInternPage>
             </Modal>
+
+            <Modal title="New Assignment" open={isModalOpen3} onOk={handleOk3} onCancel={handleCancel3} width={600}>
+                 <AddAssignmentForm intern_id={intern.intern_id!} doesPressed={doesPressed} setDoesPressed={setDoesPressed} setIsDone={setIsDone}/>
+                 {doesPressed && <LoadingContainer />}
+            </Modal>
+
+
         </div>
+
+
+
         
 
 

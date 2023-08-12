@@ -16,14 +16,13 @@ import AddTeamForm from '../forms/AddTeamForm';
 
 interface ChildProps {
     teams: Team [];
+    getData: () => void;
 }
-
-
 
 
 type DataIndex = keyof Team;
 
-const TeamTable: React.FC<ChildProps> = ({teams}) => {
+const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
 
 
     const [searchText, setSearchText] = useState('');
@@ -138,6 +137,7 @@ const TeamTable: React.FC<ChildProps> = ({teams}) => {
           ...getColumnSearchProps('team_name'),
           sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
           sortDirections: ['descend', 'ascend'],
+          defaultSortOrder: "descend",
           ellipsis: true
         },
         {
@@ -170,9 +170,7 @@ const TeamTable: React.FC<ChildProps> = ({teams}) => {
 
           giveMessage("success", "Team deleted");
           
-          setTimeout(() => {
-            navigate(0); // Navigate after the timeout
-          }, 700);
+          getData();
         } catch (error: any) {
           if (!error?.response) {
             giveMessage("error", "No server response");
@@ -218,7 +216,7 @@ const TeamTable: React.FC<ChildProps> = ({teams}) => {
             <Table columns={columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
 
             <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddTeamForm team={team} />
+              <AddTeamForm team={team} getData={getData} />
             </Modal>
 
         </>

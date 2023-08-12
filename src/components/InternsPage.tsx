@@ -1,4 +1,4 @@
-import {Form, Select, Row, Col} from "antd";
+import {Form, Select, Row, Col, message} from "antd";
 import {useEffect, useState, createContext} from "react";
 import "../styles.css";
 import {Intern} from "../models/Intern";
@@ -8,49 +8,72 @@ import InternService from "../services/InternService";
 import TeamService from "../services/TeamService";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import Loading from "./Loading";
+import { Assignment } from "../models/Assignment";
+import AssignmentService from "../services/AssignmentService";
+import { NoticeType } from "antd/es/message/interface";
 
 
 const InternsPage = () => {
 
 
-
     const [team, setTeam] = useState<Team>();
-    const [shouldRender, setShouldRender] = useState<boolean>(false);
     const [interns, setInterns] = useState<Intern []>();
     const [teams, setTeams] = useState<Team []>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isReloading, setIsReloading] = useState<boolean>(false);
     const axiosPrivate = useAxiosPrivate();
-
+    const [assignments, setAssignments] = useState<Assignment []>();
+    const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
+    const [selectedIntern, setSelectedIntern] = useState<Intern>();
+    const [form] = Form.useForm();
+    let counter = -1;
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
+      try {
+        setIsLoading(true);
+        setInterns(undefined);
+        setTeams(undefined);
+
         const internData = await InternService.getInterns(axiosPrivate);
         setInterns(internData);
 
         const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
-    };
-    
-    useEffect(() => {
-        if(isLoading){
-            getData();
+
+      } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while fetchind data");
         }
-    }, [isLoading]);
+      }
+        
+    };
+
 
     useEffect(() => {
-      if(interns && teams)
+      getData()
+    }, [])
+    
+
+    useEffect(() => {
+      if(!isLoading)
         console.log(interns, teams);
-    }, [interns, teams])
+    }, [isLoading])
 
     
     useEffect(() => {
       if(teams && interns) {
+
+        if(selectedIntern) { //If a data in the selected user updated, we have to update the intern variable from new interns array
+          const intern_id = selectedIntern.intern_id;
+          setSelectedIntern(interns?.filter(intern => intern.intern_id === intern_id)[0]);
+        }
         setIsLoading(false);
       }
     }, [teams, interns])
     
-
-  
 
   
   const handleTeamSelect = (e: any) => {
@@ -63,12 +86,6 @@ const InternsPage = () => {
   }
 
 
-
-  const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
-  const [selectedIntern, setSelectedIntern] = useState<any>();
-  let counter = -1;
-
-  
   const renderCv = (e: any) => {
 
     let teamInterns: Intern[] = []
@@ -84,11 +101,40 @@ const InternsPage = () => {
   }
 
 
-  const [form] = Form.useForm();
  
   const handleUpdateValue = () => {
     form.setFieldsValue({
       internSelectItem: "Select an intern",
+    });
+  };
+
+  useEffect(() => {
+    if(selectedIntern) {
+      getAssignments();
+    }
+  }, [selectedIntern]);
+
+  const getAssignments = async () => {
+    try {
+      const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, selectedIntern?.intern_id!);
+
+      setAssignments(assignmentsData);
+
+    } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while fetchind data");
+        }
+        console.log(error);
+    }
+    
+  }
+
+  const giveMessage = (type: NoticeType, mssge: string) => {
+    message.open({
+      type: type,
+      content: mssge,
     });
   };
 
@@ -144,7 +190,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        <CVComponent intern={selectedIntern} teams={teams!} interns={interns!} />
+        {selectedIntern && <CVComponent getAssignments={getAssignments} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} getData={getData} />}
       </div>
 
       <br />

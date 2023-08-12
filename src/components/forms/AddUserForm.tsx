@@ -10,6 +10,7 @@ import { Team } from "../../models/Team";
 interface PropType {
     teams: Team [];
     userToUpdate?: DataType;
+    getData: () => void;
 }
 
 interface DataType {
@@ -19,7 +20,7 @@ interface DataType {
     team?: string;
   }
 
-const AddUserForm: React.FC<PropType> = ({teams, userToUpdate}) => {
+const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
 
     
     const userNameErrorMessage = "Username must start with a letter and be 3 to 23 characters long, containing only letters, digits, underscores, and hyphens.";
@@ -70,9 +71,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate}) => {
                 giveMessage("error", "Error while adding user");
               }
         } finally {
-            setTimeout(()=> {
-                navigate(0);
-            }, 700)
+            getData();
         }
         
     }
@@ -119,9 +118,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate}) => {
                 giveMessage("error", "Error while updating user");
               }
         } finally {
-            setTimeout(()=> {
-                navigate(0);
-            }, 700)
+            getData();
         }
         
     }
