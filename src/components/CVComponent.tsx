@@ -29,12 +29,12 @@ interface PropType {
     setIntern: React.Dispatch<React.SetStateAction<Intern | undefined>>,
     teams: Team [],
     interns: Intern [],
-    getData: () => void,
+    refetchData: () => void,
     getAssignments: () => void,
     assignments: Assignment [] | undefined; 
 }
 
-const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assignments, getAssignments, setIntern}) => {
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern}) => {
     
 
     const [form] = Form.useForm();
@@ -59,7 +59,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
             setIsModalOpen(false);
             setIsModalOpen2(false);
 
-            getData();
+            refetchData();
             getAssignments(); 
             
             setIsDone(false);
@@ -168,6 +168,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
 
     //Edit Intern Modal
     const showModal = () => {
+        console.log(interns);
         setIsModalOpen(true);
     };
     const handleOk = (e: any) => {
@@ -240,10 +241,10 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
         <div className='assignment-table'>
             <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={<Button type='primary' onClick={handleNewAssignment}>New Assignment</Button>}>
                 <TabPane tab="Assignments" key="1">
-                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} getData={getData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
+                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
                 </TabPane>
                 <TabPane tab="Done" key="2">
-                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} getData={getData} assignments={assignments.filter(assignment => assignment.complete)}/>}
+                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => assignment.complete)}/>}
                 </TabPane>
             </Tabs>
         </div>

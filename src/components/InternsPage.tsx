@@ -31,11 +31,6 @@ const InternsPage = () => {
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
       try {
-        
-        setIsLoading(true);
-        setInterns(undefined);
-        setTeams(undefined);
-
         const internData = await InternService.getInterns(axiosPrivate);
         setInterns(internData);
 
@@ -52,6 +47,30 @@ const InternsPage = () => {
         
     };
 
+    //add another function: refetchData, without setting null to interns and teams, only update them and update the selected user
+    const refetchData = async () => {
+      try {
+        const internData = await InternService.getInterns(axiosPrivate);
+        setInterns(internData);
+
+        const teamData = await TeamService.getTeams(axiosPrivate);
+        setTeams(teamData);
+
+        if(selectedIntern) { //If a data in the selected user updated, we have to update the intern variable from new interns array
+          const intern_id = selectedIntern.intern_id;   
+
+          const updatedIntern = internData?.filter(intern => intern.intern_id === intern_id)[0]
+          setSelectedIntern(updatedIntern);
+        }
+        
+      } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while fetchind data");
+        }
+      }
+    }
 
     useEffect(() => {
       getData()
@@ -66,11 +85,6 @@ const InternsPage = () => {
     
     useEffect(() => {
       if(teams && interns) {
-
-        if(selectedIntern) { //If a data in the selected user updated, we have to update the intern variable from new interns array
-          const intern_id = selectedIntern.intern_id;
-          setSelectedIntern(interns?.filter(intern => intern.intern_id === intern_id)[0]);
-        }
         setIsLoading(false);
       }
     }, [teams, interns])
@@ -114,6 +128,7 @@ const InternsPage = () => {
       getAssignments();
     }
   }, [selectedIntern]);
+
 
   const getAssignments = async () => {
     try {
@@ -190,7 +205,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        {selectedIntern && <CVComponent setIntern={setSelectedIntern} getAssignments={getAssignments} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} getData={getData} />}
+        {selectedIntern && <CVComponent setIntern={setSelectedIntern} getAssignments={getAssignments} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
       </div>
 
       <br />

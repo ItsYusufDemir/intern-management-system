@@ -22,13 +22,13 @@ import { useForm } from 'antd/es/form/Form';
 interface ChildProps {
     assignments: Assignment[];
     getAssignments: () => void;
-    getData: () => void;
+    refetchData: () => void;
 }
 
 
 type DataIndex = keyof Assignment;
 
-const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignments}) => {
+const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAssignments}) => {
 
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
@@ -47,7 +47,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignm
         if(isDone){
           setIsModalOpen(false);
           getAssignments();
-          getData();
+          refetchData();
           setIsDone(false);
           setDoesPressed(false);
         }
@@ -322,7 +322,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignm
           
         } finally {
           getAssignments();
-          getData();
+          refetchData();
           setIsModalOpen2(false);
         }
         
