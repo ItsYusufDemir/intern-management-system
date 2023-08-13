@@ -49,6 +49,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignm
           getAssignments();
           getData();
           setIsDone(false);
+          setDoesPressed(false);
         }
     }, [isDone])
     
@@ -334,7 +335,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignm
             <Table columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 400}} pagination={{hideOnSinglePage: true}}/>
 
             <Modal title="Edit Assignment" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={600}>
-              <AddAssignmentForm doesPressed={doesPressed} setDoesPressed={setDoesPressed} assignment={assignment} setIsDone={setIsDone} />
+              <AddAssignmentForm doesPressed={doesPressed} assignment={assignment} setIsDone={setIsDone} />
               {doesPressed && <LoadingContainer />}
             </Modal>
 

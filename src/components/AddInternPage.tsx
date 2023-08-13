@@ -4,8 +4,9 @@ import { Team } from "../models/Team";
 import { useEffect, useState } from "react";
 import TeamService from "../services/TeamService";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
+import Loading from "./Loading";
 
-const AddInternPage = (props: {isEdit: boolean, intern?: Intern}) => {
+const AddInternPage = () => {
 
 
     const [teams, setTeams] = useState<Team []>();
@@ -34,7 +35,7 @@ const AddInternPage = (props: {isEdit: boolean, intern?: Intern}) => {
     
     return ( 
         <>
-        {isLoading ? <h2>Loading...</h2> : <InternAddingForm isEdit={props.isEdit} teams={teams!} intern={props.intern}/>}
+        {isLoading ? <Loading /> : <InternAddingForm   teams={teams!}/>}
         </>
      );
 }

@@ -51,7 +51,7 @@ const uploadCv = async (axiosInstance: any, options: any): Promise<string | null
         console.log('CV uploaded successfully');
   
         const cv_url = response.data.cv_url;
-  
+        
         return cv_url;
       } else {
         // File upload failed
@@ -67,9 +67,9 @@ const uploadCv = async (axiosInstance: any, options: any): Promise<string | null
   }
 
 
-const deleteCv = async (axiosInstance: any, uid: string) => {
+const deleteCv = async (axiosInstance: any, uid: string, from: "garbage" | "cv") => {
   try {
-    const response = await axiosInstance.delete(`/uploads/garbage/${uid}`, {
+    const response = await axiosInstance.delete(`/uploads/${from}/${uid}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
@@ -86,9 +86,9 @@ const deleteCv = async (axiosInstance: any, uid: string) => {
 }
 
 
-const deletePhoto = async (axiosInstance: any, uid: string) => {
+const deletePhoto = async (axiosInstance: any, uid: string, from: "garbage" | "photos") => {
   try {
-    const response = await axiosInstance.delete(`/uploads/garbage/${uid}`, {
+    const response = await axiosInstance.delete(`/uploads/${from}/${uid}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },

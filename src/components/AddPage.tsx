@@ -46,11 +46,20 @@ const AddPage = () => {
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
-        const teamData = await TeamService.getTeams(axiosPrivate);
-        setTeams(teamData);
+        try {
+            const teamData = await TeamService.getTeams(axiosPrivate);
+            setTeams(teamData);
 
-        const userData = await UserService.getUsers(axiosPrivate);
-        setUsers(userData);
+            const userData = await UserService.getUsers(axiosPrivate);
+            setUsers(userData);
+        } catch (error: any) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              }  else {
+                giveMessage("error", "Error while fetchind data");
+              }
+        }
+        
     };
     
     useEffect(() => {
@@ -65,6 +74,13 @@ const AddPage = () => {
         setIsLoading(false);
       }
     }, [teams, users])
+
+    const giveMessage = (type: NoticeType, mssge: string) => {
+        message.open({
+          type: type,
+          content: mssge,
+        });
+    };
 
 
     return (

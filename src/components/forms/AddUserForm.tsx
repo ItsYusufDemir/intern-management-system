@@ -17,7 +17,7 @@ interface DataType {
     user_id: number;
     username: string;
     role: number;
-    team?: string;
+    team_id?: number;
   }
 
 const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
@@ -53,7 +53,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
                 username: user,
                 password: pwd,
                 role: role,
-                team: formData.team,
+                team_id: formData.team,
             }
 
            await UserService.addUser(axiosPrivate, newUser);
@@ -84,9 +84,9 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
                 username: userToUpdate.username,
                 role: userToUpdate.role,
             })
-            if(userToUpdate.team) {
+            if(userToUpdate.team_id) {
                 form.setFieldsValue({
-                    team: userToUpdate.team,
+                    team: userToUpdate.team_id,
                 })
             }
         }
@@ -102,7 +102,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
                 username: user,
                 password: pwd,
                 role: role,
-                team: formData.team,
+                team_id: formData.team,
             }
 
            await UserService.updateUser(axiosPrivate, newUser);
@@ -205,7 +205,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
                     <Select>
                         {teams.map(team => {
                             return (
-                                <Select.Option value={team.team_name}>{team.team_name}</Select.Option>
+                                <Select.Option value={team.team_id}>{team.team_name}</Select.Option>
                             )
                         })}
                     </Select>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs } from 'antd';
+import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message } from 'antd';
 import {Intern} from "../models/Intern";
 import {DownloadOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled} from '@ant-design/icons';
 import AddInternPage from './AddInternPage';
@@ -18,12 +18,15 @@ import AssignmentTable from './tables/AssignmentTable';
 import { Assignment } from '../models/Assignment';
 import AddAssignmentForm from './forms/AddAssignmentForm';
 import LoadingContainer from './LoadingContainer';
+import InternAddingForm from './forms/InternAddingForm';
+import { NoticeType } from 'antd/es/message/interface';
 
 
 // TODO: Handle Download Cv,
 
 interface PropType {
     intern: Intern,
+    setIntern: React.Dispatch<React.SetStateAction<Intern | undefined>>,
     teams: Team [],
     interns: Intern [],
     getData: () => void,
@@ -31,7 +34,7 @@ interface PropType {
     assignments: Assignment [] | undefined; 
 }
 
-const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assignments, getAssignments}) => {
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assignments, getAssignments, setIntern}) => {
     
 
     const [form] = Form.useForm();
@@ -53,24 +56,22 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
     
     useEffect(()=> {
        if(isDone) {
-            setIsModalOpen3(false);
+            setIsModalOpen(false);
+            setIsModalOpen2(false);
+
+            getData();
             getAssignments(); 
+            
             setIsDone(false);
+            setDoesPressed(false);
        }
     }, [isDone])
     
-    /*
-    useEffect(() => {
-        if(!doesPressed) {
-            setIsModalOpen3(false);
-            getAssignments();
-        }
-    }, [doesPressed])
-    */
-
+    
+      
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
-      const [isModalOpen3, setIsModalOpen3] = useState(false)
+
       
       const [isHidden, setIsHidden] = useState<boolean>(true);
       const [form2] = Form.useForm()
@@ -78,7 +79,8 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
       const location = useLocation();
       const navigate = useNavigate();
       const axiosPrivate = useAxiosPrivate();
-      ;
+      
+
 
       
     if(intern === undefined){
@@ -91,33 +93,16 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
         return team;
     }
 
-    const findInternshipPeriod = (start: Date, end: Date) => {
-        return Math.round(((end.getTime() - start.getTime())/(1000 * 60 * 60 * 24 * 7)));
+    const findInternshipPeriod = (start: number, end: number) => {
+        return Math.round(((end - start)/( 60 * 60 * 24 * 7)));
     }
     
     
     //Percentage of complete of internship
-    const completePercentage = Math.round(((Date.now() - intern.internship_starting_date.getTime()) / 
-    (intern.internship_ending_date.getTime() - intern.internship_starting_date.getTime())) * 100);
+    const completePercentage = Math.round(((Date.now() - intern.internship_starting_date * 1000) / 
+    (intern.internship_ending_date * 1000 - intern.internship_starting_date * 1000)) * 100);
     
     
-    //Edit Intern Modal
-    const showModal2 = () => {
-        setIsModalOpen2(true);
-    };
-    
-   
-
-    const handleOk2 = (e: any) => {
-        editForm.resetFields();
-        setIsModalOpen2(false); 
-    };
-
-    
-
-    const handleCancel2 = () => {
-        setIsModalOpen2(false);
-    };
 
     //Delete Modal
     const {confirm} = Modal;
@@ -148,23 +133,26 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
         };
 
         if(intern.cv_url !== null){
-            console.log("tam burası", intern.cv_url);
-           await UploadService.deleteCv(axiosPrivate, intern.cv_url.split("/").pop()!);
+           await UploadService.deleteCv(axiosPrivate, intern.cv_url.split("/").pop()!, "cv");
         }
 
         if(intern.photo_url !== null) {
-            await UploadService.deletePhoto(axiosPrivate, intern.photo_url.split("/").pop()!);
+            await UploadService.deletePhoto(axiosPrivate, intern.photo_url.split("/").pop()!, "photos");
         }
 
         await InternService.deleteIntern(axiosPrivate, intern);
 
-        navigate(0); //Refresh the page  
+        
+        setIntern(undefined);
+        giveMessage("success", "Intern deleted");
     };
    
     const downloadCv =  (event: any) => {
         if(intern.cv_url !== null){   
              window.open(addAccessToken(intern.cv_url), "_blank");
-        }    
+        } else{
+            giveMessage("info", "Intern has not uploaded CV");
+        }
     }   
 
     const addAccessToken = (url: string) => {
@@ -174,33 +162,48 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
 
 
     const handleNewAssignment = () => {
-        showModal3();
+        showModal2();
     }
 
-    const showModal3 = () => {
-        setIsModalOpen3(true);
-    };
-    
-   
 
-    const handleOk3 = (e: any) => {
+    //Edit Intern Modal
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+    const handleOk = (e: any) => {
+        setDoesPressed(true); 
+    };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
+
+    //Assignment modal
+    const showModal2 = () => {
+        setIsModalOpen2(true);
+    };
+    const handleOk2 = (e: any) => {
         setDoesPressed(true);
     };
-
-    
-
-
-    const handleCancel3 = () => {
-        setIsModalOpen3(false);
+    const handleCancel2 = () => {
+        setIsModalOpen2(false);
     };
 
-    
+
+    const giveMessage = (type: NoticeType, mssge: string) => {
+        message.open({
+          type: type,
+          content: mssge,
+        });
+      }
+
+
     return (
 
         <>
         
-        <Image width={150} height={200} style={{border: "2px solid black", borderRadius: "10px"}}
-        src={intern.photo_url !== null ? addAccessToken(intern.photo_url) : addAccessToken("http://localhost:5000/uploads/photos/no-photo.jpg")}/>
+        <Image width={150} height={180} style={{border: "2px solid black", borderRadius: "10px"}}
+        src={intern.photo_url !== null ? addAccessToken(intern.photo_url) : addAccessToken("http://localhost:5000/uploads/photos/no-photo.png")}/>
 
         <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  
@@ -218,7 +221,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
             <Descriptions.Item label="Grade">{intern.grade + ". Grade"}</Descriptions.Item>
             <Descriptions.Item label="Team">{findTeam(intern).team_name}</Descriptions.Item>
             <Descriptions.Item label="Internship Date">
-            {intern.internship_starting_date.toLocaleDateString() + " - " + intern.internship_ending_date.toLocaleDateString() +
+            {new Date(intern.internship_starting_date * 1000).toLocaleDateString() + " - " + new Date(intern.internship_ending_date * 1000).toLocaleDateString() +
             " (" + findInternshipPeriod(intern.internship_starting_date, intern.internship_ending_date) + " Weeks)"}
             </Descriptions.Item>
             <Descriptions.Item label="E-mail">{intern.email}</Descriptions.Item>
@@ -226,11 +229,11 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
 
         <div className='Buttons' style={{display: 'flex'}}>
             <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} size={"large"}>Download CV</Button>
-            <Button  onClick={showModal2} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit Intern</Button>
+            <Button  onClick={showModal} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit Intern</Button>
             <Button  onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete Intern</Button>
         </div>
 
-        <br /><br />
+        <br /><br /><br />
 
         <h2>Assignments</h2>
 
@@ -248,12 +251,12 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, getData, assig
 
         {/*Modals Here*/}
         <div>
-            <Modal title="Edit" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2}>
-                 <AddInternPage isEdit={true} intern={intern} ></AddInternPage>
+            <Modal title="Edit" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                 <InternAddingForm teams={teams} intern={intern} setIsDone={setIsDone} doesPressed={doesPressed} />
             </Modal>
 
-            <Modal title="New Assignment" open={isModalOpen3} onOk={handleOk3} onCancel={handleCancel3} width={600}>
-                 <AddAssignmentForm intern_id={intern.intern_id!} doesPressed={doesPressed} setDoesPressed={setDoesPressed} setIsDone={setIsDone}/>
+            <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600}>
+                 <AddAssignmentForm intern_id={intern.intern_id!} doesPressed={doesPressed} setIsDone={setIsDone}/>
                  {doesPressed && <LoadingContainer />}
             </Modal>
 

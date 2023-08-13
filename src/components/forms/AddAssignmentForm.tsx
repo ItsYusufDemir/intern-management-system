@@ -14,11 +14,10 @@ interface PropType {
     assignment?: Assignment,
     setIsDone: React.Dispatch<React.SetStateAction<boolean>>
     doesPressed: boolean
-    setDoesPressed: React.Dispatch<React.SetStateAction<boolean>>
     intern_id?: number,
 }
 
-const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPressed, setDoesPressed, intern_id}) => {
+const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPressed, intern_id}) => {
 
 
     const [form] = useForm();
@@ -87,7 +86,6 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
         }
         finally {
             setIsDone(true);
-            setDoesPressed(false);
         }
     }
 
@@ -105,7 +103,6 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
         }
         finally {
             setIsDone(true);
-            setDoesPressed(false);
         }
     }
 

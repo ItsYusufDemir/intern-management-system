@@ -31,6 +31,7 @@ const InternsPage = () => {
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
       try {
+        
         setIsLoading(true);
         setInterns(undefined);
         setTeams(undefined);
@@ -126,7 +127,6 @@ const InternsPage = () => {
         }  else {
           giveMessage("error", "Error while fetchind data");
         }
-        console.log(error);
     }
     
   }
@@ -190,7 +190,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        {selectedIntern && <CVComponent getAssignments={getAssignments} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} getData={getData} />}
+        {selectedIntern && <CVComponent setIntern={setSelectedIntern} getAssignments={getAssignments} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} getData={getData} />}
       </div>
 
       <br />

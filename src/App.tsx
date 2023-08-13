@@ -51,7 +51,7 @@ const App: React.FC = () => {
                 </Route>
 
                 <Route element={<RequireAuth  allowedRoles={[ROLES.Admin,ROLES.Supervisor]} />}>
-                  <Route path="add-intern" element={ <AddInternPage isEdit={false}/>} />
+                  <Route path="add-intern" element={ <AddInternPage/>} />
                 </Route> 
 
                 <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]} />}>

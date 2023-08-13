@@ -45,6 +45,7 @@ const LayoutComponent = () => {
 const matchInterns = useMatch("/interns");
 const matchAddIntern = useMatch("/add-intern");
 const matchAddPage = useMatch("/add");
+//add for other new links
 const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
 const location = useLocation();
@@ -61,7 +62,6 @@ const getSelectedkey = () => {
   }
   else if (matchAddPage) {
     setSelectedKey("/add");
-    
   }
   else {
     setSelectedKey("/");
@@ -84,6 +84,7 @@ useEffect(() => {
     getItem('Intern Applications', '/intern-applications', <TeamOutlined />),
     getItem('Tools', 'sub1', <SettingOutlined />, [
       getItem("Add User/Team", "/add"),
+      getItem("Add Intern", "/add-intern"),
     ]),
     getItem('Change Password', '/change-password', <TeamOutlined />),
   ];
