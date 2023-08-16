@@ -45,6 +45,7 @@ const LayoutComponent = () => {
 const matchInterns = useMatch("/interns");
 const matchAddIntern = useMatch("/add-intern");
 const matchAddPage = useMatch("/add");
+const matchInternApplications = useMatch("/intern-applications");
 //add for other new links
 const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
@@ -62,6 +63,8 @@ const getSelectedkey = () => {
   }
   else if (matchAddPage) {
     setSelectedKey("/add");
+  } else if (matchInternApplications) {
+    setSelectedKey("/intern-applications");
   }
   else {
     setSelectedKey("/");
@@ -176,7 +179,7 @@ useEffect(() => {
         </Sider>
         <Layout style={{marginLeft: 200, marginTop: 0,}}>
           
-          <header className='header'><h1 className='header-title'>{title}</h1></header><br />
+          <header className='header'><h1 className='header-title' style={{marginLeft: "20px"}}>{title}</h1></header>
 
 
           <Content className='content'>

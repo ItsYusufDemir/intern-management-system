@@ -20,6 +20,8 @@ import LayoutComponent from './components/LayoutComponent';
 import useAuth from './utils/useAuth';
 import Unauthorized from './components/Unauthorized';
 import PersistLogin from './components/PersistLogin';
+import Applications from './components/ApplicationsPage';
+import ApplyPage from './components/ApplyPage';
 
 
 const App: React.FC = () => {
@@ -36,6 +38,8 @@ const App: React.FC = () => {
         <Routes>
           {/* Public route for login */}
           <Route path="/login" element={<Login />}></Route>
+
+          <Route path="/apply" element={<ApplyPage />} />
           
           
           {/* Protected routes*/}
@@ -56,6 +60,10 @@ const App: React.FC = () => {
 
                 <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]} />}>
                   <Route path="add" element={<AddPage />} />
+                </Route>
+
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]} />}>
+                  <Route path="intern-applications" element={<Applications />} />
                 </Route>
               </Route>
           </Route>

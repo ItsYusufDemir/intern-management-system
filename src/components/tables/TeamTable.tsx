@@ -1,5 +1,5 @@
 import { SearchOutlined, QuestionCircleOutlined  } from '@ant-design/icons';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { InputRef } from 'antd';
 import { Button, Input, Modal, Popconfirm, Space, Table, message } from 'antd';
 import type { ColumnType, ColumnsType } from 'antd/es/table';
@@ -33,6 +33,9 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
     const axiosPrivate = useAxiosPrivate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [team, setTeam] = useState<Team>();
+
+    const [isDone, setIsDone] = useState(false);
+    const [doesPressed, setDoesPressed] = useState(false);
 
       const handleSearch = (
         selectedKeys: string[],
@@ -137,7 +140,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
           ...getColumnSearchProps('team_name'),
           sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
           sortDirections: ['descend', 'ascend'],
-          defaultSortOrder: "descend",
+          defaultSortOrder: "ascend",
           ellipsis: true
         },
         {
@@ -202,12 +205,23 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
       };
     
       const handleOk = () => {
-        setIsModalOpen(false);
+        setDoesPressed(true);
       };
     
       const handleCancel = () => {
         setIsModalOpen(false);
       };
+
+      useEffect(()=> {
+        if(isDone) {
+             setIsModalOpen(false);
+             
+             getData();
+             
+             setIsDone(false);
+             setDoesPressed(false);
+        }
+     }, [isDone])
     
 
 
@@ -216,7 +230,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
             <Table columns={columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
 
             <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddTeamForm team={team} getData={getData} />
+              <AddTeamForm setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} team={team} getData={getData} />
             </Modal>
 
         </>

@@ -1,5 +1,5 @@
 import { SearchOutlined, QuestionCircleOutlined  } from '@ant-design/icons';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { InputRef } from 'antd';
 import { Button, Input, Modal, Popconfirm, Space, Table, message } from 'antd';
 import type { ColumnType, ColumnsType } from 'antd/es/table';
@@ -40,6 +40,9 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
 
     const [user, setUser] = useState<DataType>();
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [isDone, setIsDone] = useState(false);
+    const [doesPressed, setDoesPressed] = useState(false);
 
 
       const handleSearch = (
@@ -145,7 +148,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
           ...getColumnSearchProps('username'),
           sorter: (a, b) => a.username.localeCompare(b.username), // Corrected sorting function
           sortDirections: ['descend', 'ascend'],
-          defaultSortOrder: "descend",
+          defaultSortOrder: "ascend",
           ellipsis: true
         },
         {
@@ -153,6 +156,20 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
           dataIndex: 'role',
           key: 'role',
           width: '10%',
+          render: (role) => {
+            let roleAsString = "";
+            if(role === 2001) {
+              roleAsString = "Intern"
+            }
+            else if (role === 1984) {
+              roleAsString = "Supervisor";
+            }
+            else {
+              roleAsString = "Admin";
+            }
+
+            return (<span>{roleAsString}</span>)
+          }
         },
         {
           title: 'Action',
@@ -214,13 +231,23 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
       };
     
       const handleOk = () => {
-        setIsModalOpen(false);
+        setDoesPressed(true);
       };
     
       const handleCancel = () => {
         setIsModalOpen(false);
       };
       
+      useEffect(()=> {
+        if(isDone) {
+             setIsModalOpen(false);
+             
+             getData();
+             
+             setIsDone(false);
+             setDoesPressed(false);
+        }
+     }, [isDone])
 
 
 
@@ -229,7 +256,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
             <Table columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
        
             <Modal title="Edit User" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddUserForm teams={teams} userToUpdate={user} getData={getData}/>
+              <AddUserForm doesPressed={doesPressed} setIsDone={setIsDone} setDoesPressed={setDoesPressed} teams={teams} userToUpdate={user} getData={getData}/>
             </Modal>
 
           </>

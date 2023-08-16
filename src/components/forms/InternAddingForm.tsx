@@ -26,6 +26,8 @@ import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../../utils/useAxiosPrivate';
 import { NoticeType } from 'antd/es/message/interface';
 import useAuth from '../../utils/useAuth';
+import ApplicationService from '../../services/ApplicationsService';
+import { min } from 'moment';
 
 
 const { RangePicker } = DatePicker;
@@ -45,11 +47,13 @@ interface PropType {
   intern?: Intern,
   teams: Team[],
   doesPressed?: boolean,
+  setDoesPressed?: React.Dispatch<React.SetStateAction<boolean>>,
   setIsDone?: React.Dispatch<React.SetStateAction<boolean>>,
+  apply?: boolean,
 }
 
 
-const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIsDone}) => {
+const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIsDone, apply, setDoesPressed}) => {
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -57,6 +61,7 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
   const [photoList, setPhotoList] = useState<UploadFile []>([]);
   const [cvList, setCvList] = useState<UploadFile []>([]);
   const { auth }: any = useAuth();
+  const navigate = useNavigate();
 
   const [cv_url, setCv_url] = useState<string | null>();
   const [photo_url, setPhoto_url] = useState<string | null>();
@@ -64,6 +69,11 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
   const onFinish = (e: any) => {
 
     const formValues = form.getFieldsValue();
+
+    const start = formValues.internshipDate[0].set("hour", 0).set("minute", 0).set("second", 0);
+    const end = formValues.internshipDate[1].set("hour", 23).set("minute", 59).set("second", 59);
+
+    
 
     const newIntern: Intern = {
       intern_id: intern ? intern.intern_id : undefined,
@@ -78,19 +88,23 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
       gpa: formValues.gpa,
       team_id: formValues.team_id,
       birthday: formValues.birthday ? formValues.birthday.unix() : undefined,
-      internship_starting_date: formValues.internshipDate[0].unix(),
-      internship_ending_date: formValues.internshipDate[1].unix(),
+      internship_starting_date: start.unix(),
+      internship_ending_date: end.unix(),
       cv_url: cv_url ? cv_url : (intern ? intern.cv_url : null),
       photo_url: photo_url ? photo_url : (intern ? intern.photo_url : null),
       overall_success: intern ? intern.overall_success : null,
     }
 
     if(intern){
-      
       updateIntern(newIntern);
     }
     else{
-      addIntern(newIntern);
+      if(apply) {
+        applyIntern(newIntern);
+      }
+      else{
+        addIntern(newIntern);
+      }
     }
   
   };
@@ -124,6 +138,27 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
     }
 
   }
+
+  const applyIntern = async (newIntern: Intern) => {
+    try {
+      await ApplicationService.addApplication(newIntern);
+      
+      giveMessage("success", "You applied successfully");
+      form.resetFields();
+      navigate(0);
+    } catch (error: any) {
+      if (!error?.response) {
+        giveMessage("error","No server response");
+      } else if (error.response?.status === 409) {
+        giveMessage("error", "An application with this email already exists!");
+      } else {
+        giveMessage("error", "Error happened while applying");
+      } 
+    }
+
+  }
+
+
 
   const updateIntern = async (newIntern: Intern) => {
     try {
@@ -247,6 +282,13 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
     });
   };
 
+  const handleSubmitFailed = () => {
+    if(setDoesPressed) {
+      console.log("failed");
+      setDoesPressed(false);
+    }
+  }
+
   
   return (
 
@@ -255,17 +297,20 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
         layout="horizontal"
         style={{ maxWidth: 400 }}
         onFinish={onFinish}
+        labelCol={{span: 8}}
+        wrapperCol={{span: 14}}
+        onFinishFailed={handleSubmitFailed}
         form={form}>
           
         
-        <Form.Item label="Name" name="first_name" rules={[{ required: true }]}>
+        <Form.Item label="Name" name="first_name" rules={[{ required: true, message: "Name is required" }]}>
           <Input required/>
         </Form.Item>
         
-        <Form.Item label="Last Name" name="last_name" rules={[{ required: true }]}>
+        <Form.Item label="Last Name" name="last_name" rules={[{ required: true, message: "Last name is required" }]}>
           <Input required/>
         </Form.Item>
-        <Form.Item label="Personal ID" name="id_no" rules={[{ required: true }]} >
+        <Form.Item label="Personal ID" name="id_no" rules={[{ required: true, message: "Personal ID should ne 11 digits", len: 11}]} >
           <Input />
         </Form.Item>
         <Form.Item label="E-mail" name="email" rules={[
@@ -273,16 +318,16 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
         ]} >
           <Input />
         </Form.Item>
-        <Form.Item label="Tel" name="phone_number" rules={[{ required: true }]} >
+        <Form.Item label="Tel" name="phone_number" rules={[{ required: true, message: "Tel is required" }]} >
           <Input />
         </Form.Item>
-        <Form.Item label="University" name="uni">
+        <Form.Item label="University" name="uni"  rules={[{ required: true, message: "University is required" }]}>
           <Input />
         </Form.Item>
-        <Form.Item label="Major" name="major">
+        <Form.Item label="Major" name="major"  rules={[{ required: true, message: "Major is required" }]}>
           <Input/>
         </Form.Item>
-        <Form.Item label="Grade" name="grade">
+        <Form.Item label="Grade" name="grade"  rules={[{ required: true, message: "Grade is required" }]}>
             <Select>
                 <Select.Option value="1">1. Grade</Select.Option>
                 <Select.Option value="2">2. Grade</Select.Option>
@@ -290,10 +335,10 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
                 <Select.Option value="4">4. Grade</Select.Option>
             </Select>
         </Form.Item>
-        <Form.Item label="GPA" name="gpa">
+        <Form.Item label="GPA" name="gpa"  rules={[{type: "number", required: true, message: "GPA must be between 0 and 4", min: 0, max: 4}]}>
           <InputNumber/>
         </Form.Item>
-        <Form.Item label="Team" name="team_id" required>
+        <Form.Item label="Team" name="team_id"  rules={[{ required: true, message: "Team is required" }]}>
             <Select>
                 {teams.map(team => {
                   return(
@@ -303,15 +348,15 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
             </Select>
         </Form.Item>
         
-        <Form.Item label="Birthday" name="birthday">
+        <Form.Item label="Birthday" name="birthday" rules={[{ required: true, message: "Birthday is required" }]}>
           <DatePicker format="DD-MM-YYYY" />
         </Form.Item>
-        <Form.Item label="Internship Date" name="internshipDate" rules={[{ required: true }]}>
+        <Form.Item label="Internship Date" name="internshipDate"  rules={[{ required: true, message: "Internship date is required" }]}>
           <RangePicker format="DD-MM-YYYY"/>
         </Form.Item>
         
         
-        <Form.Item>
+        <Form.Item  >
           <Upload customRequest={handleCvUpload} fileList={intern?.cv_url ? cvList : undefined}  listType="picture-card" accept='.pdf,.docx,doc'maxCount={1} onRemove={handleCancelCvUpload}>
             <div>
               <PlusOutlined />
@@ -319,7 +364,7 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
             </div>
           </Upload>
         </Form.Item>
-        <Form.Item>
+        <Form.Item >
           <Upload customRequest={handlePhotoUpload} fileList={intern?.photo_url ? photoList : undefined} listType="picture-card"  accept='.jpg,.png'maxCount={1} onRemove={handleCancelPhotoUpload}>
             <div>
               <PlusOutlined />
@@ -328,8 +373,8 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
           </Upload>
         </Form.Item>
   
-        {!intern && <Form.Item>
-            <div><Button  htmlType='submit' type='primary' block>{intern ? (<>Edit Intern</>) : (<>Add Intern</>)}</Button></div>
+        {!intern && <Form.Item wrapperCol={{span: 24}}>
+            <div><Button   htmlType='submit' type='primary' block>{intern ? (<>Edit Intern</>) : (apply ? <>Apply</> : <>Add Intern</>)}</Button></div>
         </Form.Item>}
       </Form>
     </>

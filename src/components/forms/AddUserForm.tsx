@@ -10,6 +10,9 @@ import { Team } from "../../models/Team";
 interface PropType {
     teams: Team [];
     userToUpdate?: DataType;
+    setIsDone?: React.Dispatch<React.SetStateAction<boolean>>;
+    doesPressed?: boolean;
+    setDoesPressed?: React.Dispatch<React.SetStateAction<boolean>>;
     getData: () => void;
 }
 
@@ -20,7 +23,7 @@ interface DataType {
     team_id?: number;
   }
 
-const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
+const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDone, doesPressed, setDoesPressed}) => {
 
     
     const userNameErrorMessage = "Username must start with a letter and be 3 to 23 characters long, containing only letters, digits, underscores, and hyphens.";
@@ -44,6 +47,11 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
         }
                 
     }
+
+    useEffect(() => {
+        if(doesPressed)
+            form.submit();
+    },[doesPressed])
 
     const addUser = async () => {
         try {
@@ -72,6 +80,8 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
               }
         } finally {
             getData();
+            if(setIsDone)
+            setIsDone(true);
         }
         
     }
@@ -118,13 +128,16 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
                 giveMessage("error", "Error while updating user");
               }
         } finally {
-            getData();
+            if(setIsDone){
+                setIsDone(true); 
+            }
+            else{
+                getData(); //If there is a setIsDone, getdata is called in parent of it
+            }
         }
         
     }
 
-
-    
 
     const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
@@ -137,6 +150,11 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
         setRole(value);
     }
 
+    const handleSubmitFailed = () => {
+        if(setDoesPressed)
+        setDoesPressed(false);
+    }
+
 
     return (
         <>
@@ -146,7 +164,8 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
                 form={form}
                 labelCol={{span: 10}}
                 wrapperCol={{span: 14}}
-                autoComplete="off">
+                autoComplete="off"
+                onFinishFailed={handleSubmitFailed}>
                     
                 <Form.Item
                 label="Username"
@@ -210,14 +229,10 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData}) => {
                         })}
                     </Select>
                 </Form.Item>}
-                
 
-                <Form.Item wrapperCol={{span: 24}}>
-                    <Button block type="primary" htmlType="submit">
-                        {userToUpdate ? <>Update User</> : <>Add User</>}
-                    </Button>
-                </Form.Item>   
-
+                {!userToUpdate && <Form.Item wrapperCol={{span: 24}}>
+                    <Button block type="primary" htmlType="submit">Add User</Button>
+                </Form.Item>}
                 
 
                 </Form>

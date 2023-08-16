@@ -43,6 +43,9 @@ const AddPage = () => {
     const [teams, setTeams] = useState<Team []>([]);
     const [users, setUsers] = useState<DataType []>([]);
 
+    const [isDone, setIsDone] = useState(false);
+    const [doesPressed, setDoesPressed] = useState(false);
+
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
@@ -81,6 +84,17 @@ const AddPage = () => {
           content: mssge,
         });
     };
+
+    useEffect(()=> {
+        if(isDone) {
+             setIsModalOpen(false);
+             
+             getData();
+             
+             setIsDone(false);
+             setDoesPressed(false);
+        }
+     }, [isDone])
 
 
     return (

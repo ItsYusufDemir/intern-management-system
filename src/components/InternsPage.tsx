@@ -11,6 +11,7 @@ import Loading from "./Loading";
 import { Assignment } from "../models/Assignment";
 import AssignmentService from "../services/AssignmentService";
 import { NoticeType } from "antd/es/message/interface";
+import { Attendance } from "../models/Attendance";
 
 
 const InternsPage = () => {
@@ -23,6 +24,7 @@ const InternsPage = () => {
     const [isReloading, setIsReloading] = useState<boolean>(false);
     const axiosPrivate = useAxiosPrivate();
     const [assignments, setAssignments] = useState<Assignment []>();
+    const [attendance, setAttendance] = useState<Attendance []>();
     const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
     const [selectedIntern, setSelectedIntern] = useState<Intern>();
     const [form] = Form.useForm();
@@ -133,8 +135,9 @@ const InternsPage = () => {
   const getAssignments = async () => {
     try {
       const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, selectedIntern?.intern_id!);
-
+      const attendance: Attendance  [] = [];
       setAssignments(assignmentsData);
+      setAttendance(attendance);
 
     } catch (error: any) {
         if (!error?.response) {
@@ -205,7 +208,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        {selectedIntern && <CVComponent setIntern={setSelectedIntern} getAssignments={getAssignments} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
+        {selectedIntern && <CVComponent setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
       </div>
 
       <br />

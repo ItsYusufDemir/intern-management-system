@@ -14,10 +14,11 @@ interface PropType {
     assignment?: Assignment,
     setIsDone: React.Dispatch<React.SetStateAction<boolean>>
     doesPressed: boolean
+    setDoesPressed: React.Dispatch<React.SetStateAction<boolean>>,
     intern_id?: number,
 }
 
-const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPressed, intern_id}) => {
+const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPressed, setDoesPressed, intern_id}) => {
 
 
     const [form] = useForm();
@@ -114,6 +115,10 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
         }
     }, [doesPressed])
 
+    const handleSubmitFailed = () => {
+        setDoesPressed(false);
+    }
+
     const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
           type: type,
@@ -128,6 +133,7 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
             onFinish={onFinish}
             labelCol={{span: 6}}
             wrapperCol={{span: 14}}
+            onFinishFailed={handleSubmitFailed}
             form={form}>
 
             <Form.Item label="Description" name="description" rules={[{required: true, message: "Describe the assignment!"}]}>
@@ -140,7 +146,7 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
                 <DatePicker showTime format="DD-MM-YYYY HH:mm" />
             </Form.Item>
 
-            <Form.Item label="Weight" name="weight" required>
+            <Form.Item label="Coefficient" name="weight" rules={[{required: true, message: "Enter the coefficient"}]}>
                 <InputNumber/>
             </Form.Item>
 

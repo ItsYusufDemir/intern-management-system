@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message } from 'antd';
+import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message, Calendar, ConfigProvider, Badge } from 'antd';
 import {Intern} from "../models/Intern";
 import {DownloadOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled} from '@ant-design/icons';
 import AddInternPage from './AddInternPage';
@@ -20,6 +20,11 @@ import AddAssignmentForm from './forms/AddAssignmentForm';
 import LoadingContainer from './LoadingContainer';
 import InternAddingForm from './forms/InternAddingForm';
 import { NoticeType } from 'antd/es/message/interface';
+import dayjs, { Dayjs } from 'dayjs';
+import type { CellRenderInfo } from 'rc-picker/lib/interface';
+import "dayjs/locale/tr";
+import locale from "antd/locale/tr_TR";
+import { Attendance } from '../models/Attendance';
 
 
 // TODO: Handle Download Cv,
@@ -31,16 +36,19 @@ interface PropType {
     interns: Intern [],
     refetchData: () => void,
     getAssignments: () => void,
-    assignments: Assignment [] | undefined; 
+    assignments: Assignment [] | undefined;
+    attendances: Attendance [] | undefined; 
 }
 
-const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern}) => {
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances}) => {
     
 
     const [form] = Form.useForm();
     const { auth }: any = useAuth();
     const [isDone, setIsDone] = useState(false);
     const [doesPressed, setDoesPressed] = useState(false);
+
+    dayjs.locale("tr");
  
     const handleUpdateValue = () => {
         form.setFieldsValue({
@@ -198,6 +206,34 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         });
       }
 
+    const dateCellRender = (value: Dayjs) => {
+
+       if(value.day() === 6 || value.day() === 0 || value.unix() < intern.internship_starting_date ||
+        value.isAfter(dayjs(intern.internship_ending_date * 1000)) || value.isAfter(dayjs())) { //if the day is weekend
+            return;
+       }
+       const attendance = getListData(value);
+
+       if(attendance?.status === "present") {
+            return <Badge status='success' text="Present"></Badge>
+       } else{
+            return <Badge status='error' text="Absent"></Badge>
+       }
+    };
+
+    const cellRender = (current: Dayjs, info: CellRenderInfo<Dayjs>) => {
+        if (info.type === 'date') return dateCellRender(current);
+        return info.originNode;
+    }
+
+    const getListData = (value: Dayjs) => {
+        let listData;
+        const attendance = attendances?.filter(attendance => {
+            dayjs(attendance.attendance_date * 1000).isSame(value)
+        })[0];
+        
+        return attendance;
+    }
 
     return (
 
@@ -226,6 +262,8 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             " (" + findInternshipPeriod(intern.internship_starting_date, intern.internship_ending_date) + " Weeks)"}
             </Descriptions.Item>
             <Descriptions.Item label="E-mail">{intern.email}</Descriptions.Item>
+            <Descriptions.Item label="Personal ID">{intern.id_no}</Descriptions.Item>
+            <Descriptions.Item label="Tel">{intern.phone_number}</Descriptions.Item>
         </Descriptions>
 
         <div className='Buttons' style={{display: 'flex'}}>
@@ -249,15 +287,23 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             </Tabs>
         </div>
 
+        <br /><br />
+        <h2>Attendance</h2>
+        {/*
+        value={(intern.internship_starting_date > dayjs().unix()) ? dayjs(intern.internship_starting_date * 1000) : dayjs()}
+        */}
+        
+        <Calendar  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
+        
 
         {/*Modals Here*/}
         <div>
             <Modal title="Edit" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                 <InternAddingForm teams={teams} intern={intern} setIsDone={setIsDone} doesPressed={doesPressed} />
+                 <InternAddingForm teams={teams} intern={intern} setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} />
             </Modal>
 
             <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600}>
-                 <AddAssignmentForm intern_id={intern.intern_id!} doesPressed={doesPressed} setIsDone={setIsDone}/>
+                 <AddAssignmentForm setDoesPressed={setDoesPressed} intern_id={intern.intern_id!} doesPressed={doesPressed} setIsDone={setIsDone}/>
                  {doesPressed && <LoadingContainer />}
             </Modal>
 

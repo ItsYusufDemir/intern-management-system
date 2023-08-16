@@ -80,7 +80,7 @@ function Login() {
     return(
         <>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',}}>
-            <div style={{border: "2px solid black", padding: "10px", paddingTop: "50px" , borderRadius: "10px" }}>
+            <div style={{boxShadow: "rgba(0,0,0,0.25) 0 25px 50px -12px", background: "white", padding: "10px", paddingTop: "50px" , borderRadius: "10px" }}>
                 <Form
                     name="basic"
                     labelCol={{ span: 8 }}

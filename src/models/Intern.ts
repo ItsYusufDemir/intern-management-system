@@ -1,5 +1,8 @@
 export interface Intern {
   intern_id?: number;
+  application_id?: number;
+  application_status?: "accepted" | "rejected" | "waiting";
+  application_date?: number;
   first_name: string;
   last_name: string;
   id_no: string;
