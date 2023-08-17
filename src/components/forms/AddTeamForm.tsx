@@ -6,15 +6,19 @@ import form from "antd/es/form";
 import { NoticeType } from "antd/es/message/interface";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { isDocument } from "@testing-library/user-event/dist/utils";
 
 
 
 interface Prop {
     team?: Team
+    doesPressed?: boolean;
+    setDoesPressed?: React.Dispatch<React.SetStateAction<boolean>>,
+    setIsDone?: React.Dispatch<React.SetStateAction<boolean>>,
     getData: () => void;
 }
 
-const AddTeamForm: React.FC<Prop> = ({team, getData}) => {
+const AddTeamForm: React.FC<Prop> = ({team, getData, doesPressed, setDoesPressed, setIsDone}) => {
 
     const [form] = Form.useForm();
     const axiosPrivate = useAxiosPrivate();
@@ -32,6 +36,12 @@ const onFinish = () => {
     
 }
 
+useEffect(() => {
+    if(doesPressed){
+        form.submit();
+    }
+}, [doesPressed])
+
 
 
 useEffect(() => {
@@ -47,14 +57,18 @@ const updateTeam = async (team: Team) => {
         const response = await TeamService.updateTeam(axiosPrivate, team);
 
         giveMessage("success", "Team updated");
-        
-        getData();
       } catch (error: any) {
         if (!error?.response) {
           giveMessage("error", "No server response");
         } else {
           giveMessage("error", "Login failed!");
         }
+      } finally {
+            if(setIsDone){
+                setIsDone(true);
+            } else{
+                getData();
+            }     
       }
   }
 
@@ -80,7 +94,13 @@ const addTeam = async () => {
           } else {
             giveMessage("error", "Error while adding team");
           }
-    } 
+    } finally {
+        if(setIsDone){
+            setIsDone(true);
+        } else{
+            getData();
+        }
+    }
 }
 
 
@@ -92,6 +112,11 @@ const giveMessage = (type: NoticeType, mssge: string) => {
     });
 };
 
+const handleSubmitFailed = () => {
+    if(setDoesPressed)
+        setDoesPressed(false);
+}
+
 
     return (
         <>
@@ -102,14 +127,15 @@ const giveMessage = (type: NoticeType, mssge: string) => {
             labelCol={{span: 10}}
             wrapperCol={{span: 14}}
             form={form}
+            onFinishFailed={handleSubmitFailed}
             >
                 <Form.Item label="Team Name" name="team_name" rules={[{required: true, message: "Role is required!"}]}>
                 <Input />
                 </Form.Item>
 
-                <Form.Item wrapperCol={{span: 24}}>
-                    <Button  htmlType='submit' type='primary' block>{team ? <>Update Team</> : <>Add Team</>}</Button>
-                </Form.Item>
+                {!team && <Form.Item wrapperCol={{span: 24}}>
+                    <Button  htmlType='submit' type='primary' block>Add Team</Button>
+                </Form.Item>}
             </Form>
             </div>
 

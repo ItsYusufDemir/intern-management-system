@@ -3,5 +3,5 @@ export interface User {
     username: string,
     password: string,
     role?: number,
-    team?: string,
+    team_id?: number,
 }

@@ -79,30 +79,7 @@ function HomePage() {
        Team success is calculated by overall success of each team member
     */
 
-    useEffect(() => {
-
-        if(!isLoading){
-
-            teams?.forEach(team => {
-                let totalPoint = 0;
-                let counter = 0;
-                interns?.forEach(intern =>{
-                if(intern.team_id === team.team_id) {
-                    if(intern.overall_success !== null){
-                        totalPoint += intern.overall_success!;
-                        counter++;
-                    }
-                }
-        
-                })
-                numberOfInterns.push(counter);
-                team.team_success = (totalPoint / counter);
-                
-                TeamService.updateTeam(axiosPrivate, team);
-            });
-        }
-
-    }, [isLoading]);
+    
 
     
     if(isLoading){
@@ -124,7 +101,7 @@ function HomePage() {
                             currentInterns.push(intern);
                     })
                     return(
-                        <DashboardComponent team={team} interns={currentInterns}></DashboardComponent>
+                        <></>
                     )
                 })}
             </div>

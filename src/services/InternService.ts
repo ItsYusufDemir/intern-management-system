@@ -19,9 +19,11 @@ const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => 
           gpa: parseFloat(intern.gpa),
           team_id: parseInt(intern.team_id),
           overall_success: intern.overall_success ? parseFloat(intern.overall_success) : null,
+          /*
           birthday: new Date(intern.birthday),
           internship_starting_date: new Date(intern.internship_starting_date),
           internship_ending_date: new Date(intern.internship_ending_date),
+          */
         }));
         return internsData;
       } catch (error) {
@@ -53,20 +55,15 @@ const addIntern = async (axiosInstance: any, newIntern: Intern): Promise<Intern 
 
 const updateIntern = async (axiosInstance: any, updatedIntern: Intern) => {
   try {
-    console.log("buraya girdik mi")
+    console.log()
     const response = await axiosInstance.put(`/api/interns/${updatedIntern.intern_id}`, updatedIntern, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"
       }
     });
 
-    if (response.status === 200) {
-      console.log("Intern is updated");
-    } else {
-      console.log("Intern could NOT be updated!");
-    }
   } catch (error) {
-    console.log("Error: ", error);
+      throw error;
   }
 }
 
@@ -75,20 +72,14 @@ const updateIntern = async (axiosInstance: any, updatedIntern: Intern) => {
 const deleteIntern = async (axiosInstance: any, deletedIntern: Intern) => {
   try {
     const id = deletedIntern.intern_id;
-    const response = await axiosInstance.delete(`/api/interns/${id}`, {
+    await axiosInstance.delete(`/api/interns/${id}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"
       }
     });
 
-    if (response.status === 200) {
-      console.log("Intern is deleted");
-    } else {
-      console.log("Intern could NOT be deleted!");
-    }
   } catch (error) {
-    console.log("Error: ", error);
-    throw new Error("Error deleting intern.");
+    throw error;
   }
 }
 

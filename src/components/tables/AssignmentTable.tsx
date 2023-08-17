@@ -22,13 +22,13 @@ import { useForm } from 'antd/es/form/Form';
 interface ChildProps {
     assignments: Assignment[];
     getAssignments: () => void;
-    getData: () => void;
+    refetchData: () => void;
 }
 
 
 type DataIndex = keyof Assignment;
 
-const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignments}) => {
+const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAssignments}) => {
 
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
@@ -47,8 +47,9 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignm
         if(isDone){
           setIsModalOpen(false);
           getAssignments();
-          getData();
+          refetchData();
           setIsDone(false);
+          setDoesPressed(false);
         }
     }, [isDone])
     
@@ -321,7 +322,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignm
           
         } finally {
           getAssignments();
-          getData();
+          refetchData();
           setIsModalOpen2(false);
         }
         
@@ -334,7 +335,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, getData, getAssignm
             <Table columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 400}} pagination={{hideOnSinglePage: true}}/>
 
             <Modal title="Edit Assignment" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={600}>
-              <AddAssignmentForm doesPressed={doesPressed} setDoesPressed={setDoesPressed} assignment={assignment} setIsDone={setIsDone} />
+              <AddAssignmentForm setDoesPressed={setDoesPressed} doesPressed={doesPressed} assignment={assignment} setIsDone={setIsDone} />
               {doesPressed && <LoadingContainer />}
             </Modal>
 

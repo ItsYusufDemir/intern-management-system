@@ -11,6 +11,8 @@ import Loading from "./Loading";
 import { Assignment } from "../models/Assignment";
 import AssignmentService from "../services/AssignmentService";
 import { NoticeType } from "antd/es/message/interface";
+import { Attendance } from "../models/Attendance";
+import AttendanceService from "../services/AttendanceService";
 
 
 const InternsPage = () => {
@@ -23,6 +25,7 @@ const InternsPage = () => {
     const [isReloading, setIsReloading] = useState<boolean>(false);
     const axiosPrivate = useAxiosPrivate();
     const [assignments, setAssignments] = useState<Assignment []>();
+    const [attendance, setAttendance] = useState<Attendance []>();
     const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
     const [selectedIntern, setSelectedIntern] = useState<Intern>();
     const [form] = Form.useForm();
@@ -31,10 +34,6 @@ const InternsPage = () => {
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
       try {
-        setIsLoading(true);
-        setInterns(undefined);
-        setTeams(undefined);
-
         const internData = await InternService.getInterns(axiosPrivate);
         setInterns(internData);
 
@@ -51,6 +50,30 @@ const InternsPage = () => {
         
     };
 
+    //add another function: refetchData, without setting null to interns and teams, only update them and update the selected user
+    const refetchData = async () => {
+      try {
+        const internData = await InternService.getInterns(axiosPrivate);
+        setInterns(internData);
+
+        const teamData = await TeamService.getTeams(axiosPrivate);
+        setTeams(teamData);
+
+        if(selectedIntern) { //If a data in the selected user updated, we have to update the intern variable from new interns array
+          const intern_id = selectedIntern.intern_id;   
+
+          const updatedIntern = internData?.filter(intern => intern.intern_id === intern_id)[0]
+          setSelectedIntern(updatedIntern);
+        }
+        
+      } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while fetchind data");
+        }
+      }
+    }
 
     useEffect(() => {
       getData()
@@ -65,11 +88,6 @@ const InternsPage = () => {
     
     useEffect(() => {
       if(teams && interns) {
-
-        if(selectedIntern) { //If a data in the selected user updated, we have to update the intern variable from new interns array
-          const intern_id = selectedIntern.intern_id;
-          setSelectedIntern(interns?.filter(intern => intern.intern_id === intern_id)[0]);
-        }
         setIsLoading(false);
       }
     }, [teams, interns])
@@ -114,11 +132,13 @@ const InternsPage = () => {
     }
   }, [selectedIntern]);
 
+
   const getAssignments = async () => {
     try {
       const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, selectedIntern?.intern_id!);
 
       setAssignments(assignmentsData);
+
 
     } catch (error: any) {
         if (!error?.response) {
@@ -126,7 +146,22 @@ const InternsPage = () => {
         }  else {
           giveMessage("error", "Error while fetchind data");
         }
-        console.log(error);
+    }
+    
+  }
+
+  const getAttendances = async () => {
+    try {
+      const attendancesData = await AttendanceService.getAttendances(axiosPrivate, selectedIntern?.intern_id!)
+      
+      setAttendance(attendancesData);
+
+    } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while fetchind data");
+        }
     }
     
   }
@@ -190,7 +225,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        {selectedIntern && <CVComponent getAssignments={getAssignments} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} getData={getData} />}
+        {selectedIntern && <CVComponent getAttendances={getAttendances} setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
       </div>
 
       <br />
