@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message, Calendar, ConfigProvider, Badge } from 'antd';
 import {Intern} from "../models/Intern";
-import {DownloadOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled} from '@ant-design/icons';
+import {DownloadOutlined,
+        DeleteOutlined,
+        EditOutlined,
+        ExclamationCircleFilled,
+        CloseOutlined,
+        PlusOutlined,
+        MinusOutlined
+    } from '@ant-design/icons';
 import AddInternPage from './AddInternPage';
 import { Team } from '../models/Team';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -25,6 +32,7 @@ import type { CellRenderInfo } from 'rc-picker/lib/interface';
 import "dayjs/locale/tr";
 import locale from "antd/locale/tr_TR";
 import { Attendance } from '../models/Attendance';
+import AttendanceService from '../services/AttendanceService';
 
 
 // TODO: Handle Download Cv,
@@ -38,15 +46,18 @@ interface PropType {
     getAssignments: () => void,
     assignments: Assignment [] | undefined;
     attendances: Attendance [] | undefined; 
+    getAttendances: () => void,
 }
 
-const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances}) => {
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances, getAttendances}) => {
     
 
     const [form] = Form.useForm();
     const { auth }: any = useAuth();
     const [isDone, setIsDone] = useState(false);
     const [doesPressed, setDoesPressed] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<Dayjs>()
+    const [isOpen, setIsOpen] = useState(false);
 
     dayjs.locale("tr");
  
@@ -74,18 +85,16 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             setDoesPressed(false);
        }
     }, [isDone])
-    
-    
       
+
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
+      const [isModalOpen3, setIsModalOpen3] = useState(false)
 
       
       const [isHidden, setIsHidden] = useState<boolean>(true);
       const [form2] = Form.useForm()
-      const [editForm] = Form.useForm();
-      const location = useLocation();
-      const navigate = useNavigate();
+      const [form3] = Form.useForm();
       const axiosPrivate = useAxiosPrivate();
       
 
@@ -133,26 +142,34 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
     };
 
 
-    const deleteIntern = async () =>  {
-
+    const deleteIntern =  () =>  {
         const index = interns.indexOf(intern);
         if (index > -1) { // only splice array when item is found
             interns.splice(index, 1); // 2nd parameter means remove one item only
         };
-
-        if(intern.cv_url !== null){
-           await UploadService.deleteCv(axiosPrivate, intern.cv_url.split("/").pop()!, "cv");
+        try {
+            /*delete while deleting applications
+            if(intern.cv_url !== null){
+                await UploadService.deleteCv(axiosPrivate, intern.cv_url.split("/").pop()!, "cv");
+             }
+     
+             if(intern.photo_url !== null) {
+                 await UploadService.deletePhoto(axiosPrivate, intern.photo_url.split("/").pop()!, "photos");
+             }
+             */
+            InternService.deleteIntern(axiosPrivate, intern);
+     
+            setIntern(undefined);
+ 
+            giveMessage("success", "Intern deleted");
+        } catch (error: any) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              }  else {
+                giveMessage("error", "Error while deleting intern");
+              }
         }
-
-        if(intern.photo_url !== null) {
-            await UploadService.deletePhoto(axiosPrivate, intern.photo_url.split("/").pop()!, "photos");
-        }
-
-        await InternService.deleteIntern(axiosPrivate, intern);
-
         
-        setIntern(undefined);
-        giveMessage("success", "Intern deleted");
     };
    
     const downloadCv =  (event: any) => {
@@ -198,6 +215,23 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         setIsModalOpen2(false);
     };
 
+    //Note modal
+    const showModal3 = () => {
+        setIsModalOpen3(true);
+    };
+    const handleOk3 = (e: any) => {
+        form3.submit();
+    };
+    const handleCancel3 = () => {
+        setIsModalOpen3(false);
+    };
+
+    const onFinish = () => {
+        const formData = form3.getFieldsValue();
+        handleAbsent(formData.note)
+        form3.resetFields();
+    }
+
 
     const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
@@ -206,8 +240,51 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         });
       }
 
+    
+
+    
+
     const dateCellRender = (value: Dayjs) => {
 
+        if (selectedDate && value.isSame(selectedDate)) {
+            return (
+                <div>    
+                <Button //cancel button
+                    type="primary"
+                    icon={<CloseOutlined />}
+                    size='small'
+                    style={{marginLeft: "70%"}}
+                    onClick={() => {
+                        setSelectedDate(undefined);
+                        setIsOpen(false); 
+                    }}
+                    
+                    danger
+                    ghost
+                />
+                <br />           
+                <Button //Present button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    size='small'
+                    onClick={handlePresent}
+                    style={{marginTop: "5px"}}
+                    ghost
+                >Present</Button>
+                <br />
+                <Button //cancel button
+                    type="primary"
+                    icon={<MinusOutlined />}
+                    size='small'
+                    onClick={showModal3}
+                    style={{marginTop: "5px"}}
+                    danger
+                    ghost
+                >Absent</Button>
+                </div>
+            );
+        } 
+        
        if(value.day() === 6 || value.day() === 0 || value.unix() < intern.internship_starting_date ||
         value.isAfter(dayjs(intern.internship_ending_date * 1000)) || value.isAfter(dayjs())) { //if the day is weekend
             return;
@@ -216,8 +293,10 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
 
        if(attendance?.status === "present") {
             return <Badge status='success' text="Present"></Badge>
-       } else{
+       } else if(attendance?.status === "absent") {
             return <Badge status='error' text="Absent"></Badge>
+       } else{
+        return <Badge status="warning" text="Not Taken"></Badge>
        }
     };
 
@@ -226,13 +305,82 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         return info.originNode;
     }
 
+    
+
     const getListData = (value: Dayjs) => {
+        value = value.set("hour", 0).set("minute", 0).set("second", 0);
         let listData;
-        const attendance = attendances?.filter(attendance => {
-            dayjs(attendance.attendance_date * 1000).isSame(value)
-        })[0];
-        
+        const attendance = attendances?.find(attendance => {
+            return dayjs(attendance.attendance_date * 1000).isSame(value, 'day');
+        });
+            
         return attendance;
+    }
+
+    const handleSelectDate = (value: Dayjs) => {
+        if(!value.isSame(selectedDate)) {
+            setSelectedDate(value);
+            setIsOpen(true); // Reset doesPressed to false when selecting a new date
+        } else if (!isOpen && value.isSame(selectedDate)) {
+            setSelectedDate(undefined);
+        }
+        else if(!isOpen) {
+            setSelectedDate(undefined);
+        }  
+    };
+
+    const handlePresent = async () => {
+        try {
+            //Mark Present
+            const date = selectedDate!.set("hour", 0).set("minute", 0).set("second", 0);
+            const newAttendance: Attendance = {
+                intern_id: intern.intern_id!,
+                attendance_date: date.unix(),
+                status: "present"
+            }
+
+            await AttendanceService.addAttendance(axiosPrivate, newAttendance);
+
+            setSelectedDate(undefined);
+            setIsOpen(false);
+            giveMessage("success", "Attendance taken");
+        } catch (error: any) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              }  else {
+                giveMessage("error", "Error while taking attendance");
+              }
+        } finally {
+            getAttendances();
+        }
+    }
+
+    const handleAbsent = async (note: string) => {
+        try {
+            //Mark absent
+            const date = selectedDate!.set("hour", 0).set("minute", 0).set("second", 0);
+            const newAttendance: Attendance = {
+                intern_id: intern.intern_id!,
+                attendance_date: date.unix(),
+                status: "absent",
+                note: note
+            }
+            
+            await AttendanceService.addAttendance(axiosPrivate, newAttendance);
+
+            setSelectedDate(undefined);
+            setIsOpen(false);
+            giveMessage("success", "Attendance taken");
+        } catch (error: any) {
+            if (!error?.response) {
+                giveMessage("error", "No server response");
+              }  else {
+                giveMessage("error", "Error while taking attendance");
+              }
+        } finally {
+            setIsModalOpen3(false);
+            getAttendances();
+        }
     }
 
     return (
@@ -289,11 +437,16 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
 
         <br /><br />
         <h2>Attendance</h2>
-        {/*
+        {/*// Calendar için buton ekle burdan deva et
         value={(intern.internship_starting_date > dayjs().unix()) ? dayjs(intern.internship_starting_date * 1000) : dayjs()}
         */}
         
-        <Calendar  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
+        <Calendar onSelect={handleSelectDate} disabledDate={(date) => {
+            if(date.day() === 6 || date.day() === 0){ //Disable selecting weekends
+                return true;
+            }
+            return false;
+        }} style={{width: "50%", minWidth: "900px"}}  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
         
 
         {/*Modals Here*/}
@@ -305,6 +458,22 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600}>
                  <AddAssignmentForm setDoesPressed={setDoesPressed} intern_id={intern.intern_id!} doesPressed={doesPressed} setIsDone={setIsDone}/>
                  {doesPressed && <LoadingContainer />}
+            </Modal>
+
+            <Modal title="Note" open={isModalOpen3} onOk={handleOk3} onCancel={handleCancel3}>
+                <Form
+                style={{width: 400}}
+                onFinish={onFinish}
+                labelCol={{span: 6}}
+                wrapperCol={{span: 14}}
+                form={form3}
+                >
+                    <Form.Item label="Note" name="note">
+                    <Input.TextArea showCount
+                        maxLength={250}
+                        style={{ height: 100, marginBottom: 10, width: 300}}/>
+                    </Form.Item>
+                </Form>
             </Modal>
 
 

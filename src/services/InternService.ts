@@ -72,20 +72,14 @@ const updateIntern = async (axiosInstance: any, updatedIntern: Intern) => {
 const deleteIntern = async (axiosInstance: any, deletedIntern: Intern) => {
   try {
     const id = deletedIntern.intern_id;
-    const response = await axiosInstance.delete(`/api/interns/${id}`, {
+    await axiosInstance.delete(`/api/interns/${id}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8"
       }
     });
 
-    if (response.status === 200) {
-      console.log("Intern is deleted");
-    } else {
-      console.log("Intern could NOT be deleted!");
-    }
   } catch (error) {
-    console.log("Error: ", error);
-    throw new Error("Error deleting intern.");
+    throw error;
   }
 }
 

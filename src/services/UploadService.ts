@@ -75,13 +75,9 @@ const deleteCv = async (axiosInstance: any, uid: string, from: "garbage" | "cv")
       },
     });
 
-    if (response.status === 200) {
-      console.log("CV is deleted");
-    } else {
-      console.log("CV could NOT be deleted!");
-    }
+    
   } catch (error) {
-    console.log("Error: ", error);
+    throw error;
   }
 }
 
@@ -94,13 +90,10 @@ const deletePhoto = async (axiosInstance: any, uid: string, from: "garbage" | "p
       },
     });
 
-    if (response.status === 200) {
-      console.log("Photo is deleted");
-    } else {
-      console.log("Photo could NOT be deleted!");
-    }
+    
   } catch (error) {
     console.log("Error: ", error);
+    throw error;
   }
 }
 

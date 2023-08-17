@@ -12,6 +12,7 @@ import { Assignment } from "../models/Assignment";
 import AssignmentService from "../services/AssignmentService";
 import { NoticeType } from "antd/es/message/interface";
 import { Attendance } from "../models/Attendance";
+import AttendanceService from "../services/AttendanceService";
 
 
 const InternsPage = () => {
@@ -135,9 +136,25 @@ const InternsPage = () => {
   const getAssignments = async () => {
     try {
       const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, selectedIntern?.intern_id!);
-      const attendance: Attendance  [] = [];
+
       setAssignments(assignmentsData);
-      setAttendance(attendance);
+
+
+    } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while fetchind data");
+        }
+    }
+    
+  }
+
+  const getAttendances = async () => {
+    try {
+      const attendancesData = await AttendanceService.getAttendances(axiosPrivate, selectedIntern?.intern_id!)
+      
+      setAttendance(attendancesData);
 
     } catch (error: any) {
         if (!error?.response) {
@@ -208,7 +225,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        {selectedIntern && <CVComponent setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
+        {selectedIntern && <CVComponent getAttendances={getAttendances} setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
       </div>
 
       <br />

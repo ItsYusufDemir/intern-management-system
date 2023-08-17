@@ -240,38 +240,74 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
  
 
   const handlePhotoUpload = async (options: any) => {
-    const url = await UploadService.uploadPhoto(axiosPrivate, options);
-    setPhoto_url(url);
+    try {
+      const url = await UploadService.uploadPhoto(axiosPrivate, options);
+      setPhoto_url(url);
+    } catch (error:any) {
+      if (!error?.response) {
+        giveMessage("error", "No server response");
+      }  else {
+        giveMessage("error", "Error while uploading photo");
+      }
+    }
+    
   }
 
   const handleCvUpload = async (options: any) => {
-    const url = await UploadService.uploadCv(axiosPrivate, options);
-    setCv_url(url);
+    try {
+      const url = await UploadService.uploadCv(axiosPrivate, options);
+      setCv_url(url);
+    } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while fetchind data");
+        }
+    }
+    
   }
 
   const handleCancelCvUpload = async (file: any) => {
-    if(intern) { //If we are in edit mode
-      await UploadService.deleteCv(axiosPrivate, intern.cv_url!.split("/").pop()!, "cv");
-      setCvList([]);
-      intern.cv_url = null;
-      await InternService.updateIntern(axiosPrivate, intern);
+    try {
+      if(intern) { //If we are in edit mode
+        await UploadService.deleteCv(axiosPrivate, intern.cv_url!.split("/").pop()!, "cv");
+        setCvList([]);
+        intern.cv_url = null;
+        await InternService.updateIntern(axiosPrivate, intern);
+      }
+      else{
+        await UploadService.deleteCv(axiosPrivate, cv_url!.split("/").pop()!, "garbage");
+      }
+    } catch (error:any ) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while canceling upload");
+        }
     }
-    else{
-      await UploadService.deleteCv(axiosPrivate, cv_url!.split("/").pop()!, "garbage");
-    }
+    
       
   }
 
   const handleCancelPhotoUpload = async (file: any) => {
-    if(intern) { //If we are in edit mode
-      UploadService.deletePhoto(axiosPrivate, intern.photo_url!.split("/").pop()!, "photos");
-      setPhotoList([]);
-      intern.photo_url = null;
-      await InternService.updateIntern(axiosPrivate, intern);
+    try {
+      if(intern) { //If we are in edit mode
+        UploadService.deletePhoto(axiosPrivate, intern.photo_url!.split("/").pop()!, "photos");
+        setPhotoList([]);
+        intern.photo_url = null;
+        await InternService.updateIntern(axiosPrivate, intern);
+      }
+      else{
+        UploadService.deletePhoto(axiosPrivate, photo_url!.split("/").pop()!, "garbage");
+      }
+    } catch (error:any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        }  else {
+          giveMessage("error", "Error while canceling upload");
+        }
     }
-    else{
-      UploadService.deletePhoto(axiosPrivate, photo_url!.split("/").pop()!, "garbage");
-    }
+    
     
   }
 
