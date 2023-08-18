@@ -175,7 +175,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
               return a.deadline! - b.deadline!; // Compare timestamps
             }, 
             sortDirections: ['descend', 'ascend'],
-            defaultSortOrder: "descend",
+            defaultSortOrder: "ascend",
             ellipsis: true,
             render: (deadline: number | null, record) => {
               if (deadline) {

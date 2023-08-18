@@ -28,6 +28,7 @@ import { NoticeType } from 'antd/es/message/interface';
 import useAuth from '../../utils/useAuth';
 import ApplicationService from '../../services/ApplicationsService';
 import { min } from 'moment';
+import LocaleDetector from '../LocalDetecor';
 
 
 const { RangePicker } = DatePicker;
@@ -385,7 +386,9 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
         </Form.Item>
         
         <Form.Item label="Birthday" name="birthday" rules={[{ required: true, message: "Birthday is required" }]}>
+          <LocaleDetector>
           <DatePicker format="DD-MM-YYYY" />
+          </LocaleDetector>
         </Form.Item>
         <Form.Item label="Internship Date" name="internshipDate"  rules={[{ required: true, message: "Internship date is required" }]}>
           <RangePicker format="DD-MM-YYYY"/>
