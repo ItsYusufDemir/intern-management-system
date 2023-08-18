@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message, Calendar, ConfigProvider, Badge } from 'antd';
+import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message, Calendar, ConfigProvider, Badge, Row, Col, Tooltip } from 'antd';
 import {Intern} from "../models/Intern";
 import {DownloadOutlined,
         DeleteOutlined,
@@ -30,10 +30,15 @@ import { NoticeType } from 'antd/es/message/interface';
 import dayjs, { Dayjs } from 'dayjs';
 import type { CellRenderInfo } from 'rc-picker/lib/interface';
 import "dayjs/locale/tr";
-import locale from "antd/locale/tr_TR";
 import { Attendance } from '../models/Attendance';
 import AttendanceService from '../services/AttendanceService';
+import moment from 'moment';
+import LocaleDetector from './LocalDetecor';
+import { SpecialDay } from '../models/SpecialDay';
 
+
+const browserLocale = navigator.language;
+moment.locale(browserLocale);
 
 // TODO: Handle Download Cv,
 
@@ -46,10 +51,11 @@ interface PropType {
     getAssignments: () => void,
     assignments: Assignment [] | undefined;
     attendances: Attendance [] | undefined; 
+    specialDays: SpecialDay [];
     getAttendances: () => void,
 }
 
-const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances, getAttendances}) => {
+const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances, getAttendances, specialDays}) => {
     
 
     const [form] = Form.useForm();
@@ -58,8 +64,9 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
     const [doesPressed, setDoesPressed] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Dayjs>()
     const [isOpen, setIsOpen] = useState(false);
+    var workingDays: number [] = [];
 
-    dayjs.locale("tr");
+    
  
     const handleUpdateValue = () => {
         form.setFieldsValue({
@@ -85,11 +92,21 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             setDoesPressed(false);
        }
     }, [isDone])
+
+    useEffect(() => {
+        if(attendances) {
+            calculateWorkingDays();
+        }
+        
+    },[attendances])
       
 
       const [isModalOpen, setIsModalOpen] = useState(false)
       const [isModalOpen2, setIsModalOpen2] = useState(false)
       const [isModalOpen3, setIsModalOpen3] = useState(false)
+      const [totalNumberOfWorkingDays, setTotalNumberOfWorkingDays ] = useState<number>();
+      const [numberOfAbsenteeism, setNumberOfAbsenteeism ] = useState<number>();
+      const [remainingDays, setRemainingDays ] = useState<number>();
 
       
       const [isHidden, setIsHidden] = useState<boolean>(true);
@@ -118,6 +135,45 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
     //Percentage of complete of internship
     const completePercentage = Math.round(((Date.now() - intern.internship_starting_date * 1000) / 
     (intern.internship_ending_date * 1000 - intern.internship_starting_date * 1000)) * 100);
+
+    const calculateWorkingDays = () => {
+        let workingDays = 0;
+        let absenteeism = 0;
+        let counter = 0;
+
+        let currentDay = dayjs(intern.internship_starting_date * 1000);
+
+        while(currentDay.isBefore(dayjs(intern.internship_ending_date * 1000))) {
+
+            const specialDay: SpecialDay | undefined = specialDays.find(specialDay => {
+                return specialDay.date === currentDay.startOf("day").unix();
+            })
+
+            if(currentDay.day() !== 0 && currentDay.day() !== 6 && !specialDay) {
+                workingDays++;
+
+                if(currentDay.isBefore(dayjs())) {
+                    counter++;
+                }
+            }
+
+            
+
+            attendances?.map(attendance => {
+                if(attendance.attendance_date === currentDay.startOf("day").unix() && attendance.status === "absent") {
+                    absenteeism++;
+                }
+            })
+
+            currentDay = currentDay.add(1, "day");
+        }
+
+        setTotalNumberOfWorkingDays(workingDays);
+        setNumberOfAbsenteeism(absenteeism);
+        setRemainingDays(workingDays - counter);
+    }
+
+    
     
     
 
@@ -246,7 +302,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
 
     const dateCellRender = (value: Dayjs) => {
 
-        if (selectedDate && value.isSame(selectedDate)) {
+        if (selectedDate && value.isSame(selectedDate)) { 
             return (
                 <div>    
                 <Button //cancel button
@@ -284,17 +340,29 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
                 </div>
             );
         } 
+
+        const specialDay: SpecialDay | undefined = specialDays.find(specialDay => {
+            return specialDay.date === value.startOf("day").unix();
+        })
+
+
+        
+        if(specialDay) {
+            return <Badge status="default" text={specialDay.title} />
+        }
+        
         
        if(value.day() === 6 || value.day() === 0 || value.unix() < intern.internship_starting_date ||
         value.isAfter(dayjs(intern.internship_ending_date * 1000)) || value.isAfter(dayjs())) { //if the day is weekend
             return;
        }
-       const attendance = getListData(value);
 
+       const attendance = getListData(value);
+       
        if(attendance?.status === "present") {
             return <Badge status='success' text="Present"></Badge>
        } else if(attendance?.status === "absent") {
-            return <Badge status='error' text="Absent"></Badge>
+            return <Tooltip title={attendance.note}><Badge status='error' text="Absent" style={{height: "100%", width:"100%"}}></Badge></Tooltip>
        } else{
         return <Badge status="warning" text="Not Taken"></Badge>
        }
@@ -318,7 +386,10 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
     }
 
     const handleSelectDate = (value: Dayjs) => {
-        if(!value.isSame(selectedDate)) {
+        if(value.isAfter(dayjs())) {
+            giveMessage("error", "You cannot take attendance for future dates");
+        }
+        else if(!value.isSame(selectedDate)) {
             setSelectedDate(value);
             setIsOpen(true); // Reset doesPressed to false when selecting a new date
         } else if (!isOpen && value.isSame(selectedDate)) {
@@ -352,6 +423,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
               }
         } finally {
             getAttendances();
+            calculateWorkingDays();
         }
     }
 
@@ -380,6 +452,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         } finally {
             setIsModalOpen3(false);
             getAttendances();
+            calculateWorkingDays();
         }
     }
 
@@ -399,7 +472,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
     
         
 
-        <Descriptions>
+        <Descriptions size='small'>
             <Descriptions.Item label="Name">{intern.first_name + " " + intern.last_name}</Descriptions.Item>
             <Descriptions.Item label="University">{intern.uni}</Descriptions.Item>
             <Descriptions.Item label="Major">{intern.major + " (GPA: " + intern.gpa + ")"}</Descriptions.Item>
@@ -415,18 +488,19 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         </Descriptions>
 
         <div className='Buttons' style={{display: 'flex'}}>
-            <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} size={"large"}>Download CV</Button>
-            <Button  onClick={showModal} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit Intern</Button>
-            <Button  onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete Intern</Button>
+            <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} >Download CV</Button>
+            <Button ghost onClick={showModal} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit</Button>
+            <Button ghost onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete</Button>
         </div>
 
-        <br /><br /><br />
+        <br /><br /><br /><br />
 
-        <h2>Assignments</h2>
+        <Tabs defaultActiveKey='1' size='middle' type='card'>
+        <TabPane tab="Assignments" key="1">
 
         <div className='assignment-table'>
             <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={<Button type='primary' onClick={handleNewAssignment}>New Assignment</Button>}>
-                <TabPane tab="Assignments" key="1">
+                <TabPane tab="Waiting" key="1">
                     {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
                 </TabPane>
                 <TabPane tab="Done" key="2">
@@ -434,20 +508,47 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
                 </TabPane>
             </Tabs>
         </div>
+        </TabPane>
 
-        <br /><br />
-        <h2>Attendance</h2>
-        {/*// Calendar için buton ekle burdan deva et
-        value={(intern.internship_starting_date > dayjs().unix()) ? dayjs(intern.internship_starting_date * 1000) : dayjs()}
-        */}
         
-        <Calendar onSelect={handleSelectDate} disabledDate={(date) => {
-            if(date.day() === 6 || date.day() === 0){ //Disable selecting weekends
-                return true;
-            }
-            return false;
-        }} style={{width: "50%", minWidth: "900px"}}  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
-        
+        <TabPane tab="Attendance" key="2">
+            <div>
+            <Row gutter={16} justify={'center'}>
+                <Col span={5}>
+                    <Card title="Total Working Days" bordered={false} style={{textAlign: "center"}} hoverable>
+                        {totalNumberOfWorkingDays}
+                    </Card>
+                </Col>
+                <Col span={5}>
+                    <Card title="Absenteeism" bordered={false} style={{textAlign: "center"}} hoverable>
+                        {numberOfAbsenteeism}
+                    </Card>
+                </Col>
+                <Col span={5}>
+                    <Card title="Remaining Days" bordered={false} style={{textAlign: "center"}} hoverable>
+                        {remainingDays}
+                    </Card>
+                </Col>
+            </Row>
+            </div>
+            <br />
+            <div className='calendar'>
+            <LocaleDetector>
+            <Calendar onSelect={handleSelectDate} disabledDate={(date) => {
+                const specialDay = specialDays.find(specialDay => {
+                    return specialDay.date === date.startOf("day").unix();
+                })
+                if(date.day() === 6 || date.day() === 0 || specialDay){ //Disable selecting weekends
+                    return true;
+                }
+                return false;
+            }} style={{margin: "15px"}}  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
+            </LocaleDetector>
+            </div>
+
+            
+        </TabPane>
+        </Tabs>
 
         {/*Modals Here*/}
         <div>

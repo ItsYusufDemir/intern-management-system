@@ -13,6 +13,8 @@ import AssignmentService from "../services/AssignmentService";
 import { NoticeType } from "antd/es/message/interface";
 import { Attendance } from "../models/Attendance";
 import AttendanceService from "../services/AttendanceService";
+import { SpecialDay } from "../models/SpecialDay";
+import dayjs from "dayjs";
 
 
 const InternsPage = () => {
@@ -28,9 +30,14 @@ const InternsPage = () => {
     const [attendance, setAttendance] = useState<Attendance []>();
     const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
     const [selectedIntern, setSelectedIntern] = useState<Intern>();
+    const [specialDays, setSpecialDays] = useState<SpecialDay []>();
     const [form] = Form.useForm();
     let counter = -1;
 
+
+    const browserLocale = navigator.language.toLowerCase();
+
+    
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
       try {
@@ -39,6 +46,35 @@ const InternsPage = () => {
 
         const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
+
+        var local: string;
+        var holidayCheck: string;
+        if(browserLocale.startsWith("tr")){
+          local = "tr.turkish";
+          holidayCheck = "Resmi tatil"
+        } else{
+          local = "en.usa";
+          holidayCheck = "Public holiday"
+        }
+        const specialDaysData = await AttendanceService.getSpecialDays(local, dayjs().year());
+        const specialDaysArray = specialDaysData.items;
+
+        const newSpecialDays: SpecialDay [] = [] 
+        specialDaysArray.map((specialDay: any) => {
+          if(specialDay.description === holidayCheck) {
+            const title =  specialDay.summary;
+            const date = dayjs(specialDay.start.date).unix();
+
+            const newSpecialDay: SpecialDay = {
+              title: title,
+              date: date,
+            };
+
+            newSpecialDays.push(newSpecialDay);
+          }
+        })
+
+        setSpecialDays(newSpecialDays); 
 
       } catch (error: any) {
         if (!error?.response) {
@@ -82,15 +118,15 @@ const InternsPage = () => {
 
     useEffect(() => {
       if(!isLoading)
-        console.log(interns, teams);
+        console.log(interns, teams, specialDays);
     }, [isLoading])
 
     
     useEffect(() => {
-      if(teams && interns) {
+      if(teams && interns && specialDays) {
         setIsLoading(false);
       }
-    }, [teams, interns])
+    }, [teams, interns, specialDays])
     
 
   
@@ -129,6 +165,7 @@ const InternsPage = () => {
   useEffect(() => {
     if(selectedIntern) {
       getAssignments();
+      getAttendances();
     }
   }, [selectedIntern]);
 
@@ -136,6 +173,7 @@ const InternsPage = () => {
   const getAssignments = async () => {
     try {
       const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, selectedIntern?.intern_id!);
+      
 
       setAssignments(assignmentsData);
 
@@ -154,6 +192,7 @@ const InternsPage = () => {
     try {
       const attendancesData = await AttendanceService.getAttendances(axiosPrivate, selectedIntern?.intern_id!)
       
+
       setAttendance(attendancesData);
 
     } catch (error: any) {
@@ -225,7 +264,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        {selectedIntern && <CVComponent getAttendances={getAttendances} setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
+        {selectedIntern && <CVComponent specialDays={specialDays!} getAttendances={getAttendances} setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
       </div>
 
       <br />

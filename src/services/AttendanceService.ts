@@ -1,3 +1,4 @@
+import axios from "../axios";
 import { Attendance } from "../models/Attendance";
 
 
@@ -26,6 +27,19 @@ const getAttendances = async (axiosInstance: any, intern_id: number) => {
     }
 }
 
+const getSpecialDays = async (iso: string, year: number) => { //iso: tr.turkish || en.usa
+    try {
+        const response = await axios.get(`https://www.googleapis.com/calendar/v3/calendars/${iso}%23holiday%40group.v.calendar.google.com/events?key=AIzaSyChuSGkJ96STFxFGYKwEJhRLb5b1w820n4`, {
+            headers: {'Content-Type': 'application/json'},
+        })
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+
 
 
 
@@ -33,6 +47,7 @@ const getAttendances = async (axiosInstance: any, intern_id: number) => {
 const AttendanceService = {
     addAttendance: addAttendance,
     getAttendances: getAttendances,
+    getSpecialDays: getSpecialDays,
 }
 
 export default AttendanceService;
