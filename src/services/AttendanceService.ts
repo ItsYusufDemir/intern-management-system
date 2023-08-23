@@ -29,7 +29,8 @@ const getAttendances = async (axiosInstance: any, intern_id: number) => {
 
 const getSpecialDays = async (iso: string, year: number) => { //iso: tr.turkish || en.usa
     try {
-        const response = await axios.get(`https://www.googleapis.com/calendar/v3/calendars/${iso}%23holiday%40group.v.calendar.google.com/events?key=AIzaSyChuSGkJ96STFxFGYKwEJhRLb5b1w820n4`, {
+        console.log(process.env.REACT_APP_API_KEY);
+        const response = await axios.get(`https://www.googleapis.com/calendar/v3/calendars/${iso}%23holiday%40group.v.calendar.google.com/events?key=${process.env.REACT_APP_API_KEY}`, {
             headers: {'Content-Type': 'application/json'},
         })
         console.log(response.data);

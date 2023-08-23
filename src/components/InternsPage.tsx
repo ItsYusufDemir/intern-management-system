@@ -217,6 +217,7 @@ const InternsPage = () => {
       <>
       {isLoading ? <Loading /> :
       <>
+      <br />
       <div className="intern-page-selections" style={{display: "flex"}}>
       <Form layout="vertical" form={form}>
           <Row gutter={100}>

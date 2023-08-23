@@ -13,16 +13,21 @@ import { NoticeType } from 'antd/es/message/interface';
 import { Team } from '../../models/Team';
 import TeamService from '../../services/TeamService';
 import AddTeamForm from '../forms/AddTeamForm';
+import { Intern } from '../../models/Intern';
 
 interface ChildProps {
     teams: Team [];
-    getData: () => void;
+    interns?: Intern [];
+    getData?: () => void;
+    isDashboard?: boolean;
 }
 
 
 type DataIndex = keyof Team;
 
-const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
+const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns}) => {
+
+    console.log(teams);
 
 
     const [searchText, setSearchText] = useState('');
@@ -164,6 +169,59 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
         },
       ];
 
+
+      const columnsDashboard: ColumnsType<Team> = [
+        {
+          title: 'Team Name',
+          dataIndex: 'team_name',
+          key: 'team_name',
+          width: '30%',
+          ...getColumnSearchProps('team_name'),
+          sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
+          sortDirections: ['descend', 'ascend'],
+          defaultSortOrder: "ascend",
+          ellipsis: true
+        },
+        {
+          title: 'Supervisor(s)',
+          key: 'supervisors',
+          width: '30%',
+          ...getColumnSearchProps('team_name'),
+          //sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
+          //sortDirections: ['descend', 'ascend'],
+          //defaultSortOrder: "ascend",
+          ellipsis: true,
+          render: (record) => {
+            return (<>
+              {record.supervisors?.map((supervisor: string) => {
+                        return(
+                            <>
+                            {supervisor && <span>{supervisor +"\n"} </span>}
+                            </>
+                        )
+                    })}
+            </>)
+          }
+        },
+        {
+          title: 'Number of Interns',
+          key: 'number_of_interns',
+          width: '30%',
+          ...getColumnSearchProps('team_name'),
+          //sorter: (a, b) => a.team_name.localeCompare(b.team_name), // Corrected sorting function
+          //sortDirections: ['descend', 'ascend'],
+          //defaultSortOrder: "ascend",
+          //
+          ellipsis: true,
+          render: (record) => {
+            return (
+              <span>{interns?.filter(intern => intern.team_id === record.team_id).length}</span>
+            )
+          }
+        },
+        
+      ];
+
       
 
 
@@ -173,7 +231,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
 
           giveMessage("success", "Team deleted");
           
-          getData();
+          getData!();
         } catch (error: any) {
           if (!error?.response) {
             giveMessage("error", "No server response");
@@ -216,7 +274,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
         if(isDone) {
              setIsModalOpen(false);
              
-             getData();
+             getData!();
              
              setIsDone(false);
              setDoesPressed(false);
@@ -227,10 +285,10 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData}) => {
 
     return (
         <>
-            <Table columns={columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
+            <Table size='middle' columns={isDashboard ? columnsDashboard : columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
 
             <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddTeamForm setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} team={team} getData={getData} />
+              <AddTeamForm setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} team={team} getData={getData!} />
             </Modal>
 
         </>

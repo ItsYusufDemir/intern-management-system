@@ -253,7 +253,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
 
     return (
           <>
-            <Table columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
+            <Table size='middle' columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
        
             <Modal title="Edit User" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
               <AddUserForm doesPressed={doesPressed} setIsDone={setIsDone} setDoesPressed={setDoesPressed} teams={teams} userToUpdate={user} getData={getData}/>

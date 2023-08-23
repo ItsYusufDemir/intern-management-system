@@ -27,8 +27,7 @@ const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => 
         }));
         return internsData;
       } catch (error) {
-          console.error("Error fetching intern data:", error);
-          return undefined;
+          throw error;
       }
 }
 

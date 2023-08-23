@@ -23,12 +23,13 @@ interface ChildProps {
     assignments: Assignment[];
     getAssignments: () => void;
     refetchData: () => void;
+    readonly?: boolean;
 }
 
 
 type DataIndex = keyof Assignment;
 
-const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAssignments}) => {
+const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAssignments, readonly}) => {
 
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
@@ -215,16 +216,16 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
               if (grade) {
                 return <span >{grade}</span>;
               } else {
-                return <Button onClick={ () => handleGrade(record)}>Grade</Button> ;
+                return readonly ? <></> : <Button onClick={ () => handleGrade(record)}>Grade</Button> ;
               }
             }
         },
-        {
+        ...(readonly ? [] : [ {
           title: 'Action',
           dataIndex: '',
           key: 'x',
           width: '15%',
-          render: (_, record) => (
+          render: (record: any) => (
             <Space size="middle">
               <Button onClick={() => handleUpdateAssignment(record)}>Update</Button>
 
@@ -237,7 +238,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
               </Popconfirm>
              </Space>
           ),
-        },
+        }])
       ];
 
       
@@ -332,7 +333,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
 
     return (
         <>
-            <Table columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 400}} pagination={{hideOnSinglePage: true}}/>
+            <Table size="middle" columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 400}} pagination={{hideOnSinglePage: true}}/>
 
             <Modal title="Edit Assignment" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={600}>
               <AddAssignmentForm setDoesPressed={setDoesPressed} doesPressed={doesPressed} assignment={assignment} setIsDone={setIsDone} />

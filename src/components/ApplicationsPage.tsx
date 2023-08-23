@@ -7,7 +7,7 @@ import ApplicationService from "../services/ApplicationsService";
 import Loading from "./Loading";
 import TeamService from "../services/TeamService";
 import { NoticeType } from "antd/es/message/interface";
-import { Tabs, message } from "antd";
+import { Button, Popconfirm, Tabs, message } from "antd";
 import TabPane from "antd/es/tabs/TabPane";
 
 const Applications = () => {
@@ -82,6 +82,22 @@ const Applications = () => {
       });
     };
 
+    const emptyArchieve = async ()  => {
+      try {
+        await ApplicationService.emptyArchieve(axiosPrivate);
+        
+        giveMessage("success", "Archieve emptied");
+      } catch (error: any) {
+        if (!error?.response) {
+          giveMessage("error", "No server response");
+        } else {
+          giveMessage("error", "Error while emptying archieve!");
+        }
+      } finally {
+          refetchData();
+      }
+    }
+
 
 
     return (
@@ -90,11 +106,21 @@ const Applications = () => {
         <h2>Intern Applications</h2>
 
         <div className='applications-table'>
-            <Tabs defaultActiveKey='1' size='middle' >
+            <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={
+              <Popconfirm
+              title="Empty Archieve"
+              description="Are you sure to delete all archieved applications?"
+              onConfirm={emptyArchieve}
+              okText="Yes"
+              cancelText="No"
+              >
+              <Button type='primary' danger>Emtyp Archieve</Button>
+              </Popconfirm>
+            }>
                 <TabPane tab="Waiting" key="1">
                   <InternApplicationsTable applications={applications!.filter(application => application.application_status === "waiting")} refetchData={refetchData} teams={teams!}/>
                 </TabPane>
-                <TabPane tab="Archive" key="2">
+                <TabPane tab="Archive" key="2" >
                   <InternApplicationsTable applications={applications!.filter(application => application.application_status === "accepted" || application.application_status === "rejected" )} refetchData={refetchData} teams={teams!}/>
                 </TabPane>
             </Tabs>

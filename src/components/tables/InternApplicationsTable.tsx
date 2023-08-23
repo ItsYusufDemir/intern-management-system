@@ -1,6 +1,6 @@
 import { SearchOutlined, QuestionCircleOutlined, DeleteOutlined, CheckOutlined, CloseOutlined} from '@ant-design/icons';
 import React, { useEffect, useRef, useState } from 'react';
-import type { InputRef } from 'antd';
+import type { InputRef, Pagination } from 'antd';
 import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnType, ColumnsType } from 'antd/es/table';
 import type { FilterConfirmProps, SorterResult } from 'antd/es/table/interface';
@@ -158,7 +158,7 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
           ...getColumnSearchProps('first_name'),
           ellipsis: true,
           render: (text, record) => (
-            <span style={{cursor: "pointer", color: "blue"}} onClick={() => viewProfile(record)}>
+            <span style={{cursor: "pointer", color: "blue", fontWeight: "bold"}} onClick={() => viewProfile(record)}>
                 {`${record.first_name} ${record.last_name}`}
             </span>
           ),
@@ -296,16 +296,6 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
 
               </>
               
-
-              {/*
-              <Popconfirm
-              title="Are you sure to delete this application?"
-              icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
-              onConfirm={() => handleDeleteApplication(record)}
-              >
-                <Button type="primary" danger ghost icon={<DeleteOutlined />}></Button>
-              </Popconfirm>
-              */}
              </Space>
           ),
         },
@@ -367,24 +357,7 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
       
       }
 
-      const handleDeleteApplication = async (application: Intern) => {
-        
-        try {
-          await ApplicationService.deleteApplication(axiosPrivate, application.application_id!);
-
-          
-          giveMessage("success", "Application deleted");
-        } catch (error: any) {
-          if (!error?.response) {
-            giveMessage("error", "No server response");
-          } else {
-            giveMessage("error", "Error while deleting application!");
-          }
-        } finally {
-            refetchData();
-        }
       
-      }
 
       const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
@@ -412,9 +385,9 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
     return (
         <>
             
-            <Table columns={columns} dataSource={applications} style={{ top: "0"}} scroll={{y: 1000}}/>
+            <Table size='middle' columns={columns} dataSource={applications} style={{ top: "0"}} scroll={{y: 1000}} pagination={{pageSize: 5}} />
 
-            <Modal title="View Profile" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={"50%"}>
+            <Modal title="View Profile" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={"70%"}>
                 <InternProfile intern={intern} teams={teams} apply={true}/>
             </Modal>
             

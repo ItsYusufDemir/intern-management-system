@@ -91,7 +91,7 @@ const InternProfile: React.FC<PropType> = ({intern, teams, apply}) => {
         </Descriptions>
 
         <div className='Buttons' style={{display: 'flex'}}>
-            <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} size={"large"}>Download CV</Button>
+            <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} size={"middle"}>Download CV</Button>
         </div>
         </>
       );

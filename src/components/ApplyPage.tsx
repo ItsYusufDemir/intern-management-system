@@ -5,11 +5,13 @@ import Loading from "./Loading";
 import TeamService from "../services/TeamService";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { Team } from "../models/Team";
+import { Result, Steps } from "antd";
 
 const ApplyPage = () => {
 
     const [teams, setTeams] = useState<Team []>();
     const [isLoading, setIsLoading] = useState(true);
+    const [isDone, setIsDone] = useState<boolean>(false);
     const axiosPrivate = useAxiosPrivate();
 
      // GET ALL DATA FROM DATABASE
@@ -30,6 +32,10 @@ const ApplyPage = () => {
         }
       }, [teams])
 
+    if(isLoading) {
+        return <Loading /> 
+    }
+
 
     return (
         <>
@@ -39,19 +45,31 @@ const ApplyPage = () => {
             <h1 style={{color: "white"}}>Apply Internship</h1>
         </Header>
 
-        <div style={{ margin: "auto", boxShadow: "rgba(0,0,0,0.25) 0 25px 50px -12px" ,background: "white", width: "600px", borderRadius: "10px"}}>
-            <h1 style={{alignItems: "center", justifyContent: "center", display: "flex"}}>Application Form</h1>
-            {isLoading ? <Loading /> :
-            <>
-            <br /><br />
-            <div style={{alignItems: "center", display: "flex", justifyContent: "center"}}>
-                <InternAddingForm teams={teams!} apply={true}/>
-             </div>
-            </>
-             }
+        
+
+        {!isDone && <>
+
+            
+
+        <div style={{ margin: "auto", boxShadow: "rgba(0,0,0,0.25) 0 25px 50px -12px" ,background: "white", width: "900px", borderRadius: "10px"}}>     
+            
+            <InternAddingForm setIsDone={setIsDone} teams={teams!} apply={true}/>
         </div>
 
+
+
+
+        </>}
+
         </div>
+
+        {isDone && <div>
+            <Result
+            status="success"
+            title="You have successfully applied!"
+            subTitle="We will inform you by email, do not forget to check your spam folder!"
+            />
+        </div>}
         
         </>
       );
