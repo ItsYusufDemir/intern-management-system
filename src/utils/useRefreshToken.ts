@@ -17,6 +17,7 @@ const useRefreshToken = () => {
 
             setAuth(
                 {
+                    user_id: response.data.user_id,
                     username: response.data.username,
                     accessToken:response.data.accessToken,
                     role: response.data.role,
@@ -24,11 +25,15 @@ const useRefreshToken = () => {
                  })
             return response.data.accessToken; 
         } catch (error) {
-            console.log(error);
+
             setAuth(null);
-            navigate("/login", { state: { from: location}, replace: true})
-            giveMessage("error", "Session expired, please login")
+
+            if (location.pathname !== "/login") {
+                await navigate("/login", { state: { from: location }, replace: true });
+                giveMessage("error", "Session expired, please login");
+            }
             
+            throw new Error("Refresh token expired");
         }
         
     }

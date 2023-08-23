@@ -14,7 +14,7 @@ function Login() {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || "/";
+    const from = location.state?.from?.pathname || (auth.role === 1984 ? "/interns" : "/");
 
 
     const [form] = Form.useForm();
@@ -36,7 +36,7 @@ function Login() {
     const login = async () => {
         const formValues = form.getFieldsValue();
 
-        console.log(formValues.username, formValues.password);
+
         const user: User = {
             username:formValues.username,
             password: formValues.password,
@@ -46,12 +46,12 @@ function Login() {
             const response = await UserService.login(axiosPrivate, user);
 
             if(response.accessToken !== undefined) {
+                const user_id = response.user_id;
                 const role = response.role;
                 const accessToken = response.accessToken;
                 const username = user.username;
     
-                console.log("role:", role,"access: ", accessToken);
-                setAuth({username, pwd, role, accessToken});
+                setAuth({user_id, username, pwd, role, accessToken});
                 giveMessage("success", "Login successfull");
                 navigate(from, {replace: true});
 

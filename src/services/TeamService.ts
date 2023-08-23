@@ -12,14 +12,12 @@ const getTeams = async (axiosInstance: any): Promise<Team[]> => {
         const teamsData: Team[] = data.map((team: any) => ({
           ...team,
           team_id: parseInt(team.team_id),
-          overall_success: parseFloat(team.team_success),
         }));
 
-
+        console.log("team", teamsData);
         return teamsData;
       } catch (error) {
-        console.error("Error fetching team data:", error);
-        throw new Error("Failed to fetch team data.");
+        throw error;
       }
 }
 

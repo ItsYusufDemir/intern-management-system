@@ -204,15 +204,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             interns.splice(index, 1); // 2nd parameter means remove one item only
         };
         try {
-            /*delete while deleting applications
-            if(intern.cv_url !== null){
-                await UploadService.deleteCv(axiosPrivate, intern.cv_url.split("/").pop()!, "cv");
-             }
-     
-             if(intern.photo_url !== null) {
-                 await UploadService.deletePhoto(axiosPrivate, intern.photo_url.split("/").pop()!, "photos");
-             }
-             */
+            
             InternService.deleteIntern(axiosPrivate, intern);
      
             setIntern(undefined);
@@ -386,6 +378,11 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
     }
 
     const handleSelectDate = (value: Dayjs) => {
+
+        if(auth.role !== 1984) {
+            return;
+        }
+
         if(value.isAfter(dayjs())) {
             giveMessage("error", "You cannot take attendance for future dates");
         }
@@ -489,8 +486,8 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
 
         <div className='Buttons' style={{display: 'flex'}}>
             <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} >Download CV</Button>
-            <Button ghost onClick={showModal} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit</Button>
-            <Button ghost onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete</Button>
+            {auth.role === 5150 && <Button ghost onClick={showModal} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit</Button>}
+            {auth.role === 5150 && <Button ghost onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete</Button>}
         </div>
 
         <br /><br /><br /><br />
@@ -499,12 +496,12 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         <TabPane tab="Assignments" key="1">
 
         <div className='assignment-table'>
-            <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={<Button type='primary' onClick={handleNewAssignment}>New Assignment</Button>}>
+            <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={auth.role === 1984 ? <Button type='primary' onClick={handleNewAssignment}>New Assignment</Button> : <></>}>
                 <TabPane tab="Waiting" key="1">
-                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
+                    {!assignments ? <Loading /> : <AssignmentTable readonly={auth.role === 1984 ? false : true} getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
                 </TabPane>
                 <TabPane tab="Done" key="2">
-                    {!assignments ? <Loading /> : <AssignmentTable getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => assignment.complete)}/>}
+                    {!assignments ? <Loading /> : <AssignmentTable readonly={auth.role === 1984 ? false : true} getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => assignment.complete)}/>}
                 </TabPane>
             </Tabs>
         </div>
@@ -552,11 +549,11 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
 
         {/*Modals Here*/}
         <div>
-            <Modal title="Edit" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+            <Modal title="Edit" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={"800px"} okButtonProps={{style: {display: "none"}}} cancelButtonProps={{style: {display: "none"}}}>
                  <InternAddingForm teams={teams} intern={intern} setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} />
             </Modal>
 
-            <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600}>
+            <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600} footer={null}>
                  <AddAssignmentForm setDoesPressed={setDoesPressed} intern_id={intern.intern_id!} doesPressed={doesPressed} setIsDone={setIsDone}/>
                  {doesPressed && <LoadingContainer />}
             </Modal>

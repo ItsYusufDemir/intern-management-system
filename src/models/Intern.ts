@@ -13,7 +13,7 @@ export interface Intern {
   grade: number | null;
   gpa: number | null;
   team_id: number;
-  birthday?: number
+  birthday: number
   internship_starting_date: number;
   internship_ending_date: number;
   cv_url: string | null;

@@ -4,12 +4,14 @@ import {
   Cascader,
   Checkbox,
   DatePicker,
+  Divider,
   Form,
   Input,
   InputNumber,
   Radio,
   Select,
   Slider,
+  Steps,
   Switch,
   TreeSelect,
   Upload,
@@ -32,15 +34,6 @@ import LocaleDetector from '../LocalDetecor';
 
 
 const { RangePicker } = DatePicker;
-
-
-const normFile = (e: any) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
-
 let isFormUpdated = false;
 
 
@@ -66,16 +59,14 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
 
   const [cv_url, setCv_url] = useState<string | null>();
   const [photo_url, setPhoto_url] = useState<string | null>();
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const onFinish = (e: any) => {
+  const onFinish = (formValues: any) => {
 
-    const formValues = form.getFieldsValue();
-
-    const start = formValues.internshipDate[0].set("hour", 0).set("minute", 0).set("second", 0);
-    const end = formValues.internshipDate[1].set("hour", 23).set("minute", 59).set("second", 59);
+    const start = formValues.internshipDate[0].startOf("day");
+    const end = formValues.internshipDate[1].startOf("day");
 
     
-
     const newIntern: Intern = {
       intern_id: intern ? intern.intern_id : undefined,
       first_name: formValues.first_name,
@@ -144,9 +135,8 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
     try {
       await ApplicationService.addApplication(newIntern);
       
-      giveMessage("success", "You applied successfully");
       form.resetFields();
-      navigate(0);
+      setIsDone!(true);
     } catch (error: any) {
       if (!error?.response) {
         giveMessage("error","No server response");
@@ -326,20 +316,39 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
     }
   }
 
-  
-  return (
 
-    <>
-      <Form
-        layout="horizontal"
-        style={{ maxWidth: 400 }}
-        onFinish={onFinish}
-        labelCol={{span: 8}}
-        wrapperCol={{span: 14}}
-        onFinishFailed={handleSubmitFailed}
-        form={form}>
-          
+  const handleNext = async () => {
+      try {
+        await form.validateFields()
+        setCurrentStep(currentStep + 1);
+      } catch (error) {
         
+      }
+  }
+
+  const handlePrevious = () => {
+    setCurrentStep(currentStep - 1);
+  }
+
+  const submitForm = async () => {
+    try {
+      await form.validateFields();
+
+      const formData = form.getFieldsValue(true);
+      onFinish(formData);
+    } catch (error) {
+      console.log(error);
+      giveMessage("error", "Fill the required parts of the form");
+    }
+  }
+
+
+  const formSections = [
+    {
+      title: "Personal Information",
+      fields: (
+        <>
+
         <Form.Item label="Name" name="first_name" rules={[{ required: true, message: "Name is required" }]}>
           <Input required/>
         </Form.Item>
@@ -358,6 +367,17 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
         <Form.Item label="Tel" name="phone_number" rules={[{ required: true, message: "Tel is required" }]} >
           <Input />
         </Form.Item>
+        
+        <Form.Item label="Birthday" name="birthday" rules={[{ required: true, message: "Birthday is required" }]}>
+          <DatePicker format="DD-MM-YYYY" />
+        </Form.Item>
+        </>
+      )
+    },
+    {
+      title: "Educational Information",
+      fields: (
+        <>
         <Form.Item label="University" name="uni"  rules={[{ required: true, message: "University is required" }]}>
           <Input />
         </Form.Item>
@@ -385,16 +405,18 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
             </Select>
         </Form.Item>
         
-        <Form.Item label="Birthday" name="birthday" rules={[{ required: true, message: "Birthday is required" }]}>
-          <LocaleDetector>
-          <DatePicker format="DD-MM-YYYY" />
-          </LocaleDetector>
-        </Form.Item>
+        
         <Form.Item label="Internship Date" name="internshipDate"  rules={[{ required: true, message: "Internship date is required" }]}>
           <RangePicker format="DD-MM-YYYY"/>
         </Form.Item>
-        
-        
+        </>
+      )
+    },
+    {
+      title: "Uploads",
+      fields: (
+        <>
+        <div style={{marginLeft: "100px"}}>
         <Form.Item  >
           <Upload customRequest={handleCvUpload} fileList={intern?.cv_url ? cvList : undefined}  listType="picture-card" accept='.pdf,.docx,doc'maxCount={1} onRemove={handleCancelCvUpload}>
             <div>
@@ -411,11 +433,75 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
             </div>
           </Upload>
         </Form.Item>
+        </div>
+        </>
+      )
+    }
+  ]
+
   
-        {!intern && <Form.Item wrapperCol={{span: 24}}>
+  return (
+
+    <>
+      <div style={{height: "500px"}}>
+      <br /><br />  
+      <Steps
+        current={currentStep}
+        items={[
+          {
+                title: 'Personal Information',
+          },
+          {
+                title: 'Educational Information',
+          },
+          {
+            title: 'Uploads',
+          },
+        ]}
+        style={{width: "80%", margin: "auto"}}
+      />
+      <br /><br />
+
+      
+      <div style={{height: "350px"}}>
+      <Form
+        layout="horizontal"
+        style={{maxWidth: "500px"}}
+        onFinish={onFinish}
+        labelCol={{span: 8}}
+        wrapperCol={{span: 14}}
+        onFinishFailed={handleSubmitFailed}
+        form={form}>
+          {formSections[currentStep].fields}
+        
+        
+        
+        
+        
+        
+        {/*!intern && <Form.Item wrapperCol={{span: 24}}>
             <div><Button   htmlType='submit' type='primary' block>{intern ? (<>Edit Intern</>) : (apply ? <>Apply</> : <>Add Intern</>)}</Button></div>
-        </Form.Item>}
+      </Form.Item>*/}
+        
       </Form>
+      </div>
+
+      <div style={{display: "block", height: "50px", width: "100%"}}>
+        {currentStep <= formSections.length - 1 && currentStep > 0 &&
+        <Button ghost onClick={handlePrevious} type='primary' style={{left: "30px", marginBottom: "30px"}}>Previous</Button>
+        }
+
+        {currentStep < formSections.length - 1 &&
+        <Button ghost onClick={handleNext} type='primary' style={{float: "right", marginRight: "30px"}}>Next</Button>
+        }
+
+        {currentStep === formSections.length - 1 &&
+        <Button onClick={submitForm} type='primary' style={{float: "right", marginRight: "30px"}}>{intern ? <>Edit</> : <>Submit</>}</Button>
+        }
+      
+      </div>
+
+      </div>
     </>
   );
 };

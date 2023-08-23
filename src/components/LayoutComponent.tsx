@@ -4,16 +4,19 @@ import {
   TeamOutlined,
   SettingOutlined,
   PoweroffOutlined,
+  BellOutlined,
+  BellFilled,
 } from '@ant-design/icons';
 import "../styles.css";
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation, Outlet } from "react-router-dom";
 import {Team} from "../models/Team";
-import { Menu, theme, type MenuProps, Layout, Space, Button, message } from 'antd';
+import { Menu, theme, type MenuProps, Layout, Space, Button, message, Badge, Avatar, FloatButton, Popover, List, notification } from 'antd';
 import UserService from '../services/UserService';
-import { axiosPrivate } from '../axios';
 import { NoticeType } from 'antd/es/message/interface';
 import useAuth from '../utils/useAuth';
 import useAxiosPrivate from '../utils/useAxiosPrivate';
+import NotificationService from '../services/NotificationService';
+import { Notification } from '../models/Notification';
 
 
 var teams: Team[] = [];
@@ -51,7 +54,34 @@ const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
 const location = useLocation();
 const {auth}: any = useAuth();
-const [username, setUsername] = useState("");
+const [notifications, setNotifications] = useState<Notification []>();
+const axiosPrivate = useAxiosPrivate();
+
+
+const getData = async () => {
+  try {
+    const notificationsData: Notification [] = await NotificationService.getNotifications(axiosPrivate, auth.user_id);
+    setNotifications(notificationsData);
+  } catch (error:any) {
+    if (!error?.response) {
+      giveMessage("error", "No server response");
+    }  else {
+      giveMessage("error", "Error while fetchind data");
+    }
+  }
+}
+
+useEffect(() => {
+  getData()
+  console.log(auth);
+},[auth])
+
+useEffect(() => {
+    if(notifications) {
+      console.log(notifications);
+    }
+}, [notifications])
+
 
 
 const getSelectedkey = () => {
@@ -93,7 +123,6 @@ useEffect(() => {
   ];
 
   const supervisorItems: MenuItem[] = [
-    getItem('Home', '/', <HomeOutlined />),
     getItem('Interns', '/interns', <TeamOutlined />),
     getItem('Change Password', '/change-password', <TeamOutlined />),
   ];
@@ -145,6 +174,22 @@ useEffect(() => {
     });
   };
 
+  const handleSeen = async () => {
+    try {
+      await NotificationService.handleSeen(axiosPrivate, auth.user_id);
+      
+      setNotifications(prevNotifications => {
+        return prevNotifications?.map(notification => {
+            return { ...notification, is_seen: true };
+        });
+    });
+      
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
 
 
   return (
@@ -179,7 +224,47 @@ useEffect(() => {
         </Sider>
         <Layout style={{marginLeft: 200, marginTop: 0,}}>
           
-          <header className='header'><h1 className='header-title' style={{marginLeft: "20px"}}>{title}</h1></header>
+          <header className='header'>
+            <h1 className='header-title' style={{marginLeft: "20px"}}>{title}</h1>
+
+            <div className='notifications'>
+
+            <Popover placement="bottomRight" content={
+              <>
+                {<List
+                header="Notifications"
+                bordered
+                style={{width: "600px"}}
+                itemLayout="horizontal"
+                dataSource={notifications?.map(notification => notification.content)}
+                renderItem={(item) => (
+                    <List.Item>{item}</List.Item>
+                )}
+            ></List>}
+              </>
+            } trigger="click">
+
+
+              <div style={{position: "absolute", right: "50px", top: "50px"}}>
+              <Badge size='small' offset={[-5,10]} count={notifications?.filter(notification => notification.is_seen === false).length}>
+                <Button
+                  icon={<BellOutlined />}
+                  onClick={handleSeen}
+                  size='large'
+                  ghost
+                  style={{border: "none"}}
+                 
+                  />
+              </Badge>
+              </div>
+            
+            </Popover>
+               
+                
+
+              
+            </div>
+          </header>
 
 
           <Content className='content'>

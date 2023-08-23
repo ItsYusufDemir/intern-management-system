@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Select, Space, Table, message, theme } from "antd";
+import { Button, Divider, Form, Input, Modal, Select, Space, Table, message, theme } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserService from "../services/UserService";
@@ -112,6 +112,7 @@ const AddPage = () => {
             </div>
         </Space>
 
+        <Divider />
 
         {/*Add Team*/}
         <h2>Add Team</h2>

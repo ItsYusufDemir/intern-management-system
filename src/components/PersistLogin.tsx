@@ -15,7 +15,7 @@ const PersistLogin = () => {
             try {
                 await refresh();
             } catch (error) {
-                console.log(error);
+                
             }
             finally{
                 setIsLoading(false);
@@ -23,7 +23,7 @@ const PersistLogin = () => {
         }
 
         !auth?.accessToken ? verifyRefreshToken() : setIsLoading(false);
-    }, [])
+    }, [auth?.accessToken, refresh])
 
     return(
         <>
