@@ -4,7 +4,7 @@ import { Intern } from "../models/Intern";
 
 const addApplication = async (application: Intern) => {
     try {
-        const response = await axios.post("/api/applications", application, {
+        await axios.post("/api/applications", application, {
             headers: {'Content-Type': 'application/json'},
             withCredentials: true,
         })
@@ -15,10 +15,7 @@ const addApplication = async (application: Intern) => {
 
 const getApplications = async (axiosInstance: any) => {
     try {
-        const response = await axiosInstance.get('/api/applications', {
-          headers: {'Content-Type': 'application/json'},
-          withCredentials: true,
-        });
+        const response = await axiosInstance.get('/api/applications');
         
         return response.data;
       } catch (error: any) {
@@ -29,10 +26,7 @@ const getApplications = async (axiosInstance: any) => {
 
 const acceptApplication = async (axiosInstance: any, application_id: number) => {
     try {
-        await axiosInstance.post(`/api/applications/accept/${application_id}`, {
-            headers: {'Content-Type': 'application/json'},
-            withCredentials: true,
-        })
+        await axiosInstance.post(`/api/applications/accept/${application_id}`)
     } catch (error) {
         throw error;
     }
@@ -40,10 +34,7 @@ const acceptApplication = async (axiosInstance: any, application_id: number) => 
 
 const rejectApplication = async (axiosInstance: any, application_id: number) => {
     try {
-        await axiosInstance.post(`/api/applications/reject/${application_id}`, {
-            headers: {'Content-Type': 'application/json'},
-            withCredentials: true,
-        })
+        await axiosInstance.post(`/api/applications/reject/${application_id}`)
     } catch (error) {
         throw error;
     }
@@ -52,6 +43,14 @@ const rejectApplication = async (axiosInstance: any, application_id: number) => 
 const emptyArchieve = async (axiosInstance: any) => {
     try {
         await axiosInstance.delete("/api/applications");
+    } catch (error) {
+        throw error;
+    }
+}
+
+const deleteApplication = async (axiosInstance: any, application_id: number) => {
+    try {
+        await axiosInstance.delete(`/api/applications/${application_id}`);
     } catch (error) {
         throw error;
     }
@@ -66,6 +65,7 @@ const ApplicationService = {
     acceptApplication: acceptApplication,
     rejectApplication: rejectApplication,
     emptyArchieve: emptyArchieve,
+    deleteApplication: deleteApplication,
 }
 
 export default ApplicationService;

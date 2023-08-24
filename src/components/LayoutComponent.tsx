@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState } from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 import {
   HomeOutlined,
   TeamOutlined,
@@ -6,17 +6,19 @@ import {
   PoweroffOutlined,
   BellOutlined,
   BellFilled,
+  SmileOutlined,
 } from '@ant-design/icons';
 import "../styles.css";
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation, Outlet } from "react-router-dom";
 import {Team} from "../models/Team";
-import { Menu, theme, type MenuProps, Layout, Space, Button, message, Badge, Avatar, FloatButton, Popover, List, notification } from 'antd';
+import { Menu, Image, theme, type MenuProps, Layout, Space, Button, message, Badge, Avatar, FloatButton, Popover, List, notification, Divider, Result } from 'antd';
 import UserService from '../services/UserService';
 import { NoticeType } from 'antd/es/message/interface';
 import useAuth from '../utils/useAuth';
 import useAxiosPrivate from '../utils/useAxiosPrivate';
 import NotificationService from '../services/NotificationService';
 import { Notification } from '../models/Notification';
+import dayjs from 'dayjs';
 
 
 var teams: Team[] = [];
@@ -61,7 +63,7 @@ const axiosPrivate = useAxiosPrivate();
 const getData = async () => {
   try {
     const notificationsData: Notification [] = await NotificationService.getNotifications(axiosPrivate, auth.user_id);
-    setNotifications(notificationsData);
+    processNotifications(notificationsData);
   } catch (error:any) {
     if (!error?.response) {
       giveMessage("error", "No server response");
@@ -82,6 +84,31 @@ useEffect(() => {
     }
 }, [notifications])
 
+const processNotifications = (notificationsData: Notification []) => {
+
+  //Handle day for ending internship notifications
+  notificationsData?.map(notification => {
+    if(notification.type_code === 2) {
+
+      const endingDay = dayjs(notification.timestamp * 1000);
+      const today = dayjs().startOf("day");
+
+      let dayText = "";
+        if (endingDay.isSame(today, "day")) {
+          dayText = "today";
+        } else if (endingDay.isSame(today.add(1, "day"), "day")) {
+          dayText = "tomorrow";
+        } else {
+          dayText = endingDay.format("dddd");
+        }
+      notification.content = notification.content + dayText;
+    }
+  })
+
+
+
+  setNotifications(notificationsData);
+}
 
 
 const getSelectedkey = () => {
@@ -176,7 +203,7 @@ useEffect(() => {
 
   const handleSeen = async () => {
     try {
-      await NotificationService.handleSeen(axiosPrivate, auth.user_id);
+      //await NotificationService.handleSeen(axiosPrivate, auth.user_id);
       
       setNotifications(prevNotifications => {
         return prevNotifications?.map(notification => {
@@ -191,13 +218,23 @@ useEffect(() => {
   }
 
 
+  const addAccessToken = (url: string) => {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}access_token=${auth.accessToken}`;
+}
+
+
 
   return (
 
       <>
       <Layout style={{ minHeight: '98vh' }}>
         <Sider style={{ height: '100vh', position: 'fixed', left: 0, top: 0 }}>
-          <div className="logo-area"><h1 className='logo' style={{color: "white"}}>LOGO</h1></div>
+
+          <div className="logo-area" style={{marginLeft: "25px"}}>
+            <Image width={150} height={150} style={{}} preview={false}
+            src={addAccessToken("http://localhost:5000/uploads/photos/issd_logo.png")} />  
+          </div>
           
           <Menu theme="dark" defaultSelectedKeys={['/']} mode="inline" items={items} selectedKeys={[seletctedKey]}  onClick={({key}) => {
               navigate(key);
@@ -231,16 +268,26 @@ useEffect(() => {
 
             <Popover placement="bottomRight" content={
               <>
-                {<List
-                header="Notifications"
-                bordered
+                <Divider orientation='center'>Notifications</Divider>
+
+                {notifications?.length !== 0 && <List
                 style={{width: "600px"}}
                 itemLayout="horizontal"
                 dataSource={notifications?.map(notification => notification.content)}
                 renderItem={(item) => (
                     <List.Item>{item}</List.Item>
                 )}
-            ></List>}
+               />}
+
+               {notifications?.length === 0 && 
+                <Result
+                icon={<SmileOutlined />}
+                title="You don't have any notifications"
+              />
+               }
+
+
+            
               </>
             } trigger="click">
 

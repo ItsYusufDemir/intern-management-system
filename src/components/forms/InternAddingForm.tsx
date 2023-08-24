@@ -21,7 +21,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import {Intern} from "../../models/Intern";
 import { Team } from '../../models/Team';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import InternService from '../../services/InternService';
 import UploadService from "../../services/UploadService";
 import { useNavigate } from 'react-router-dom';
@@ -407,7 +407,19 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
         
         
         <Form.Item label="Internship Date" name="internshipDate"  rules={[{ required: true, message: "Internship date is required" }]}>
-          <RangePicker format="DD-MM-YYYY"/>
+          <RangePicker disabledDate={(value: Dayjs) => {
+              if(intern) {
+                if(value.isBefore(dayjs(intern.internship_starting_date * 1000))) {
+                  return true;
+                }
+                return false;
+              }
+              if(value.isBefore(dayjs())) {
+                return true;
+              }
+              return false;
+          }} 
+          format="DD-MM-YYYY"/>
         </Form.Item>
         </>
       )
@@ -452,7 +464,7 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
                 title: 'Personal Information',
           },
           {
-                title: 'Educational Information',
+                title: 'Education',
           },
           {
             title: 'Uploads',
@@ -496,7 +508,7 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
         }
 
         {currentStep === formSections.length - 1 &&
-        <Button onClick={submitForm} type='primary' style={{float: "right", marginRight: "30px"}}>{intern ? <>Edit</> : <>Submit</>}</Button>
+        <Button onClick={submitForm} type='primary' style={{float: "right", marginRight: "30px"}}>{intern ? <>Update</> : (apply ? <>Submit</> : <>Add Intern</>)}</Button>
         }
       
       </div>

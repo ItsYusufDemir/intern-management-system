@@ -88,6 +88,8 @@ const InternProfile: React.FC<PropType> = ({intern, teams, apply}) => {
             " (" + findInternshipPeriod(intern.internship_starting_date, intern.internship_ending_date) + " Weeks)"}
             </Descriptions.Item>
             <Descriptions.Item label="E-mail">{intern.email}</Descriptions.Item>
+            <Descriptions.Item label="Personal ID">{intern.id_no}</Descriptions.Item>
+            <Descriptions.Item label="Tel">{intern.phone_number}</Descriptions.Item>
         </Descriptions>
 
         <div className='Buttons' style={{display: 'flex'}}>

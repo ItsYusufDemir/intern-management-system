@@ -22,6 +22,7 @@ import { Intern } from '../../models/Intern';
 import CVComponent from '../CVComponent';
 import InternProfile from '../InternProfile';
 import ApplicationService from '../../services/ApplicationsService';
+import dayjs from 'dayjs';
 
 interface ChildProps {
     applications: Intern[];
@@ -274,23 +275,39 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
               
               <>
 
-              {record.application_status !== "accepted" && <Popconfirm
+              {record.application_status === "waiting" && <Popconfirm
               title="Are you sure to accept?"
               icon={<QuestionCircleOutlined style={{ color: 'blue' }}/>}
               onConfirm={() => handleAcceptApplication(record)}
+              okText="Yes"
+              cancelText="No"
               >
                 <Tooltip title="Accept">
                   <Button icon={<CheckOutlined />} type='primary' ghost></Button>
                 </Tooltip>
               </Popconfirm>}
 
-              {record.application_status !== "rejected" && <Popconfirm
+              {record.application_status === "waiting" && <Popconfirm
               title="Are you sure to reject?"
               icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
               onConfirm={() => handleRejectApplication(record)}
+              okText="Yes"
+              cancelText="No"
               >
                 <Tooltip title="Reject">
                   <Button icon={<CloseOutlined />} type='primary' ghost danger></Button>
+                </Tooltip>
+              </Popconfirm>}
+
+              {<Popconfirm
+              title="Are you sure to delete?"
+              icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
+              onConfirm={() => handleDeleteApplication(record)}
+              okText="Yes"
+              cancelText="No"
+              >
+                <Tooltip title="Delete">
+                  <Button icon={<DeleteOutlined />} type='primary' ghost danger></Button>
                 </Tooltip>
               </Popconfirm>}
 
@@ -313,11 +330,11 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
 
       const handleAcceptApplication = async (application: Intern) => {
 
-        if(application.application_status === "accepted"){
-          giveMessage("warning", "Application has already been accepted");
+        if(dayjs(intern?.internship_ending_date).isAfter(dayjs())){
+          giveMessage("error", "Applicant's internship date passed");
           return;
         }
-         
+
         try {
             await ApplicationService.acceptApplication(axiosPrivate, application.application_id!);
   
@@ -335,11 +352,6 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
       }
 
       const handleRejectApplication = async (application: Intern) => {
-
-        if(application.application_status === "rejected"){
-          giveMessage("warning", "Application has already been accepted");
-          return;
-        }
         
         try {
           await ApplicationService.rejectApplication(axiosPrivate, application.application_id!);
@@ -356,6 +368,24 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
         }
       
       }
+      
+      const handleDeleteApplication = async (application: Intern) => {
+
+        try {
+          await ApplicationService.deleteApplication(axiosPrivate, application.application_id!);
+          
+          giveMessage("success", "Application deleted");
+        } catch (error: any) {
+          if (!error?.response) {
+            giveMessage("error", "No server response");
+          } else {
+            giveMessage("error", "Error while deleting application!");
+          }
+        } finally {
+            refetchData();
+        }
+      
+      } 
 
       
 

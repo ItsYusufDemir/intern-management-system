@@ -100,7 +100,10 @@ const AddPage = () => {
     return (
         <>
         {isLoading ? <Loading /> : <>
-        <h2>Add User</h2>
+        
+        <Divider orientation="left">
+                <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Add User</h2>
+        </Divider>
 
         {/*Add User*/}
         <Space align="start">
@@ -112,10 +115,14 @@ const AddPage = () => {
             </div>
         </Space>
 
-        <Divider />
+  
 
         {/*Add Team*/}
-        <h2>Add Team</h2>
+        <Divider orientation="left">
+                <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Add Team</h2>
+        </Divider>
+
+
         <Space align="start">
             <AddTeamForm getData={getData}/>
           
@@ -125,6 +132,8 @@ const AddPage = () => {
         </Space>
 
         </>}
+
+        <br /><br />
         </>
     )
 

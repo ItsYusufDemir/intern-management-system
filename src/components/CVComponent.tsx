@@ -462,7 +462,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
 
         <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  
-            <Progress type="circle" percent={intern.overall_success ? intern.overall_success : 0} format={(percent) => `${percent}% Success`} size={100}></Progress>
+            <Progress style={{marginRight: "15px"}} type="circle" percent={intern.overall_success ? intern.overall_success : 0} format={(percent) => `${percent}% Success`} size={100}></Progress>
         </Space>
 
         <br /><br />
@@ -487,7 +487,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         <div className='Buttons' style={{display: 'flex'}}>
             <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} >Download CV</Button>
             {auth.role === 5150 && <Button ghost onClick={showModal} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit</Button>}
-            {auth.role === 5150 && <Button ghost onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right'}} danger>Delete</Button>}
+            {auth.role === 5150 && <Button ghost onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right', marginRight: "15px"}} danger>Delete</Button>}
         </div>
 
         <br /><br /><br /><br />

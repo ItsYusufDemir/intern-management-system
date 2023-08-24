@@ -8,7 +8,7 @@ import useRefreshToken from "../utils/useRefreshToken";
 import { useFetcher } from "react-router-dom";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import Loading from "./Loading";
-import { Badge, Calendar, List, message } from "antd";
+import { Badge, Calendar, Card, Divider, List, Space, message } from "antd";
 import { NoticeType } from "antd/es/message/interface";
 import TeamTable from "./tables/TeamTable";
 import ApplicationService from "../services/ApplicationsService";
@@ -229,9 +229,34 @@ function HomePage() {
         return (
 
             <>
-            
 
-            <h2>Calendar</h2>
+            <Divider orientation="left">
+                <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Teams</h2>
+            </Divider>
+
+
+            {/*isLoading ? <Loading /> : <TeamTable teams={teams!} interns={interns} isDashboard={true}/>
+            */}
+
+            <Space size={[30, 32]} wrap style={{display: "flex", justifyContent: "center"}}>
+
+                {teams?.map(team => {
+                    const numberOfInterns = interns?.filter(intern => intern.team_id === team.team_id).length;
+                    
+                    return (
+                        <Card title={<div style={{ textAlign: "center", fontSize: "20px" }}>{team.team_name}</div>} bordered={false} style={{ width: "250px"}} hoverable>
+                        <span>Number of Interns: {numberOfInterns}</span><br /><br />
+                        <span>Supervisors: {team.supervisors?.toString()}</span><br />
+                        </Card>
+                    )
+                })}
+            </Space>
+
+            <br /><br />
+            
+            <Divider orientation="left">
+                <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Calendar</h2>
+            </Divider>
             
             <div style={{display: "flex", justifyContent: "center"}}>
             <div style={{width: "85%", border: "2px solid #f0f0f0", borderRadius: "10px"}}>
@@ -243,12 +268,18 @@ function HomePage() {
 
             <br /><br />
 
-            <h2>Teams</h2>
-            {isLoading ? <Loading /> : <TeamTable teams={teams!} interns={interns} isDashboard={true}/>}
             
 
             
- 
+                
+
+
+
+            
+            
+
+            
+            <br /><br /><br />
             </>
         );
     }
