@@ -14,7 +14,6 @@ const getTeams = async (axiosInstance: any): Promise<Team[]> => {
           team_id: parseInt(team.team_id),
         }));
 
-        console.log("team", teamsData);
         return teamsData;
       } catch (error) {
         throw error;
@@ -53,10 +52,10 @@ const updateTeam = async (axiosInstance: any, updatedTeam: Team) => {
   }
 }
 
-const deleteTeam = async (axiosInstance: any, teamName: string) => {
+const deleteTeam = async (axiosInstance: any, team_id: number) => {
   try {
 
-    const response = await axiosInstance.delete(`/api/teams/${teamName}`, {
+    const response = await axiosInstance.delete(`/api/teams/${team_id}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       }

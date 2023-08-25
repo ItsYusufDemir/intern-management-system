@@ -160,7 +160,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns})
               <Popconfirm
               title="Are you sure to delete this team?"
               icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
-              onConfirm={() => handleDeleteTeam(record.team_name)}
+              onConfirm={() => handleDeleteTeam(record.team_id!)}
               >
                 <Button type="primary" danger>Delete</Button>
               </Popconfirm>
@@ -225,9 +225,9 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns})
       
 
 
-      const handleDeleteTeam = async (teamName: string) => {
+      const handleDeleteTeam = async (team_id: number) => {
         try {
-          const response = await TeamService.deleteTeam(axiosPrivate, teamName);
+          const response = await TeamService.deleteTeam(axiosPrivate, team_id);
 
           giveMessage("success", "Team deleted");
           
@@ -235,8 +235,11 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns})
         } catch (error: any) {
           if (!error?.response) {
             giveMessage("error", "No server response");
-          } else {
-            giveMessage("error", "Login failed!");
+          } else if (error.response.status === 403) {
+            giveMessage("error", "Team is used by some interns, cannot delete");
+          }
+           else {
+            giveMessage("error", "Deletion failed!");
           }
         }
       

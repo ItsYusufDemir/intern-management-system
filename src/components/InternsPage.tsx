@@ -15,6 +15,7 @@ import { Attendance } from "../models/Attendance";
 import AttendanceService from "../services/AttendanceService";
 import { SpecialDay } from "../models/SpecialDay";
 import dayjs from "dayjs";
+import useAuth from "../utils/useAuth";
 
 
 const InternsPage = () => {
@@ -32,6 +33,7 @@ const InternsPage = () => {
     const [selectedIntern, setSelectedIntern] = useState<Intern>();
     const [specialDays, setSpecialDays] = useState<SpecialDay []>();
     const [form] = Form.useForm();
+    const {auth}: any = useAuth();
     let counter = -1;
 
 
@@ -173,11 +175,7 @@ const InternsPage = () => {
   const getAssignments = async () => {
     try {
       const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, selectedIntern?.intern_id!);
-      
-
       setAssignments(assignmentsData);
-
-
     } catch (error: any) {
         if (!error?.response) {
           giveMessage("error", "No server response");
@@ -191,8 +189,6 @@ const InternsPage = () => {
   const getAttendances = async () => {
     try {
       const attendancesData = await AttendanceService.getAttendances(axiosPrivate, selectedIntern?.intern_id!)
-      
-
       setAttendance(attendancesData);
 
     } catch (error: any) {
@@ -227,9 +223,21 @@ const InternsPage = () => {
                 showSearch
                 optionFilterProp="children"
                 placeholder="Select a team" >
-                    {teams!.map((team,index) => (
-                      <Select.Option key={index} value={index}>{team.team_name}</Select.Option>
-                    ))}
+                    {teams!.map((team,index) => {
+
+                      if(auth.role === 1984) {
+                        return (
+                          team.team_id === auth.team_id && <Select.Option key={index} value={index}>{team.team_name}</Select.Option>
+                        )
+                      } else {
+                        return (
+                          <Select.Option key={index} value={index}>{team.team_name}</Select.Option>
+                        )
+                      }
+                      
+                      
+                      
+                    })}
                 </Select>
               </Form.Item>
             </Col>

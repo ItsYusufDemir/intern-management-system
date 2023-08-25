@@ -21,7 +21,7 @@ const useRefreshToken = () => {
                     username: response.data.username,
                     accessToken:response.data.accessToken,
                     role: response.data.role,
-
+                    team_id: response.data.team_id,
                  })
             return response.data.accessToken; 
         } catch (error) {

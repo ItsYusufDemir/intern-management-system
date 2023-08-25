@@ -21,8 +21,8 @@ import { useForm } from 'antd/es/form/Form';
 
 interface ChildProps {
     assignments: Assignment[];
-    getAssignments: () => void;
-    refetchData: () => void;
+    getAssignments?: () => void;
+    refetchData?: () => void;
     readonly?: boolean;
 }
 
@@ -47,8 +47,8 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
     useEffect(() => {
         if(isDone){
           setIsModalOpen(false);
-          getAssignments();
-          refetchData();
+          getAssignments!();
+          refetchData!();
           setIsDone(false);
           setDoesPressed(false);
         }
@@ -322,8 +322,8 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
         } catch (error: any) {
           
         } finally {
-          getAssignments();
-          refetchData();
+          getAssignments!();
+          refetchData!();
           setIsModalOpen2(false);
         }
         

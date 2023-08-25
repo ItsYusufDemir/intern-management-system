@@ -66,6 +66,7 @@ const Applications = () => {
         setTeams(teamsData);
 
       } catch (error: any) {
+        console.log(error);
         if (!error?.response) {
           giveMessage("error", "No server response");
         }  else {
@@ -103,13 +104,19 @@ const Applications = () => {
     return (
       <>
         {isLoading ? <Loading /> : <>
-        <h2>Intern Applications</h2>
+
+        <br />
 
         <div className='applications-table'>
             <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={
               <Popconfirm
               title="Empty Archieve"
-              description="Are you sure to delete all archieved applications?"
+              description={
+              <>
+              <span>Are you sure to delete all archieved applications?</span><br />
+              <span style={{fontWeight: "bold"}}>Warning!</span><span> Current working interns could not be deleted.</span>
+              </>
+            }
               onConfirm={emptyArchieve}
               okText="Yes"
               cancelText="No"

@@ -27,7 +27,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
 
     
     const userNameErrorMessage = "Username must start with a letter and be 3 to 23 characters long, containing only letters, digits, underscores, and hyphens.";
-    const passwordErrorMessage = "Password must contain at least one lowercase letter, at least one uppercase letter, at least one digit (0-9), at least one special character (!@#$%), and be 8 to 24 characters in length.";
+    const passwordErrorMessage = "Password must be between 8 and 24 characters in length and contain at least one letter and one digit."
 
     const navigate = useNavigate();
     const [form] = Form.useForm();
@@ -185,7 +185,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
                 name="password"
                 rules={[{ required: true,
                     message: passwordErrorMessage,
-                    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/ }]}
+                    pattern: /^(?=.*[a-zA-Z])(?=.*\d).{8,24}$/ }]}
                     hasFeedback
                 >
                     <Input.Password onChange={(e) => setPwd(e.target.value)}/>
