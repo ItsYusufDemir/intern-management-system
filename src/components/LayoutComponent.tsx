@@ -7,6 +7,7 @@ import {
   BellOutlined,
   BellFilled,
   SmileOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
 import "../styles.css";
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation, Outlet } from "react-router-dom";
@@ -19,6 +20,7 @@ import useAxiosPrivate from '../utils/useAxiosPrivate';
 import NotificationService from '../services/NotificationService';
 import { Notification } from '../models/Notification';
 import dayjs from 'dayjs';
+import { type } from 'os';
 
 
 var teams: Team[] = [];
@@ -51,11 +53,13 @@ const matchInterns = useMatch("/interns");
 const matchAddIntern = useMatch("/add-intern");
 const matchAddPage = useMatch("/add");
 const matchInternApplications = useMatch("/intern-applications");
+const matchChangePassword = useMatch("/change-password");
+const matchMyProfile = useMatch("/profile");
 //add for other new links
 const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
 const location = useLocation();
-const {auth}: any = useAuth();
+const {auth, setAuth}: any = useAuth();
 const [notifications, setNotifications] = useState<Notification []>();
 const axiosPrivate = useAxiosPrivate();
 
@@ -66,6 +70,7 @@ const getData = async () => {
     processNotifications(notificationsData);
   } catch (error:any) {
     if (!error?.response) {
+      console.log(error);
       giveMessage("error", "No server response");
     }  else {
       giveMessage("error", "Error while fetchind data");
@@ -78,11 +83,7 @@ useEffect(() => {
   console.log(auth);
 },[auth])
 
-useEffect(() => {
-    if(notifications) {
-      console.log(notifications);
-    }
-}, [notifications])
+
 
 const processNotifications = (notificationsData: Notification []) => {
 
@@ -120,8 +121,13 @@ const getSelectedkey = () => {
   }
   else if (matchAddPage) {
     setSelectedKey("/add");
-  } else if (matchInternApplications) {
+  } else if (matchChangePassword) {
+    setSelectedKey("/change-password");
+  }
+  else if (matchInternApplications) {
     setSelectedKey("/intern-applications");
+  } else if (matchMyProfile) {
+    setSelectedKey("/profile");
   }
   else {
     setSelectedKey("/");
@@ -145,18 +151,18 @@ useEffect(() => {
     getItem('Tools', 'sub1', <SettingOutlined />, [
       getItem("Add User/Team", "/add"),
       getItem("Add Intern", "/add-intern"),
+      getItem("Change Password", "/change-password"),
     ]),
-    getItem('Change Password', '/change-password', <TeamOutlined />),
   ];
 
   const supervisorItems: MenuItem[] = [
     getItem('Interns', '/interns', <TeamOutlined />),
-    getItem('Change Password', '/change-password', <TeamOutlined />),
+    getItem('Change Password', '/change-password', <KeyOutlined />),
   ];
 
   const internItems: MenuItem[] = [
-    getItem('My Profile', '/', <HomeOutlined />),
-    getItem('Change Password', '/change-password', <TeamOutlined />),
+    getItem('My Profile', '/profile', <HomeOutlined />),
+    getItem('Change Password', '/change-password', <KeyOutlined />),
   ];
 
 
@@ -229,7 +235,7 @@ useEffect(() => {
 
       <>
       <Layout style={{ minHeight: '98vh' }}>
-        <Sider style={{ height: '100vh', position: 'fixed', left: 0, top: 0 }}>
+        <Sider style={{ height: '100vh', position: 'fixed', left: 0, top: 0, zIndex: 999 }}>
 
           <div className="logo-area" style={{marginLeft: "25px"}}>
             <Image width={150} height={150} style={{}} preview={false}
@@ -245,7 +251,7 @@ useEffect(() => {
 
           <div className='logout-area' style={{backgroundColor:"#163851", height: "50px", position: "absolute", bottom: "0%", width: "200px", zIndex: 99, display: "inline-block"}}>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "5px" }}>
-              <span style={{fontSize: "25px", fontWeight: "initial", color: "white", marginLeft: "5px"}}>{auth.username}</span>
+              <span style={{fontSize: "20px", fontWeight: "initial", color: "white", marginLeft: "5px"}}>{auth.username}</span>
               <Button
                 type="primary"
                 icon={<PoweroffOutlined />}
@@ -290,7 +296,6 @@ useEffect(() => {
             
               </>
             } trigger="click">
-
 
               <div style={{position: "absolute", right: "50px", top: "50px"}}>
               <Badge size='small' offset={[-5,10]} count={notifications?.filter(notification => notification.is_seen === false).length}>

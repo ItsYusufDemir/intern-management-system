@@ -19,11 +19,6 @@ const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => 
           gpa: parseFloat(intern.gpa),
           team_id: parseInt(intern.team_id),
           overall_success: intern.overall_success ? parseFloat(intern.overall_success) : null,
-          /*
-          birthday: new Date(intern.birthday),
-          internship_starting_date: new Date(intern.internship_starting_date),
-          internship_ending_date: new Date(intern.internship_ending_date),
-          */
         }));
         return internsData;
       } catch (error) {
@@ -81,6 +76,24 @@ const deleteIntern = async (axiosInstance: any, deletedIntern: Intern) => {
     throw error;
   }
 }
+const getIntern = async (axiosInstance: any, username: number) => {
+  try {
+
+    const response = await axiosInstance.get(`/api/interns/${username}`);
+    const intern = response.data;
+
+    intern.intern_id = parseInt(intern.intern_id);
+    intern.grade = parseInt(intern.grade);
+    intern.gpa = parseFloat(intern.gpa);
+    intern.team_id = parseInt(intern.team_id);
+    intern.overall_success = intern.overall_success ? parseFloat(intern.overall_success) : null;
+
+    return response.data;
+
+  } catch (error) {
+    throw error;
+  }
+}
 
 
 
@@ -91,6 +104,7 @@ const InternService  = {
   addIntern: addIntern,
   deleteIntern: deleteIntern,
   updateIntern: updateIntern,
+  getIntern: getIntern,
 }
 
 export default InternService;

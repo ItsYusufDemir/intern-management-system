@@ -8,7 +8,7 @@ import useRefreshToken from "../utils/useRefreshToken";
 import { useFetcher } from "react-router-dom";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import Loading from "./Loading";
-import { Badge, Calendar, Card, Divider, List, Space, message } from "antd";
+import { Badge, Calendar, Card, Divider, List, Space, Statistic, message } from "antd";
 import { NoticeType } from "antd/es/message/interface";
 import TeamTable from "./tables/TeamTable";
 import ApplicationService from "../services/ApplicationsService";
@@ -21,10 +21,6 @@ import useAuth from "../utils/useAuth";
 
 
  
-
-
-
-
 function HomePage() {
 
     const axiosPrivate = useAxiosPrivate();
@@ -208,7 +204,6 @@ function HomePage() {
         
 
         if(currentImportantDays) {
-            console.log(currentImportantDays);
             currentImportantDays.map(importantDay => {
                 badges.push(<Badge status="success" text={importantDay.title} />);
             }) 
@@ -244,9 +239,10 @@ function HomePage() {
                     const numberOfInterns = interns?.filter(intern => intern.team_id === team.team_id).length;
                     
                     return (
-                        <Card title={<div style={{ textAlign: "center", fontSize: "20px" }}>{team.team_name}</div>} bordered={false} style={{ width: "250px"}} hoverable>
-                        <span>Number of Interns: {numberOfInterns}</span><br /><br />
-                        <span>Supervisors: {team.supervisors?.toString()}</span><br />
+                        <Card title={<div style={{ textAlign: "center", fontSize: "20px" }}>{team.team_name}</div>} bordered={false} style={{ width: "400px"}} hoverable>
+                        <Statistic title="Number of Interns" value={numberOfInterns} /><br />
+                        <span style={{color: "gray"}}>Supervisors</span><br />
+                        <span>{team.supervisors?.toString()}</span>
                         </Card>
                     )
                 })}

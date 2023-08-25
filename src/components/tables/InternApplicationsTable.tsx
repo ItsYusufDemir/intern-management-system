@@ -23,6 +23,8 @@ import CVComponent from '../CVComponent';
 import InternProfile from '../InternProfile';
 import ApplicationService from '../../services/ApplicationsService';
 import dayjs from 'dayjs';
+import AttendanceService from '../../services/AttendanceService';
+import UploadService from '../../services/UploadService';
 
 interface ChildProps {
     applications: Intern[];
@@ -373,12 +375,23 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
 
         try {
           await ApplicationService.deleteApplication(axiosPrivate, application.application_id!);
+
+          if(application.cv_url !== null){
+            await UploadService.deleteCv(axiosPrivate, application.cv_url.split("/").pop()!, "cv");
+         }
+ 
+         if(application.photo_url !== null) {
+             await UploadService.deletePhoto(axiosPrivate, application.photo_url.split("/").pop()!, "photos");
+         }
           
           giveMessage("success", "Application deleted");
         } catch (error: any) {
           if (!error?.response) {
             giveMessage("error", "No server response");
-          } else {
+          } else if(error.response.status === 403) {
+            giveMessage("error", "Intern is currently working, cannot delete");
+          }
+          else {
             giveMessage("error", "Error while deleting application!");
           }
         } finally {
@@ -417,7 +430,7 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
             
             <Table size='middle' columns={columns} dataSource={applications} style={{ top: "0"}} scroll={{y: 1000}} pagination={{pageSize: 5}} />
 
-            <Modal title="View Profile" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={"70%"}>
+            <Modal title="View Profile" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={"70%"} footer={null}>
                 <InternProfile intern={intern} teams={teams} apply={true}/>
             </Modal>
             

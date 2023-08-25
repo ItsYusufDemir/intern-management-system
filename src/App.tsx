@@ -22,6 +22,8 @@ import Unauthorized from './components/Unauthorized';
 import PersistLogin from './components/PersistLogin';
 import Applications from './components/ApplicationsPage';
 import ApplyPage from './components/ApplyPage';
+import ChangePassword from './components/ChangePassword';
+import MyProfile from './components/MyProfile';
 
 
 const App: React.FC = () => {
@@ -46,7 +48,7 @@ const App: React.FC = () => {
           
           <Route path='/' element={<PersistLogin />}>
               <Route element={<LayoutComponent />}>
-                <Route element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Supervisor]} />}>
+                <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
                   <Route path='/' element={ <HomePage />} />
                 </Route>
 
@@ -65,6 +67,16 @@ const App: React.FC = () => {
                 <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]} />}>
                   <Route path="intern-applications" element={<Applications />} />
                 </Route>
+
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Supervisor, ROLES.Intern]} />}>
+                  <Route path="change-password" element={<ChangePassword />} />
+                </Route>
+
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Supervisor, ROLES.Intern]} />}>
+                  <Route path="profile" element={<MyProfile />} />
+                </Route>
+
+
               </Route>
           </Route>
           

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Checkbox, Form, Input, message } from 'antd';
 import useAuth from '../utils/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -14,18 +14,15 @@ function Login() {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || (auth.role === 1984 ? "/interns" : "/");
+    
+
+    
 
 
     const [form] = Form.useForm();
-
-    const [userName, setUserName] = useState("");
-    const [pwd, setPwd] = useState("");
-
-
-    const [user, setUser] = useState("");
     const axiosPrivate = useAxiosPrivate();
-    const [messageApi, contextHolder] = message.useMessage();
+    const [shouldNavigate, setShouldNavigate] = useState<boolean>();
+  
 
     const onFinish = () => {
         login();    
@@ -50,12 +47,15 @@ function Login() {
                 const role = response.role;
                 const accessToken = response.accessToken;
                 const username = user.username;
+                const team_id = response.team_id;
     
-                setAuth({user_id, username, pwd, role, accessToken});
+                setShouldNavigate(true);
+                setAuth({user_id, username, role, team_id, accessToken});
                 giveMessage("success", "Login successfull");
-                navigate(from, {replace: true});
+                
 
                 form.resetFields();
+                
             }
         } catch (error:any ) {
             if (!error?.response) {
@@ -75,6 +75,27 @@ function Login() {
         });
       };
 
+    useEffect(() => {
+        if(auth && shouldNavigate) {
+
+            var from: string;
+            if(location.state?.from?.pathname) {
+                from = location.state?.from?.pathname;
+            }
+            else if(auth?.role === 1984) {
+                from = "/interns"
+            }
+            else if (auth?.role === 2001) {
+                from = "/profile"
+            }
+            else {
+                from = "/"
+            }
+
+            navigate(from, {replace: true});
+            setShouldNavigate(false);
+        }
+    },[auth])
 
 
     return(

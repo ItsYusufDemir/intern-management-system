@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message, Calendar, ConfigProvider, Badge, Row, Col, Tooltip } from 'antd';
+import { Descriptions, Image, Button, Select, Form, Input, Card, Progress, Space, Modal, Tabs, message, Calendar, ConfigProvider, Badge, Row, Col, Tooltip, Dropdown, MenuProps, Popover, Divider } from 'antd';
 import {Intern} from "../models/Intern";
 import {DownloadOutlined,
         DeleteOutlined,
@@ -7,7 +7,9 @@ import {DownloadOutlined,
         ExclamationCircleFilled,
         CloseOutlined,
         PlusOutlined,
-        MinusOutlined
+        MinusOutlined,
+        DownOutlined,
+        ProfileOutlined,
     } from '@ant-design/icons';
 import AddInternPage from './AddInternPage';
 import { Team } from '../models/Team';
@@ -44,15 +46,15 @@ moment.locale(browserLocale);
 
 interface PropType {
     intern: Intern,
-    setIntern: React.Dispatch<React.SetStateAction<Intern | undefined>>,
+    setIntern?: React.Dispatch<React.SetStateAction<Intern | undefined>>,
     teams: Team [],
-    interns: Intern [],
-    refetchData: () => void,
-    getAssignments: () => void,
+    interns?: Intern [],
+    refetchData?: () => void,
+    getAssignments?: () => void,
     assignments: Assignment [] | undefined;
     attendances: Attendance [] | undefined; 
     specialDays: SpecialDay [];
-    getAttendances: () => void,
+    getAttendances?: () => void,
 }
 
 const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances, getAttendances, specialDays}) => {
@@ -85,8 +87,8 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             setIsModalOpen(false);
             setIsModalOpen2(false);
 
-            refetchData();
-            getAssignments(); 
+            refetchData!();
+            getAssignments!(); 
             
             setIsDone(false);
             setDoesPressed(false);
@@ -199,15 +201,15 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
 
 
     const deleteIntern =  () =>  {
-        const index = interns.indexOf(intern);
+        const index = interns!.indexOf(intern);
         if (index > -1) { // only splice array when item is found
-            interns.splice(index, 1); // 2nd parameter means remove one item only
+            interns!.splice(index, 1); // 2nd parameter means remove one item only
         };
         try {
             
             InternService.deleteIntern(axiosPrivate, intern);
      
-            setIntern(undefined);
+            setIntern!(undefined);
  
             giveMessage("success", "Intern deleted");
         } catch (error: any) {
@@ -419,7 +421,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
                 giveMessage("error", "Error while taking attendance");
               }
         } finally {
-            getAttendances();
+            getAttendances!();
             calculateWorkingDays();
         }
     }
@@ -448,10 +450,12 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
               }
         } finally {
             setIsModalOpen3(false);
-            getAttendances();
+            getAttendances!();
             calculateWorkingDays();
         }
     }
+
+    
 
     return (
 
@@ -474,7 +478,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             <Descriptions.Item label="University">{intern.uni}</Descriptions.Item>
             <Descriptions.Item label="Major">{intern.major + " (GPA: " + intern.gpa + ")"}</Descriptions.Item>
             <Descriptions.Item label="Grade">{intern.grade + ". Grade"}</Descriptions.Item>
-            <Descriptions.Item label="Team">{findTeam(intern).team_name}</Descriptions.Item>
+            <Descriptions.Item label="Team">{findTeam(intern)?.team_name}</Descriptions.Item>
             <Descriptions.Item label="Internship Date">
             {new Date(intern.internship_starting_date * 1000).toLocaleDateString() + " - " + new Date(intern.internship_ending_date * 1000).toLocaleDateString() +
             " (" + findInternshipPeriod(intern.internship_starting_date, intern.internship_ending_date) + " Weeks)"}
@@ -484,11 +488,36 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             <Descriptions.Item label="Tel">{intern.phone_number}</Descriptions.Item>
         </Descriptions>
 
+        <br />
+
+        {auth.role === 5150 && <Popover placement="rightTop" content={
+              <>
+                <div style={{width: "200px"}}>
+                <Button onClick={downloadCv} size='small' type='dashed' block> CV</Button>
+
+                <br /><br />
+                <Button size='small' type="primary" block>Download All</Button>
+                </div>
+              </>
+            } trigger="click" >
+
+              
+                <Button
+                  size='middle'
+                  type='primary'
+                  shape='round'
+                  icon={<ProfileOutlined />}
+                >Documents</Button>
+            
+        </Popover>}
+
         <div className='Buttons' style={{display: 'flex'}}>
-            <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} >Download CV</Button>
+            {auth.role !== 5150 && <Button  onClick={downloadCv} type="primary" shape="round" icon={<DownloadOutlined />} >Download CV</Button>}
             {auth.role === 5150 && <Button ghost onClick={showModal} type="primary" shape="round" icon={<EditOutlined />} style={{marginLeft: 'auto', marginRight: 10}}>Edit</Button>}
             {auth.role === 5150 && <Button ghost onClick={showDeleteConfirm} type="primary" shape="round" icon={<DeleteOutlined />} style={{float: 'right', marginRight: "15px"}} danger>Delete</Button>}
         </div>
+
+        
 
         <br /><br /><br /><br />
 
@@ -553,7 +582,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
                  <InternAddingForm teams={teams} intern={intern} setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} />
             </Modal>
 
-            <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600} footer={null}>
+            <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600}>
                  <AddAssignmentForm setDoesPressed={setDoesPressed} intern_id={intern.intern_id!} doesPressed={doesPressed} setIsDone={setIsDone}/>
                  {doesPressed && <LoadingContainer />}
             </Modal>

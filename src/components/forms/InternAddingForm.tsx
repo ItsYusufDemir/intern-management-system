@@ -409,6 +409,10 @@ const InternAddingForm: React.FC<PropType> = ({intern, teams, doesPressed, setIs
         <Form.Item label="Internship Date" name="internshipDate"  rules={[{ required: true, message: "Internship date is required" }]}>
           <RangePicker disabledDate={(value: Dayjs) => {
               if(intern) {
+                if(value.isAfter(dayjs())){
+                  return false;
+                }
+
                 if(value.isBefore(dayjs(intern.internship_starting_date * 1000))) {
                   return true;
                 }

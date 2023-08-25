@@ -1,6 +1,6 @@
 
 const getNotifications = async (axiosInstance: any, user_id: number) => {
-    console.log(user_id);
+
     try {
         const response = await axiosInstance.get(`/api/notifications/${user_id}`);
 
