@@ -558,6 +558,7 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             </Row>
             </div>
             <br />
+            <div style={{display: "flex", justifyContent: "center"}}>
             <div className='calendar'>
             <LocaleDetector>
             <Calendar onSelect={handleSelectDate} disabledDate={(date) => {
@@ -571,6 +572,8 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
             }} style={{margin: "15px"}}  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
             </LocaleDetector>
             </div>
+            </div>
+            
 
             
         </TabPane>

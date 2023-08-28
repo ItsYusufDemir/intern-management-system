@@ -91,7 +91,7 @@ const processNotifications = (notificationsData: Notification []) => {
   notificationsData?.map(notification => {
     if(notification.type_code === 2) {
 
-      const endingDay = dayjs(notification.timestamp * 1000);
+      const endingDay = dayjs(notification.timestamp! * 1000);
       const today = dayjs().startOf("day");
 
       let dayText = "";
@@ -105,8 +105,9 @@ const processNotifications = (notificationsData: Notification []) => {
       notification.content = notification.content + dayText;
     }
   })
+  console.log(notificationsData);
 
-
+ 
 
   setNotifications(notificationsData);
 }
@@ -209,7 +210,7 @@ useEffect(() => {
 
   const handleSeen = async () => {
     try {
-      //await NotificationService.handleSeen(axiosPrivate, auth.user_id);
+      await NotificationService.handleSeen(axiosPrivate, auth.user_id);
       
       setNotifications(prevNotifications => {
         return prevNotifications?.map(notification => {
@@ -219,7 +220,7 @@ useEffect(() => {
       
 
     } catch (error) {
-      console.log(error);
+        console.log(error);
     }
   }
 
@@ -229,7 +230,35 @@ useEffect(() => {
     return `${url}${separator}access_token=${auth.accessToken}`;
 }
 
+  const handlePopoverVisibleChange = (visible: boolean) => {
+    if (!visible) {
+      handleSeen();
+    }
+  }
 
+  function formatRelativeTime(timestamp: number) {
+    console.log(timestamp);
+    const currentDate = dayjs();
+    const inputDate = dayjs(timestamp * 1000);
+  
+    const diffInSeconds = currentDate.diff(inputDate, 'second');
+    
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 3600) {
+      const diffInMinutes = Math.floor(diffInSeconds / 60);
+      return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+      const diffInHours = Math.floor(diffInSeconds / 3600);
+      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    } else {
+      const diffInDays = Math.floor(diffInSeconds / 86400);
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    }
+  }
+
+
+//<List.Item  style={{background: background, padding: "5px", height: "50px"}}>{item.content}</List.Item>
 
   return (
 
@@ -277,12 +306,19 @@ useEffect(() => {
                 <Divider orientation='center'>Notifications</Divider>
 
                 {notifications?.length !== 0 && <List
-                style={{width: "600px"}}
+                style={{width: "600px", borderRadius: "20px"}}
                 itemLayout="horizontal"
-                dataSource={notifications?.map(notification => notification.content)}
-                renderItem={(item) => (
-                    <List.Item>{item}</List.Item>
-                )}
+                dataSource={notifications?.map(notification => notification)}
+                renderItem={(item) => {
+                  let background = item.is_seen ? "white" : "#c6e2ff"
+                  return (
+                    <div style={{height: "35px", background: background, paddingTop: "20px", paddingLeft: "10px", marginBottom: "2px"}}>
+                      <span>{item.content}</span> <span style={{color: "gray", paddingRight: "10px", float: "right"}}>{formatRelativeTime(item.notification_date)}</span>
+                    </div>
+                    
+                  )  
+                }
+                }
                />}
 
                {notifications?.length === 0 && 
@@ -295,13 +331,12 @@ useEffect(() => {
 
             
               </>
-            } trigger="click">
+            } trigger="click" onVisibleChange={handlePopoverVisibleChange}>
 
               <div style={{position: "absolute", right: "50px", top: "50px"}}>
               <Badge size='small' offset={[-5,10]} count={notifications?.filter(notification => notification.is_seen === false).length}>
                 <Button
                   icon={<BellOutlined />}
-                  onClick={handleSeen}
                   size='large'
                   ghost
                   style={{border: "none"}}

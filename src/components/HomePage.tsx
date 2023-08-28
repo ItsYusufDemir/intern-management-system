@@ -239,10 +239,10 @@ function HomePage() {
                     const numberOfInterns = interns?.filter(intern => intern.team_id === team.team_id).length;
                     
                     return (
-                        <Card title={<div style={{ textAlign: "center", fontSize: "20px" }}>{team.team_name}</div>} bordered={false} style={{ width: "400px"}} hoverable>
+                        <Card title={<div style={{ textAlign: "center", fontSize: "20px" }}>{team.team_name}</div>} bordered={false} style={{ width: "400px", height: "240px"}} hoverable>
                         <Statistic title="Number of Interns" value={numberOfInterns} /><br />
                         <span style={{color: "gray"}}>Supervisors</span><br />
-                        <span>{team.supervisors?.toString()}</span>
+                        <span style={{fontSize: "20px"}}>{team.supervisors?.toString()}</span>
                         </Card>
                     )
                 })}
