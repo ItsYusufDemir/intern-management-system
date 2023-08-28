@@ -62,7 +62,10 @@ h1{
   .calendar {
     border: 1px solid lightgray;
     border-radius: 10px;
-    display: inline-block;
+    display: flex;
+    width: 85%;
+    justify-content: center;
+
   }
 
   .css-dev-only-do-not-override-fpg3f5.ant-table-wrapper .ant-table-thead > tr > th,
