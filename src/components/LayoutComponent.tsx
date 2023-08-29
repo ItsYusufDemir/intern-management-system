@@ -8,6 +8,7 @@ import {
   BellFilled,
   SmileOutlined,
   KeyOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import "../styles.css";
 import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation, Outlet } from "react-router-dom";
@@ -55,6 +56,8 @@ const matchAddPage = useMatch("/add");
 const matchInternApplications = useMatch("/intern-applications");
 const matchChangePassword = useMatch("/change-password");
 const matchMyProfile = useMatch("/profile");
+const matchDocumentRequest = useMatch("/document-request");
+const matchUploadDocument = useMatch("/upload-document");
 //add for other new links
 const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
@@ -127,8 +130,15 @@ const getSelectedkey = () => {
   }
   else if (matchInternApplications) {
     setSelectedKey("/intern-applications");
-  } else if (matchMyProfile) {
+  } 
+  else if (matchMyProfile) {
     setSelectedKey("/profile");
+  } 
+  else if (matchDocumentRequest) {
+    setSelectedKey("/document-request");
+  }
+  else if (matchUploadDocument) {
+    setSelectedKey("/upload-document");
   }
   else {
     setSelectedKey("/");
@@ -153,6 +163,7 @@ useEffect(() => {
       getItem("Add User/Team", "/add"),
       getItem("Add Intern", "/add-intern"),
       getItem("Change Password", "/change-password"),
+      getItem("Document Request", "/document-request"),
     ]),
   ];
 
@@ -163,6 +174,7 @@ useEffect(() => {
 
   const internItems: MenuItem[] = [
     getItem('My Profile', '/profile', <HomeOutlined />),
+    getItem('Upload Document', '/upload-document', <UploadOutlined />),
     getItem('Change Password', '/change-password', <KeyOutlined />),
   ];
 
@@ -256,6 +268,20 @@ useEffect(() => {
       return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
     }
   }
+
+
+  
+  
+function sortByUnseenFirst(a: Notification, b: Notification) {
+  // Sort unseen notifications first
+  if (!a.is_seen && b.is_seen) {
+    return -1;
+  } else if (a.is_seen && !b.is_seen) {
+    return 1;
+  }
+  // Sort by notification_date if both are seen or both are unseen
+  return dayjs(b.notification_date).diff(a.notification_date);
+}
 
 
 //<List.Item  style={{background: background, padding: "5px", height: "50px"}}>{item.content}</List.Item>

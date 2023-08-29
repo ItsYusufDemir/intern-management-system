@@ -95,6 +95,16 @@ const getIntern = async (axiosInstance: any, username: number) => {
   }
 }
 
+const getDocuments = async (axiosInstance: any, intern_id: number) => {
+  try {
+    const response = await axiosInstance.get(`/api/interns/${intern_id}/documents`);
+
+    return response.data;
+  } catch (error) {
+      throw error;
+  }
+}
+
 
 
 
@@ -105,6 +115,7 @@ const InternService  = {
   deleteIntern: deleteIntern,
   updateIntern: updateIntern,
   getIntern: getIntern,
+  getDocuments: getDocuments,
 }
 
 export default InternService;

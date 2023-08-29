@@ -48,9 +48,10 @@ function Login() {
                 const accessToken = response.accessToken;
                 const username = user.username;
                 const team_id = response.team_id;
+                const intern_id = response.intern_id;
     
                 setShouldNavigate(true);
-                setAuth({user_id, username, role, team_id, accessToken});
+                setAuth({user_id, username, role, team_id, accessToken, intern_id});
                 giveMessage("success", "Login successfull");
                 
 
