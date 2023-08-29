@@ -137,7 +137,7 @@ const handleSubmitFailed = () => {
                     <Button  htmlType='submit' type='primary' block>Add Team</Button>
                 </Form.Item>}
             </Form>
-            </div>
+        </div>
 
             
         </>

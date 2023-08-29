@@ -24,6 +24,8 @@ import Applications from './components/ApplicationsPage';
 import ApplyPage from './components/ApplyPage';
 import ChangePassword from './components/ChangePassword';
 import MyProfile from './components/MyProfile';
+import DocumentRequest from './components/DocumentRequest';
+import UploadDocument from './components/UploadDocument';
 
 
 const App: React.FC = () => {
@@ -74,6 +76,14 @@ const App: React.FC = () => {
 
                 <Route element={<RequireAuth  allowedRoles={[ROLES.Admin, ROLES.Supervisor, ROLES.Intern]} />}>
                   <Route path="profile" element={<MyProfile />} />
+                </Route>
+
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Admin]} />}>
+                  <Route path="document-request" element={<DocumentRequest />} />
+                </Route>
+
+                <Route element={<RequireAuth  allowedRoles={[ROLES.Intern]} />}>
+                  <Route path="upload-document" element={<UploadDocument />} />
                 </Route>
 
 
