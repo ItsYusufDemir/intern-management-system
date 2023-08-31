@@ -61,6 +61,18 @@ const deleteAssignment = async (axiosInstance: any, assignment_id: number) => {
   }
 }
 
+const markDone = async (axiosInstance: any, assignment_id: number) => {
+  try {
+    await axiosInstance.post(`/api/assignments/${assignment_id}/done`, {
+      headers: {
+        "Content-type": "application/json; charset=UTF-8"
+      }
+    })
+  } catch (error) {
+      throw error;
+  }
+}
+
 
 
 const AssignmentService = {
@@ -68,6 +80,7 @@ const AssignmentService = {
     getAssignmentsForIntern: getAssignmentsForIntern,
     updateAssignment: updateAssignment,
     deleteAssignment: deleteAssignment,
+    markDone: markDone,
 }
 
 export default AssignmentService;

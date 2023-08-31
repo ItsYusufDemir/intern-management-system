@@ -376,14 +376,6 @@ const InternApplicationsTable: React.FC<ChildProps> = ({applications, refetchDat
         try {
           await ApplicationService.deleteApplication(axiosPrivate, application.application_id!);
 
-          if(application.cv_url !== null){
-            await UploadService.deleteCv(axiosPrivate, application.cv_url.split("/").pop()!, "cv");
-         }
- 
-         if(application.photo_url !== null) {
-             await UploadService.deletePhoto(axiosPrivate, application.photo_url.split("/").pop()!, "photos");
-         }
-          
           giveMessage("success", "Application deleted");
         } catch (error: any) {
           if (!error?.response) {

@@ -1,4 +1,4 @@
-import { Divider, Upload, UploadFile, message } from "antd";
+import { Alert, Divider, Upload, UploadFile, message } from "antd";
 import Loading from "./Loading";
 import { useEffect, useState } from "react";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
@@ -73,6 +73,7 @@ const UploadDocument = () => {
             const url = await UploadService.uploadDocument(axiosPrivate, options, auth.intern_id, requiredDocuments![index].document_name);
             
             getData();
+            giveMessage("success", "Document uploaded");
           } catch (error: any) {
               if (!error?.response) {
                 giveMessage("error", "No server response");
@@ -94,6 +95,7 @@ const UploadDocument = () => {
 
             await UploadService.deleteDocument(axiosPrivate, documentName);
             getData();
+            giveMessage("success", "Document deleted");
             
           } catch (error:any) {
               if (!error?.response) {
@@ -141,7 +143,7 @@ const UploadDocument = () => {
                 <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Upload Document</h2>
             </Divider>
 
-
+            <Alert message="Only upload pdf and docx files." type="info" style={{width: "400px"}} showIcon/> <br />
             <div>
                 {requiredDocuments?.map((document, index) => {
                     return(
