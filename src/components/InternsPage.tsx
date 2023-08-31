@@ -118,14 +118,10 @@ const InternsPage = () => {
     }, [])
     
 
-    useEffect(() => {
-      if(!isLoading)
-        console.log(interns, teams, specialDays);
-    }, [isLoading])
-
     
     useEffect(() => {
       if(teams && interns && specialDays) {
+        console.log(teams);
         setIsLoading(false);
       }
     }, [teams, interns, specialDays])
@@ -224,7 +220,7 @@ const InternsPage = () => {
                 optionFilterProp="children"
                 placeholder="Select a team" >
                     {teams!.map((team,index) => {
-
+                      console.log(auth.team_id);
                       if(auth.role === 1984) {
                         return (
                           team.team_id === auth.team_id && <Select.Option key={index} value={index}>{team.team_name}</Select.Option>

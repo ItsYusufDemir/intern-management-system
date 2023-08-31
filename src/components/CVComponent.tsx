@@ -527,10 +527,10 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         <div className='assignment-table'>
             <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={auth.role === 1984 ? <Button type='primary' onClick={handleNewAssignment}>New Assignment</Button> : <></>}>
                 <TabPane tab="Waiting" key="1">
-                    {!assignments ? <Loading /> : <AssignmentTable readonly={auth.role === 1984 ? false : true} getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => !assignment.complete)}/>}
+                    {!assignments ? <Loading /> : <AssignmentTable readonly={auth.role === 1984 ? false : true} getAssignments={getAssignments} refetchData={refetchData} isComplete={false} assignments={assignments.filter(assignment => !assignment.complete)}/>}
                 </TabPane>
                 <TabPane tab="Done" key="2">
-                    {!assignments ? <Loading /> : <AssignmentTable readonly={auth.role === 1984 ? false : true} getAssignments={getAssignments} refetchData={refetchData} assignments={assignments.filter(assignment => assignment.complete)}/>}
+                    {!assignments ? <Loading /> : <AssignmentTable readonly={auth.role === 1984 ? false : true} getAssignments={getAssignments} refetchData={refetchData} isComplete={true} assignments={assignments.filter(assignment => assignment.complete)}/>}
                 </TabPane>
             </Tabs>
         </div>

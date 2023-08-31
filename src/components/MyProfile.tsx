@@ -101,6 +101,22 @@ const MyProfile = () => {
 
 
 
+    const refetchData = async () => {
+        try {
+            const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, intern?.intern_id!);
+            setAssignments(assignmentsData);
+    
+            } catch (error: any) {
+                if (!error?.response) {
+                    giveMessage("error", "No server response");
+                }  else {
+                    giveMessage("error", "Error while fetchind data");
+                }
+            }  
+    };
+
+
+
     const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
           type: type,
@@ -117,7 +133,7 @@ const MyProfile = () => {
         <>
         <h2>My Profile</h2>
 
-        <CVComponent intern={intern!} teams={teams!} assignments={assignments} attendances={attendance} specialDays={specialDays!}  />
+        <CVComponent intern={intern!} teams={teams!} assignments={assignments} attendances={attendance} specialDays={specialDays!} refetchData={refetchData}  />
         </>
       );
 }

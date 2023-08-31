@@ -18,18 +18,20 @@ import AddAssignmentForm from '../forms/AddAssignmentForm';
 import LoadingContainer from '../LoadingContainer';
 import AssignmentService from '../../services/AssignmentService';
 import { useForm } from 'antd/es/form/Form';
+import useAuth from '../../utils/useAuth';
 
 interface ChildProps {
     assignments: Assignment[];
     getAssignments?: () => void;
     refetchData?: () => void;
     readonly?: boolean;
+    isComplete?: boolean;
 }
 
 
 type DataIndex = keyof Assignment;
 
-const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAssignments, readonly}) => {
+const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAssignments, readonly, isComplete}) => {
 
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
@@ -38,7 +40,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalOpen2, setIsModalOpen2] = useState(false);
     const [form] = useForm();
-
+    const {auth }: any = useAuth();
     const [doesPressed, setDoesPressed] = useState(false);
     const [isDone, setIsDone] = useState(false);
     const [assignment, setAssignment] = useState<Assignment>();
@@ -70,6 +72,8 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
         clearFilters();
         setSearchText('');
       };
+
+   
 
       const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<Assignment> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -216,7 +220,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
               if (grade) {
                 return <span >{grade}</span>;
               } else {
-                return readonly ? <></> : <Button onClick={ () => handleGrade(record)}>Grade</Button> ;
+                return readonly ? <>Not Graded</> : <Button onClick={ () => handleGrade(record)}>Grade</Button> ;
               }
             }
         },
@@ -238,7 +242,26 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
               </Popconfirm>
              </Space>
           ),
-        }])
+        }]),
+        ...((auth.role === 2001 && !isComplete) ? [ {
+          title: 'Action',
+          dataIndex: '',
+          key: 'x',
+          width: '10%',
+          render: (record: any) => (
+
+            <Space size="middle">
+            
+              <Popconfirm
+              title="Are you sure to mark as done?"
+              icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
+              onConfirm={() => handleMarkAsDone(record)}
+              >
+                <Button type="primary" ghost>Complete</Button>
+              </Popconfirm>
+             </Space>
+          ),
+        }] : [])
       ];
 
       
@@ -320,13 +343,32 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
 
           giveMessage("success", "Assignment graded");
         } catch (error: any) {
-          
+          if (!error?.response) {
+            giveMessage("error", "No server response");
+          }  else {
+            giveMessage("error", "Error while grading");
+          }
         } finally {
           getAssignments!();
           refetchData!();
           setIsModalOpen2(false);
         }
         
+      }
+
+      const handleMarkAsDone =  async (record: Assignment) => {
+        try {
+          await AssignmentService.markDone(axiosPrivate, record.assignment_id!);
+          refetchData!();
+          giveMessage("success", "Assignment marked as done")
+        } catch (error:any) {
+          console.log(error);
+          if (!error?.response) {
+            giveMessage("error", "No server response");
+          }  else {
+            giveMessage("error", "Error while marking");
+          }
+        }
       }
     
 
