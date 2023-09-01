@@ -37,6 +37,9 @@ import AttendanceService from '../services/AttendanceService';
 import moment from 'moment';
 import LocaleDetector from './LocalDetecor';
 import { SpecialDay } from '../models/SpecialDay';
+import {Document} from "../models/Document"
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 
 const browserLocale = navigator.language;
@@ -51,13 +54,14 @@ interface PropType {
     interns?: Intern [],
     refetchData?: () => void,
     getAssignments?: () => void,
-    assignments: Assignment [] | undefined;
-    attendances: Attendance [] | undefined; 
-    specialDays: SpecialDay [];
+    assignments: Assignment [] | undefined,
+    attendances: Attendance [] | undefined,
+    specialDays: SpecialDay [],
     getAttendances?: () => void,
+    documents?: Document [],
 }
 
-const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances, getAttendances, specialDays}) => {
+const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances, getAttendances, specialDays}) => {
     
 
     const [form] = Form.useForm();
@@ -455,7 +459,44 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         }
     }
 
-    
+
+    const openFile = (url: string) => {
+        if(url !== null){   
+            window.open(addAccessToken(url), "_blank");
+       }
+    }
+
+
+    const downloadFilesAsZip = async (zipFileName: string) => {
+        if (!documents || documents.length === 0) {
+          giveMessage("info", "There is no document to download");
+          return;
+        }
+      
+        const zip = new JSZip();
+      
+        try {
+
+            if(intern.cv_url) {
+                const response = await fetch(addAccessToken(intern.cv_url));
+                const blob = await response.blob();
+                zip.file("CV.pdf", blob);
+            }
+
+            await Promise.all(
+                documents.map(async (document) => {
+                const response = await fetch(addAccessToken(document.document_url));
+                const blob = await response.blob();
+                zip.file(`${document.document_name}.pdf`, blob);
+                })
+            );
+      
+            const content = await zip.generateAsync({ type: 'blob' });
+            saveAs(content, zipFileName);
+        } catch (error) {
+          console.error('Error downloading files:', error);
+        }
+      };
 
     return (
 
@@ -493,10 +534,18 @@ const CVComponent: React.FC<PropType> = ({intern, teams, interns, refetchData, a
         {auth.role === 5150 && <Popover placement="rightTop" content={
               <>
                 <div style={{width: "200px"}}>
-                <Button onClick={downloadCv} size='small' type='dashed' block> CV</Button>
+                {intern.cv_url && <><Button onClick={downloadCv} size='small' type='dashed' block> CV</Button> <br /><br /></>}
 
-                <br /><br />
-                <Button size='small' type="primary" block>Download All</Button>
+                {documents?.map((document: Document) => {
+                    return(
+                        <>
+                        <Button onClick={() => openFile(document.document_url)} size='small' type='dashed' block>{document.document_name}</Button>
+                        <br /><br />
+                        </>
+                    )
+                })}
+
+                <Button onClick={() => downloadFilesAsZip(`${intern.id_no}.zip`)} size='small' type="primary" block>Download All</Button>
                 </div>
               </>
             } trigger="click" >

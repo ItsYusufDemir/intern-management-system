@@ -9,18 +9,13 @@ import UploadService from "../services/UploadService";
 import useAuth from "../utils/useAuth";
 import { url } from "inspector";
 import InternService from "../services/InternService";
+import { Document } from "../models/Document";
 
 interface DataType  {
     id?: number,
     document_name: string,
 }
 
-interface Document {
-    document_id: number,
-    document_name: string,
-    intern_id: number,
-    document_url: string
-}
 
 const UploadDocument = () => {
 

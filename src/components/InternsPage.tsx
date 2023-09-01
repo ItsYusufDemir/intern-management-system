@@ -16,6 +16,7 @@ import AttendanceService from "../services/AttendanceService";
 import { SpecialDay } from "../models/SpecialDay";
 import dayjs from "dayjs";
 import useAuth from "../utils/useAuth";
+import { Document } from "../models/Document";
 
 
 const InternsPage = () => {
@@ -32,6 +33,7 @@ const InternsPage = () => {
     const [selectDisabled, setSelectDisabled] = useState<boolean>(true);
     const [selectedIntern, setSelectedIntern] = useState<Intern>();
     const [specialDays, setSpecialDays] = useState<SpecialDay []>();
+    const [documents, setDocuments] = useState<Document []>();
     const [form] = Form.useForm();
     const {auth}: any = useAuth();
     let counter = -1;
@@ -48,6 +50,8 @@ const InternsPage = () => {
 
         const teamData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamData);
+
+        
 
         var local: string;
         var holidayCheck: string;
@@ -164,6 +168,7 @@ const InternsPage = () => {
     if(selectedIntern) {
       getAssignments();
       getAttendances();
+      getDocuments();
     }
   }, [selectedIntern]);
 
@@ -195,6 +200,21 @@ const InternsPage = () => {
         }
     }
     
+  }
+
+  const getDocuments = async () => {
+    try {
+      if(auth.role === 5150 && selectedIntern) {
+        const documentsData = await InternService.getDocuments(axiosPrivate, selectedIntern.intern_id!);
+        setDocuments(documentsData);
+      }
+    } catch (error: any) {
+      if (!error?.response) {
+        giveMessage("error", "No server response");
+      }  else {
+        giveMessage("error", "Error while fetchind data");
+      }
+    }
   }
 
   const giveMessage = (type: NoticeType, mssge: string) => {
@@ -269,7 +289,7 @@ const InternsPage = () => {
       
     
       <div className="cv-area">
-        {selectedIntern && <CVComponent specialDays={specialDays!} getAttendances={getAttendances} setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
+        {selectedIntern && <CVComponent documents={documents} specialDays={specialDays!} getAttendances={getAttendances} setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
       </div>
 
       <br />
