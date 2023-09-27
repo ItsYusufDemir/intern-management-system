@@ -8,20 +8,13 @@ import {DownloadOutlined,
         CloseOutlined,
         PlusOutlined,
         MinusOutlined,
-        DownOutlined,
-        ProfileOutlined,
+                ProfileOutlined,
     } from '@ant-design/icons';
-import AddInternPage from './AddInternPage';
 import { Team } from '../models/Team';
-import { useLocation, useNavigate } from 'react-router-dom';
-import PDFViewer from './PDFViewer';
 import InternService from '../services/InternService';
-import UploadService from '../services/UploadService';
 import useAuth from '../utils/useAuth';
-import useRefreshToken from '../utils/useRefreshToken';
 import useAxiosPrivate from '../utils/useAxiosPrivate';
 import TabPane from 'antd/es/tabs/TabPane';
-import UserTable from './tables/UserTable';
 import Loading from './Loading';
 import AssignmentTable from './tables/AssignmentTable';
 import { Assignment } from '../models/Assignment';
@@ -45,7 +38,6 @@ import { saveAs } from 'file-saver';
 const browserLocale = navigator.language;
 moment.locale(browserLocale);
 
-// TODO: Handle Download Cv,
 
 interface PropType {
     intern: Intern,
@@ -63,16 +55,24 @@ interface PropType {
 
 const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, refetchData, assignments, getAssignments, setIntern, attendances, getAttendances, specialDays}) => {
     
-
     const [form] = Form.useForm();
     const { auth }: any = useAuth();
     const [isDone, setIsDone] = useState(false);
-    const [doesPressed, setDoesPressed] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<Dayjs>()
+        const [selectedDate, setSelectedDate] = useState<Dayjs>()
     const [isOpen, setIsOpen] = useState(false);
     var workingDays: number [] = [];
 
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isModalOpen2, setIsModalOpen2] = useState(false)
+    const [isModalOpen3, setIsModalOpen3] = useState(false)
+    const [totalNumberOfWorkingDays, setTotalNumberOfWorkingDays ] = useState<number>();
+    const [numberOfAbsenteeism, setNumberOfAbsenteeism ] = useState<number>();
+    const [remainingDays, setRemainingDays ] = useState<number>();
     
+    const [isHidden, setIsHidden] = useState<boolean>(true);
+    const [form2] = Form.useForm()
+    const [form3] = Form.useForm();
+    const axiosPrivate = useAxiosPrivate();  
  
     const handleUpdateValue = () => {
         form.setFieldsValue({
@@ -95,38 +95,17 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
             getAssignments!(); 
             
             setIsDone(false);
-            setDoesPressed(false);
-       }
+                   }
     }, [isDone])
 
     useEffect(() => {
         if(attendances) {
             calculateWorkingDays();
         }
-        
-    },[attendances])
+            },[attendances])
       
 
-      const [isModalOpen, setIsModalOpen] = useState(false)
-      const [isModalOpen2, setIsModalOpen2] = useState(false)
-      const [isModalOpen3, setIsModalOpen3] = useState(false)
-      const [totalNumberOfWorkingDays, setTotalNumberOfWorkingDays ] = useState<number>();
-      const [numberOfAbsenteeism, setNumberOfAbsenteeism ] = useState<number>();
-      const [remainingDays, setRemainingDays ] = useState<number>();
-
       
-      const [isHidden, setIsHidden] = useState<boolean>(true);
-      const [form2] = Form.useForm()
-      const [form3] = Form.useForm();
-      const axiosPrivate = useAxiosPrivate();
-      
-
-
-      
-    if(intern === undefined){
-       return (<></>);
-    }
-
 
     const findTeam = (temp: Intern) => {
         const team = teams.filter(team => team.team_id === temp.team_id)[0];
@@ -179,10 +158,6 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
         setRemainingDays(workingDays - counter);
     }
 
-    
-    
-    
-
     //Delete Modal
     const {confirm} = Modal;
 
@@ -216,27 +191,31 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
             setIntern!(undefined);
  
             giveMessage("success", "Intern deleted");
-        } catch (error: any) {
+        }
+        catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
-              }  else {
+              } 
+            else {
                 giveMessage("error", "Error while deleting intern");
               }
         }
         
     };
    
-    const downloadCv =  (event: any) => {
+    const downloadCv =  () => {
         if(intern.cv_url !== null){   
              window.open(addAccessToken(intern.cv_url), "_blank");
-        } else{
+        } 
+        else{
             giveMessage("info", "Intern has not uploaded CV");
         }
     }   
 
     const addAccessToken = (url: string) => {
         const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}access_token=${auth.accessToken}`;
+        return `${process.env.REACT_APP_PROXY}${url}${separator}access_token=${auth.accessToken}`;
     }
 
 
@@ -250,25 +229,12 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
         console.log(interns);
         setIsModalOpen(true);
     };
-    const handleOk = (e: any) => {
-        setDoesPressed(true); 
-    };
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
-
-
+    
     //Assignment modal
     const showModal2 = () => {
         setIsModalOpen2(true);
     };
-    const handleOk2 = (e: any) => {
-        setDoesPressed(true);
-    };
-    const handleCancel2 = () => {
-        setIsModalOpen2(false);
-    };
-
+    
     //Note modal
     const showModal3 = () => {
         setIsModalOpen3(true);
@@ -295,9 +261,6 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
       }
 
     
-
-    
-
     const dateCellRender = (value: Dayjs) => {
 
         if (selectedDate && value.isSame(selectedDate)) { 
@@ -326,7 +289,7 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
                     ghost
                 >Present</Button>
                 <br />
-                <Button //cancel button
+                <Button //Absent button
                     type="primary"
                     icon={<MinusOutlined />}
                     size='small'
@@ -344,8 +307,7 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
         })
 
 
-        
-        if(specialDay) {
+                if(specialDay) {
             return <Badge status="default" text={specialDay.title} />
         }
         
@@ -359,23 +321,26 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
        
        if(attendance?.status === "present") {
             return <Badge status='success' text="Present"></Badge>
-       } else if(attendance?.status === "absent") {
+       }
+       else if(attendance?.status === "absent") {
             return <Tooltip title={attendance.note}><Badge status='error' text="Absent" style={{height: "100%", width:"100%"}}></Badge></Tooltip>
-       } else{
+       } 
+       else{
         return <Badge status="warning" text="Not Taken"></Badge>
        }
     };
 
     const cellRender = (current: Dayjs, info: CellRenderInfo<Dayjs>) => {
-        if (info.type === 'date') return dateCellRender(current);
+        if (info.type === 'date'){ 
+            return dateCellRender(current);
+}
+
         return info.originNode;
     }
 
-    
-
     const getListData = (value: Dayjs) => {
         value = value.set("hour", 0).set("minute", 0).set("second", 0);
-        let listData;
+        
         const attendance = attendances?.find(attendance => {
             return dayjs(attendance.attendance_date * 1000).isSame(value, 'day');
         });
@@ -394,7 +359,7 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
         }
         else if(!value.isSame(selectedDate)) {
             setSelectedDate(value);
-            setIsOpen(true); // Reset doesPressed to false when selecting a new date
+            setIsOpen(true);
         } else if (!isOpen && value.isSame(selectedDate)) {
             setSelectedDate(undefined);
         }
@@ -419,9 +384,11 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
             setIsOpen(false);
             giveMessage("success", "Attendance taken");
         } catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
-              }  else {
+              }
+            else {
                 giveMessage("error", "Error while taking attendance");
               }
         } finally {
@@ -455,17 +422,14 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
         } finally {
             setIsModalOpen3(false);
             getAttendances!();
-            calculateWorkingDays();
-        }
+                    }
     }
-
 
     const openFile = (url: string) => {
         if(url !== null){   
             window.open(addAccessToken(url), "_blank");
        }
     }
-
 
     const downloadFilesAsZip = async (zipFileName: string) => {
         if (!documents || documents.length === 0) {
@@ -495,15 +459,20 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
             saveAs(content, zipFileName);
         } catch (error) {
           console.error('Error downloading files:', error);
+giveMessage("error", "Error while downloading files");
         }
       };
+
+if(intern === undefined){
+        return (<></>);
+    }
 
     return (
 
         <>
         
         <Image width={150} height={180} style={{border: "2px solid black", borderRadius: "10px"}}
-        src={intern.photo_url !== null ? addAccessToken(intern.photo_url) : addAccessToken("http://localhost:5000/uploads/photos/no-photo.png")}/>
+        src={intern.photo_url !== null ? addAccessToken(intern.photo_url) : addAccessToken("/uploads/photos/no-photo.png")}/>
 
         <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  
@@ -512,9 +481,7 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
 
         <br /><br />
     
-        
-
-        <Descriptions size='small'>
+                <Descriptions size='small'>
             <Descriptions.Item label="Name">{intern.first_name + " " + intern.last_name}</Descriptions.Item>
             <Descriptions.Item label="University">{intern.uni}</Descriptions.Item>
             <Descriptions.Item label="Major">{intern.major + " (GPA: " + intern.gpa + ")"}</Descriptions.Item>
@@ -531,7 +498,8 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
 
         <br />
 
-        {auth.role === 5150 && <Popover placement="rightTop" content={
+        {auth.role === 5150 && 
+        <Popover placement="rightTop" content={
               <>
                 <div style={{width: "200px"}}>
                 {intern.cv_url && <><Button onClick={downloadCv} size='small' type='dashed' block> CV</Button> <br /><br /></>}
@@ -548,8 +516,8 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
                 <Button onClick={() => downloadFilesAsZip(`${intern.id_no}.zip`)} size='small' type="primary" block>Download All</Button>
                 </div>
               </>
-            } trigger="click" >
-
+            } 
+        trigger="click" >
               
                 <Button
                   size='middle'
@@ -558,6 +526,7 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
                   icon={<ProfileOutlined />}
                 >Documents</Button>
             
+
         </Popover>}
 
         <div className='Buttons' style={{display: 'flex'}}>
@@ -567,12 +536,10 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
         </div>
 
         
-
         <br /><br /><br /><br />
 
         <Tabs defaultActiveKey='1' size='middle' type='card'>
         <TabPane tab="Assignments" key="1">
-
         <div className='assignment-table'>
             <Tabs defaultActiveKey='1' size='middle' tabBarExtraContent={auth.role === 1984 ? <Button type='primary' onClick={handleNewAssignment}>New Assignment</Button> : <></>}>
                 <TabPane tab="Waiting" key="1">
@@ -606,7 +573,9 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
                 </Col>
             </Row>
             </div>
+
             <br />
+
             <div style={{display: "flex", justifyContent: "center"}}>
             <div className='calendar'>
             <LocaleDetector>
@@ -618,27 +587,26 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
                     return true;
                 }
                 return false;
-            }} style={{margin: "15px"}}  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
+            }}
+                            style={{margin: "15px"}}  cellRender={cellRender} validRange={[dayjs(intern.internship_starting_date * 1000), dayjs(intern.internship_ending_date * 1000)]}/>
             </LocaleDetector>
             </div>
             </div>
-            
+                    </TabPane>
 
-            
-        </TabPane>
         </Tabs>
 
         {/*Modals Here*/}
         <div>
-            <Modal title="Edit" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={"800px"} okButtonProps={{style: {display: "none"}}} cancelButtonProps={{style: {display: "none"}}}>
-                 <InternAddingForm teams={teams} intern={intern} setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} />
-            </Modal>
+            {isModalOpen && <Modal title="Edit" open={isModalOpen} width={"800px"} onCancel={() => setIsModalOpen(false)} footer={null}>
+                 <InternAddingForm teams={teams} intern={intern} setIsDone={setIsDone}/>
+            </Modal>}
 
-            <Modal title="New Assignment" open={isModalOpen2} onOk={handleOk2} onCancel={handleCancel2} width={600}>
-                 <AddAssignmentForm setDoesPressed={setDoesPressed} intern_id={intern.intern_id!} doesPressed={doesPressed} setIsDone={setIsDone}/>
-                 {doesPressed && <LoadingContainer />}
-            </Modal>
-
+            {isModalOpen2 && <Modal title="New Assignment" open={isModalOpen2} width={600} onCancel={() => setIsModalOpen2(false)} footer={null}>
+                 <AddAssignmentForm  intern_id={intern.intern_id!} setIsDone={setIsDone}/>
+                 </Modal>}
+            
+            {isModalOpen3 &&
             <Modal title="Note" open={isModalOpen3} onOk={handleOk3} onCancel={handleCancel3}>
                 <Form
                 style={{width: 400}}
@@ -653,15 +621,8 @@ const CVComponent: React.FC<PropType> = ({documents, intern, teams, interns, ref
                         style={{ height: 100, marginBottom: 10, width: 300}}/>
                     </Form.Item>
                 </Form>
-            </Modal>
-
-
+            </Modal>}
         </div>
-
-
-
-        
-
 
         </>
       );

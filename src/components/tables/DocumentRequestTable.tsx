@@ -1,19 +1,12 @@
 import { SearchOutlined, QuestionCircleOutlined  } from '@ant-design/icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { InputRef } from 'antd';
-import { Button, Input, Modal, Popconfirm, Space, Table, message } from 'antd';
+import { Button, Input, Popconfirm, Space, Table, message } from 'antd';
 import type { ColumnType, ColumnsType } from 'antd/es/table';
-import type { FilterConfirmProps, SorterResult } from 'antd/es/table/interface';
-import { User } from '../../models/User';
+import type { FilterConfirmProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-import UserService from '../../services/UserService';
-import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../../utils/useAxiosPrivate';
 import { NoticeType } from 'antd/es/message/interface';
-
-import TeamService from '../../services/TeamService';
-import AddTeamForm from '../forms/AddTeamForm';
-import { Intern } from '../../models/Intern';
 import DocumentReqeustService from '../../services/DocumentRequestService';
 
 interface DataType  {
@@ -26,20 +19,14 @@ interface ChildProps {
     getData?: () => void;
 }
 
-
 type DataIndex = keyof DataType;
 
 const DocumentRequestTable: React.FC<ChildProps> = ({documents, getData}) => {
 
-    
-
-
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
-    const [sortedInfo, setSortedInfo] = useState<SorterResult<DataType>>({});
-    const navigate = useNavigate();
-    const axiosPrivate = useAxiosPrivate();
+        const axiosPrivate = useAxiosPrivate();
 
 
       const handleSearch = (
@@ -68,6 +55,7 @@ const DocumentRequestTable: React.FC<ChildProps> = ({documents, getData}) => {
               onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
               style={{ marginBottom: 8, display: 'block' }}
             />
+
             <Space>
               <Button
                 type="primary"
@@ -78,6 +66,7 @@ const DocumentRequestTable: React.FC<ChildProps> = ({documents, getData}) => {
               >
                 Search
               </Button>
+
               <Button
                 onClick={() => clearFilters && handleReset(clearFilters)}
                 size="small"
@@ -85,6 +74,7 @@ const DocumentRequestTable: React.FC<ChildProps> = ({documents, getData}) => {
               >
                 Reset
               </Button>
+
               <Button
                 type="link"
                 size="small"
@@ -96,6 +86,7 @@ const DocumentRequestTable: React.FC<ChildProps> = ({documents, getData}) => {
               >
                 Filter
               </Button>
+
               <Button
                 type="link"
                 size="small"
@@ -169,19 +160,16 @@ const DocumentRequestTable: React.FC<ChildProps> = ({documents, getData}) => {
       ];
 
 
-      
-
-      
-
-
       const handleDeleteDocument = async (id: number) => {
         try {
-          const response = await DocumentReqeustService.deleteRequest(axiosPrivate,id);
+          await DocumentReqeustService.deleteRequest(axiosPrivate,id);
 
           giveMessage("success", "Document deleted");
           
           getData!();
-        } catch (error: any) {
+        } 
+        catch (error: any) {
+console.log(error);
           if (!error?.response) {
             giveMessage("error", "No server response");
           } 
@@ -201,12 +189,10 @@ const DocumentRequestTable: React.FC<ChildProps> = ({documents, getData}) => {
 
     
 
-
     return (
         <>
-            <Table size='middle' columns={columns} dataSource={documents} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
-
-           
+                       
+<Table size='middle' columns={columns} dataSource={documents} style={{width: "600px", top: "0"}} scroll={{y: 250}} pagination={{hideOnSinglePage: true}}/>
 
         </>
     )

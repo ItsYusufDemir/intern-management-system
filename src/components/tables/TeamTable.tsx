@@ -4,9 +4,7 @@ import type { InputRef } from 'antd';
 import { Button, Input, Modal, Popconfirm, Space, Table, message } from 'antd';
 import type { ColumnType, ColumnsType } from 'antd/es/table';
 import type { FilterConfirmProps, SorterResult } from 'antd/es/table/interface';
-import { User } from '../../models/User';
 import Highlighter from 'react-highlight-words';
-import UserService from '../../services/UserService';
 import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../../utils/useAxiosPrivate';
 import { NoticeType } from 'antd/es/message/interface';
@@ -27,20 +25,15 @@ type DataIndex = keyof Team;
 
 const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns}) => {
 
-    console.log(teams);
-
-
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
-    const [sortedInfo, setSortedInfo] = useState<SorterResult<Team>>({});
-    const navigate = useNavigate();
-    const axiosPrivate = useAxiosPrivate();
+        const axiosPrivate = useAxiosPrivate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [team, setTeam] = useState<Team>();
 
     const [isDone, setIsDone] = useState(false);
-    const [doesPressed, setDoesPressed] = useState(false);
+    
 
       const handleSearch = (
         selectedKeys: string[],
@@ -135,8 +128,7 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns})
       });
 
 
-      
-      const columns: ColumnsType<Team> = [
+            const columns: ColumnsType<Team> = [
         {
           title: 'Team Name',
           dataIndex: 'team_name',
@@ -224,26 +216,28 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns})
 
       
 
-
       const handleDeleteTeam = async (team_id: number) => {
         try {
-          const response = await TeamService.deleteTeam(axiosPrivate, team_id);
+          await TeamService.deleteTeam(axiosPrivate, team_id);
 
           giveMessage("success", "Team deleted");
           
           getData!();
-        } catch (error: any) {
+        } 
+        catch (error: any) {
+console.log(error);
           if (!error?.response) {
             giveMessage("error", "No server response");
-          } else if (error.response.status === 403) {
+          } 
+            else if (error.response.status === 403) {
             giveMessage("error", "Team is used by some interns, cannot delete");
           }
            else {
             giveMessage("error", "Deletion failed!");
           }
         }
-      
       }
+
 
       const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
@@ -258,21 +252,11 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns})
       }
 
       
-  
-      
-
-      const showModal = () => {
+        const showModal = () => {
         setIsModalOpen(true);
       };
     
-      const handleOk = () => {
-        setDoesPressed(true);
-      };
-    
-      const handleCancel = () => {
-        setIsModalOpen(false);
-      };
-
+      
       useEffect(()=> {
         if(isDone) {
              setIsModalOpen(false);
@@ -280,18 +264,17 @@ const TeamTable: React.FC<ChildProps> = ({teams, getData, isDashboard, interns})
              getData!();
              
              setIsDone(false);
-             setDoesPressed(false);
-        }
+                     }
      }, [isDone])
     
 
 
     return (
         <>
-            <Table size='middle' columns={isDashboard ? columnsDashboard : columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
+            <Table size='middle' columns={isDashboard ? columnsDashboard : columns} dataSource={teams} style={{width: "600px", top: "0"}} scroll={{y: 250}} pagination={{hideOnSinglePage: true}}/>
 
-            <Modal title="Basic Modal" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddTeamForm setIsDone={setIsDone} doesPressed={doesPressed} setDoesPressed={setDoesPressed} team={team} getData={getData!} />
+            <Modal title="Basic Modal" open={isModalOpen} onCancel={() => setIsModalOpen(false)} footer={null}>
+              <AddTeamForm setIsDone={setIsDone} team={team} getData={getData!} />
             </Modal>
 
         </>

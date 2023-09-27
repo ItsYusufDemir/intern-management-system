@@ -1,19 +1,19 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   HomeOutlined,
   TeamOutlined,
   SettingOutlined,
   PoweroffOutlined,
   BellOutlined,
-  BellFilled,
-  SmileOutlined,
+    SmileOutlined,
   KeyOutlined,
   UploadOutlined,
+ClockCircleOutlined
 } from '@ant-design/icons';
 import "../styles.css";
-import { BrowserRouter as Router, Route, useMatch, Routes, useNavigate, useLocation, Outlet } from "react-router-dom";
+import { useMatch, useNavigate, useLocation, Outlet } from "react-router-dom";
 import {Team} from "../models/Team";
-import { Menu, Image, theme, type MenuProps, Layout, Space, Button, message, Badge, Avatar, FloatButton, Popover, List, notification, Divider, Result } from 'antd';
+import { Menu, Image, theme, type MenuProps, Layout, Button, message, Badge, Popover, List, Divider, Result } from 'antd';
 import UserService from '../services/UserService';
 import { NoticeType } from 'antd/es/message/interface';
 import useAuth from '../utils/useAuth';
@@ -21,12 +21,11 @@ import useAxiosPrivate from '../utils/useAxiosPrivate';
 import NotificationService from '../services/NotificationService';
 import { Notification } from '../models/Notification';
 import dayjs from 'dayjs';
-import { type } from 'os';
 
 
 var teams: Team[] = [];
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -44,12 +43,8 @@ function getItem(
   } as MenuItem;
 }
 
-
-
-
 const LayoutComponent = () => {
     
-
 const matchInterns = useMatch("/interns");
 const matchAddIntern = useMatch("/add-intern");
 const matchAddPage = useMatch("/add");
@@ -59,12 +54,17 @@ const matchMyProfile = useMatch("/profile");
 const matchDocumentRequest = useMatch("/document-request");
 const matchUploadDocument = useMatch("/upload-document");
 //add for other new links
+
 const [seletctedKey, setSelectedKey] = useState("/");
 const [items, setItems] = useState<MenuItem []>();
 const location = useLocation();
 const {auth, setAuth}: any = useAuth();
 const [notifications, setNotifications] = useState<Notification []>();
 const axiosPrivate = useAxiosPrivate();
+const navigate = useNavigate();
+
+    const title = "Intern Management System";
+    const footer = "IMS ©2023"
 
 
 const getData = async () => {
@@ -72,10 +72,11 @@ const getData = async () => {
     const notificationsData: Notification [] = await NotificationService.getNotifications(axiosPrivate, auth.user_id);
     processNotifications(notificationsData);
   } catch (error:any) {
-    if (!error?.response) {
-      console.log(error);
+          console.log(error);
+if (!error?.response) {
       giveMessage("error", "No server response");
-    }  else {
+    }
+            else {
       giveMessage("error", "Error while fetchind data");
     }
   }
@@ -83,9 +84,7 @@ const getData = async () => {
 
 useEffect(() => {
   getData()
-  console.log(auth);
-},[auth])
-
+  },[auth])
 
 
 const processNotifications = (notificationsData: Notification []) => {
@@ -108,10 +107,7 @@ const processNotifications = (notificationsData: Notification []) => {
       notification.content = notification.content + dayText;
     }
   })
-  console.log(notificationsData);
-
- 
-
+  
   setNotifications(notificationsData);
 }
 
@@ -149,9 +145,6 @@ const getSelectedkey = () => {
 useEffect(() => {
   getSelectedkey();
 }, [location.pathname]);
-
-
-  const navigate = useNavigate();
 
 
   //In the side bar, we have a menu. Those are the navigate items
@@ -194,16 +187,9 @@ useEffect(() => {
   }, [auth])
 
 
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
-
-  const title = "Intern Management System";
-  const footer = "IMS ©2023"
-
+  
   const logout = async () => {
-    UserService.logout();
+    await UserService.logout();
   }
 
   const onClick = () => {
@@ -229,13 +215,10 @@ useEffect(() => {
             return { ...notification, is_seen: true };
         });
     });
-      
-
-    } catch (error) {
+          } catch (error) {
         console.log(error);
     }
   }
-
 
   const addAccessToken = (url: string) => {
     const separator = url.includes('?') ? '&' : '?';
@@ -249,7 +232,7 @@ useEffect(() => {
   }
 
   function formatRelativeTime(timestamp: number) {
-    console.log(timestamp);
+    
     const currentDate = dayjs();
     const inputDate = dayjs(timestamp * 1000);
   
@@ -257,45 +240,31 @@ useEffect(() => {
     
     if (diffInSeconds < 60) {
       return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
-    } else if (diffInSeconds < 3600) {
+    } 
+        else if (diffInSeconds < 3600) {
       const diffInMinutes = Math.floor(diffInSeconds / 60);
       return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
-    } else if (diffInSeconds < 86400) {
+    } 
+        else if (diffInSeconds < 86400) {
       const diffInHours = Math.floor(diffInSeconds / 3600);
       return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
-    } else {
+    } 
+        else {
       const diffInDays = Math.floor(diffInSeconds / 86400);
       return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
     }
   }
 
-
-  
-  
-function sortByUnseenFirst(a: Notification, b: Notification) {
-  // Sort unseen notifications first
-  if (!a.is_seen && b.is_seen) {
-    return -1;
-  } else if (a.is_seen && !b.is_seen) {
-    return 1;
-  }
-  // Sort by notification_date if both are seen or both are unseen
-  return dayjs(b.notification_date).diff(a.notification_date);
-}
-
-
-//<List.Item  style={{background: background, padding: "5px", height: "50px"}}>{item.content}</List.Item>
-
   return (
-
       <>
+
       <Layout style={{ minHeight: '98vh' }}>
         <Sider style={{ height: '100vh', position: 'fixed', left: 0, top: 0, zIndex: 999 }}>
 
           <div className="logo-area" style={{marginLeft: "25px"}}>
             <Image width={150} height={150} style={{}} preview={false}
-            src={addAccessToken("http://localhost:5000/uploads/photos/issd_logo.png")} />  
-          </div>
+            src={addAccessToken( process.env.REACT_APP_PROXY +"/uploads/photos/issd_logo.png")} />  
+          </div>1
           
           <Menu theme="dark" defaultSelectedKeys={['/']} mode="inline" items={items} selectedKeys={[seletctedKey]}  onClick={({key}) => {
               navigate(key);
@@ -320,6 +289,7 @@ function sortByUnseenFirst(a: Notification, b: Notification) {
           </div>
 
         </Sider>
+
         <Layout style={{marginLeft: 200, marginTop: 0,}}>
           
           <header className='header'>
@@ -339,7 +309,7 @@ function sortByUnseenFirst(a: Notification, b: Notification) {
                   let background = item.is_seen ? "white" : "#c6e2ff"
                   return (
                     <div style={{height: "35px", background: background, paddingTop: "20px", paddingLeft: "10px", marginBottom: "2px"}}>
-                      <span>{item.content}</span> <span style={{color: "gray", paddingRight: "10px", float: "right"}}>{formatRelativeTime(item.notification_date)}</span>
+                      <span>{item.content}</span> <span style={{color: "gray", paddingRight: "10px", float: "right"}}><ClockCircleOutlined />{" "}{formatRelativeTime(item.notification_date)}</span>
                     </div>
                     
                   )  
@@ -373,10 +343,7 @@ function sortByUnseenFirst(a: Notification, b: Notification) {
             
             </Popover>
                
-                
-
-              
-            </div>
+                            </div>
           </header>
 
 
@@ -387,13 +354,11 @@ function sortByUnseenFirst(a: Notification, b: Notification) {
 
           <Footer style={{ textAlign: 'center' }}>{footer}</Footer>
         </Layout>
+
       </Layout>
-      </>
-      
+            
+</>
   );
-
-
-
 }
 
 export default LayoutComponent;

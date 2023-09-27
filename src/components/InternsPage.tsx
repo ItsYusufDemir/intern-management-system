@@ -1,5 +1,5 @@
 import {Form, Select, Row, Col, message} from "antd";
-import {useEffect, useState, createContext} from "react";
+import {useEffect, useState} from "react";
 import "../styles.css";
 import {Intern} from "../models/Intern";
 import {Team} from "../models/Team";
@@ -21,7 +21,6 @@ import { Document } from "../models/Document";
 
 const InternsPage = () => {
 
-
     const [team, setTeam] = useState<Team>();
     const [interns, setInterns] = useState<Intern []>();
     const [teams, setTeams] = useState<Team []>();
@@ -37,7 +36,6 @@ const InternsPage = () => {
     const [form] = Form.useForm();
     const {auth}: any = useAuth();
     let counter = -1;
-
 
     const browserLocale = navigator.language.toLowerCase();
 
@@ -62,7 +60,7 @@ const InternsPage = () => {
           local = "en.usa";
           holidayCheck = "Public holiday"
         }
-        const specialDaysData = await AttendanceService.getSpecialDays(local, dayjs().year());
+        const specialDaysData = await AttendanceService.getSpecialDays(local);
         const specialDaysArray = specialDaysData.items;
 
         const newSpecialDays: SpecialDay [] = [] 
@@ -82,7 +80,9 @@ const InternsPage = () => {
 
         setSpecialDays(newSpecialDays); 
 
-      } catch (error: any) {
+      }
+        catch (error: any) {
+console.log(error);
         if (!error?.response) {
           giveMessage("error", "No server response");
         }  else {
@@ -108,10 +108,12 @@ const InternsPage = () => {
           setSelectedIntern(updatedIntern);
         }
         
-      } catch (error: any) {
+      }
+        catch (error: any) {
         if (!error?.response) {
           giveMessage("error", "No server response");
-        }  else {
+        }  
+            else {
           giveMessage("error", "Error while fetchind data");
         }
       }
@@ -122,11 +124,9 @@ const InternsPage = () => {
     }, [])
     
 
-    
-    useEffect(() => {
+        useEffect(() => {
       if(teams && interns && specialDays) {
-        console.log(teams);
-        setIsLoading(false);
+                setIsLoading(false);
       }
     }, [teams, interns, specialDays])
     
@@ -177,15 +177,17 @@ const InternsPage = () => {
     try {
       const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, selectedIntern?.intern_id!);
       setAssignments(assignmentsData);
-    } catch (error: any) {
+    }
+        catch (error: any) {
+console.log(error);
         if (!error?.response) {
           giveMessage("error", "No server response");
-        }  else {
+        }  
+            else {
           giveMessage("error", "Error while fetchind data");
         }
     }
-    
-  }
+      }
 
   const getAttendances = async () => {
     try {
@@ -193,6 +195,7 @@ const InternsPage = () => {
       setAttendance(attendancesData);
 
     } catch (error: any) {
+console.log(error);
         if (!error?.response) {
           giveMessage("error", "No server response");
         }  else {
@@ -208,10 +211,12 @@ const InternsPage = () => {
         const documentsData = await InternService.getDocuments(axiosPrivate, selectedIntern.intern_id!);
         setDocuments(documentsData);
       }
-    } catch (error: any) {
+    } 
+        catch (error: any) {
       if (!error?.response) {
         giveMessage("error", "No server response");
-      }  else {
+      }
+            else {
         giveMessage("error", "Error while fetchind data");
       }
     }
@@ -225,11 +230,15 @@ const InternsPage = () => {
   };
 
 
+    if(isLoading){
+        return <Loading />
+    }
+
     return (
       <>
-      {isLoading ? <Loading /> :
-      <>
+      
       <br />
+
       <div className="intern-page-selections" style={{display: "flex"}}>
       <Form layout="vertical" form={form}>
           <Row gutter={100}>
@@ -240,8 +249,7 @@ const InternsPage = () => {
                 optionFilterProp="children"
                 placeholder="Select a team" >
                     {teams!.map((team,index) => {
-                      console.log(auth.team_id);
-                      if(auth.role === 1984) {
+                                            if(auth.role === 1984) {
                         return (
                           team.team_id === auth.team_id && <Select.Option key={index} value={index}>{team.team_name}</Select.Option>
                         )
@@ -257,6 +265,7 @@ const InternsPage = () => {
                 </Select>
               </Form.Item>
             </Col>
+
             <Col span={12}>
               <Form.Item label="Intern" name="internSelectItem" style={{width: 350, marginLeft: "auto"}}>
                 
@@ -287,16 +296,11 @@ const InternsPage = () => {
       </div>
       <br />
       
-    
-      <div className="cv-area">
+          <div className="cv-area">
         {selectedIntern && <CVComponent documents={documents} specialDays={specialDays!} getAttendances={getAttendances} setIntern={setSelectedIntern} getAssignments={getAssignments} attendances={attendance} assignments={assignments} intern={selectedIntern} teams={teams!} interns={interns!} refetchData={refetchData} />}
       </div>
 
-      <br />
-      
-
-      </>} 
-      
+      <br /><br /><br />
       </> 
       );
 }

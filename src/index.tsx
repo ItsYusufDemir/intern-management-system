@@ -10,11 +10,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   
-  <BrowserRouter>
+  <BrowserRouter basename='/ims'>
     <AuthProvider >
       <App />
     </AuthProvider>
   </BrowserRouter>
   
 );
-

@@ -1,11 +1,8 @@
 import { Team } from "../models/Team";
-const controller = new AbortController();
 
 const getTeams = async (axiosInstance: any): Promise<Team[]> => {
     try {
-        const response = await axiosInstance.get("/api/teams", {
-        signal: controller.signal
-      })
+        const response = await axiosInstance.get("/api/teams")
         
         const data: Team[] = response.data;
 
@@ -15,7 +12,8 @@ const getTeams = async (axiosInstance: any): Promise<Team[]> => {
         }));
 
         return teamsData;
-      } catch (error) {
+      }
+    catch (error) {
         throw error;
       }
 }
@@ -23,57 +21,28 @@ const getTeams = async (axiosInstance: any): Promise<Team[]> => {
 
 const addTeam= async (axiosInstance: any, newTeam: Team) => {
   try {
-    const response = await axiosInstance.post("/api/teams", newTeam, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
-      }
-    });
-
+    await axiosInstance.post("/api/teams", newTeam);
   } catch (error) {
-    console.error("Error adding team:", error);
-    throw error;
+        throw error;
   }
 }
 
 
 const updateTeam = async (axiosInstance: any, updatedTeam: Team) => {
-
-  try {
-    const response = await axiosInstance.put(`/api/teams/${updatedTeam.team_id}`, updatedTeam, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
-      }
-    });
-
-    
+try {
+    await axiosInstance.put(`/api/teams/${updatedTeam.team_id}`, updatedTeam);
   } catch (error) {
-    console.log("Error: ", error);
-    throw error;
+        throw error;
   }
 }
 
 const deleteTeam = async (axiosInstance: any, team_id: number) => {
   try {
-
-    const response = await axiosInstance.delete(`/api/teams/${team_id}`, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      }
-    });
-
-    if (response.status === 200) {
-      console.log("Team is deleted");
-    } else {
-      console.log("Team could NOT be deleted!");
-    }
+await axiosInstance.delete(`/api/teams/${team_id}`);
   } catch (error) {
-    console.log("Error: ", error);
-    throw error;
+        throw error;
   }
 }
-
-
-
 
 
 const TeamService = {

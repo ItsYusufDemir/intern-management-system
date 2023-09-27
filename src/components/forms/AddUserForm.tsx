@@ -11,57 +11,51 @@ interface PropType {
     teams: Team [];
     userToUpdate?: DataType;
     setIsDone?: React.Dispatch<React.SetStateAction<boolean>>;
-    doesPressed?: boolean;
-    setDoesPressed?: React.Dispatch<React.SetStateAction<boolean>>;
-    getData: () => void;
+        getData: () => void;
 }
 
 interface DataType {
+email?: string;
     user_id: number;
     username: string;
     role: number;
     team_id?: number;
   }
 
-const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDone, doesPressed, setDoesPressed}) => {
-
+const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDone}) => {
     
     const userNameErrorMessage = "Username must start with a letter and be 3 to 23 characters long, containing only letters, digits, underscores, and hyphens.";
     const passwordErrorMessage = "Password must be between 8 and 24 characters in length and contain at least one letter and one digit."
+const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
+    const ID_NO_REGEX = /^\d{11}$/;
+    const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).{8,24}$/;
 
-    const navigate = useNavigate();
-    const [form] = Form.useForm();
-    const [user, setUser] = useState("");
+        const [form] = Form.useForm();
+    const [username, setUsername] = useState("");
 
     const axiosPrivate = useAxiosPrivate();
-    const [pwd, setPwd] = useState("");
+    const [password, setPassword] = useState("");
     const [role, setRole] = useState<number>();
-
 
     const onFinish = () => {
         if(userToUpdate){
-            console.log("bu değil mi")
-            updateUser();
+                        updateUser();
         }else{
             addUser();
         }
-                
-    }
+                    }
 
-    useEffect(() => {
-        if(doesPressed)
-            form.submit();
-    },[doesPressed])
-
+    
     const addUser = async () => {
         try {
             const formData = form.getFieldsValue();
 
             const newUser: User = {
-                username: user,
-                password: pwd,
+                username: username,
+                password: password,
                 role: role,
                 team_id: formData.team,
+email: formData.email,
             }
 
            await UserService.addUser(axiosPrivate, newUser);
@@ -70,29 +64,36 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
 
            giveMessage("success", "User added");
            
-        } catch (error: any) {
+        if(setIsDone) {
+                setIsDone(true);
+            }
+                
+        } 
+        catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
-              } else if (error.response?.status === 409) {
+              }
+            else if (error.response?.status === 409) {
                 giveMessage("error", "User already exists");
-              } else {
+              }
+            else {
                 giveMessage("error", "Error while adding user");
               }
         } finally {
             getData();
-            if(setIsDone)
-            setIsDone(true);
-        }
+                    }
         
     }
 
     useEffect(() => {
         if(userToUpdate) {
             setRole(userToUpdate.role);
-            setUser(userToUpdate.username);
+            setUsername(userToUpdate.username);
             form.setFieldsValue({
                 username: userToUpdate.username,
                 role: userToUpdate.role,
+email: userToUpdate.email,
             })
             if(userToUpdate.team_id) {
                 form.setFieldsValue({
@@ -109,10 +110,11 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
 
             const newUser: User = {
                 user_id: userToUpdate?.user_id!,
-                username: user,
-                password: pwd,
+                username: username,
+                password: password,
                 role: role,
                 team_id: formData.team,
+email: formData.email,
             }
 
            await UserService.updateUser(axiosPrivate, newUser);
@@ -121,25 +123,25 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
 
            giveMessage("success", "User updated");
            
-        } catch (error: any) {
+        if(setIsDone){
+                setIsDone(true); 
+            }
+           
+        } 
+        catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
               }  else {
                 giveMessage("error", "Error while updating user");
               }
-        } finally {
-            if(setIsDone){
-                setIsDone(true); 
-            }
-            else{
-                getData(); //If there is a setIsDone, getdata is called in parent of it
+        } 
+        finally {
+                getData();
             }
         }
         
-    }
-
-
-    const giveMessage = (type: NoticeType, mssge: string) => {
+        const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
           type: type,
           content: mssge,
@@ -150,12 +152,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
         setRole(value);
     }
 
-    const handleSubmitFailed = () => {
-        if(setDoesPressed)
-        setDoesPressed(false);
-    }
-
-
+    
     return (
         <>
          <div>
@@ -164,8 +161,7 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
                 form={form}
                 labelCol={{span: 10}}
                 wrapperCol={{span: 14}}
-                autoComplete="off"
-                onFinishFailed={handleSubmitFailed}>
+                autoComplete="off">
                     
                 <Form.Item
                 label="Username"
@@ -173,11 +169,11 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
                 rules={[{ 
                     required: true,
                     message: userNameErrorMessage,
-                    pattern: /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/ },
+                    pattern: userToUpdate ? ID_NO_REGEX : USERNAME_REGEX },
                 ]}
                 hasFeedback
                 >
-                    <Input onChange={(e) => setUser(e.target.value)} />
+                    <Input onChange={(e) => setUsername(e.target.value)} />
                 </Form.Item>
 
                 <Form.Item
@@ -185,10 +181,10 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
                 name="password"
                 rules={[{ required: true,
                     message: passwordErrorMessage,
-                    pattern: /^(?=.*[a-zA-Z])(?=.*\d).{8,24}$/ }]}
+                    pattern: PASSWORD_REGEX }]}
                     hasFeedback
                 >
-                    <Input.Password onChange={(e) => setPwd(e.target.value)}/>
+                    <Input.Password onChange={(e) => setPassword(e.target.value)}/>
                 </Form.Item>
 
                 <Form.Item
@@ -211,6 +207,11 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
                     <Input.Password />
                 </Form.Item>
 
+<Form.Item label="E-mail" name="email" rules={[
+			{ type: 'email', message: 'Please enter a valid email address', required: true },
+			]} hasFeedback >
+				<Input />
+			</Form.Item>
 
                 <Form.Item label="Role" name="role" rules={[{required: true, message: "Role is required!"}]}>
                     <Select onChange={handleSelectChange}>
@@ -230,12 +231,13 @@ const AddUserForm: React.FC<PropType> = ({teams, userToUpdate, getData, setIsDon
                     </Select>
                 </Form.Item>}
 
-                {!userToUpdate && <Form.Item wrapperCol={{span: 24}}>
-                    <Button block type="primary" htmlType="submit">Add User</Button>
-                </Form.Item>}
+                <Form.Item wrapperCol={{span: 24}}>
+                    <Button block type="primary" htmlType="submit">{userToUpdate ? <>Update User</> : <>Add User</>}</Button>
+                </Form.Item>
                 
 
                 </Form>
+
             </div>
         </>
       );

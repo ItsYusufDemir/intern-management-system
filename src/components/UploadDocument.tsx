@@ -7,7 +7,6 @@ import { NoticeType } from "antd/es/message/interface";
 import { PlusOutlined } from '@ant-design/icons';
 import UploadService from "../services/UploadService";
 import useAuth from "../utils/useAuth";
-import { url } from "inspector";
 import InternService from "../services/InternService";
 import { Document } from "../models/Document";
 
@@ -24,8 +23,7 @@ const UploadDocument = () => {
     const [documents, setDocuments] = useState<Document []>();
     const { auth }: any = useAuth();
     const axiosPrivate = useAxiosPrivate();
-    const urls: string [] = [];
-
+    
     const getData = async () => {
 
         try {
@@ -36,7 +34,9 @@ const UploadDocument = () => {
             setDocuments(documentsData);
 
 
-        } catch (error: any) {
+        } 
+        catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
             }  else {
@@ -65,19 +65,22 @@ const UploadDocument = () => {
 
     const handleUploadDocument = async (options: any, index: number) => {
         try {
-            const url = await UploadService.uploadDocument(axiosPrivate, options, auth.intern_id, requiredDocuments![index].document_name);
+            await UploadService.uploadDocument(axiosPrivate, options, auth.intern_id, requiredDocuments![index].document_name);
             
             getData();
             giveMessage("success", "Document uploaded");
-          } catch (error: any) {
+          } 
+        catch (error: any) {
+console.log(error);
               if (!error?.response) {
                 giveMessage("error", "No server response");
-              }  else {
+              } 
+            else {
                 giveMessage("error", "Error while uploading document");
               }
           }
-
     }
+
 
     const handleRemoveDocument = async (document_name: string) => {
         try {
@@ -92,7 +95,9 @@ const UploadDocument = () => {
             getData();
             giveMessage("success", "Document deleted");
             
-          } catch (error:any) {
+          }
+        catch (error:any) {
+console.log(error);
               if (!error?.response) {
                 giveMessage("error", "No server response");
               }  else {
@@ -125,20 +130,21 @@ const UploadDocument = () => {
 
     const addAccessToken = (url: string) => {
         const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}access_token=${auth.accessToken}`;
+        return `${process.env.REACT_APP_PROXY}${url}${separator}access_token=${auth.accessToken}`;
     }
-
-
 
 
     return ( 
         <>
-        {isLoading ? <Loading /> : <div>
+        
+        {isLoading ? <Loading /> :
+        <div>
             <Divider orientation="left">
                 <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Upload Document</h2>
             </Divider>
 
             <Alert message="Only upload pdf and docx files." type="info" style={{width: "400px"}} showIcon/> <br />
+
             <div>
                 {requiredDocuments?.map((document, index) => {
                     return(
@@ -153,11 +159,8 @@ const UploadDocument = () => {
 
             </div>
         
-
-
-
-
         </div>}
+
         </>
      );
 }

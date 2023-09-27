@@ -12,11 +12,6 @@ import TabPane from "antd/es/tabs/TabPane";
 
 const Applications = () => {
 
-
-    //fetch applications data, you will have two operations, accept and reject, add tags to the table waiting, accepted, rejected
-    //Keep the application data in an another table ind the db. When you accept it, transfer the data to the interns table,
-    //when you reject, do nothing to the application data,
-    //We can also have a delete application button, to delete the application
     const axiosPrivate = useAxiosPrivate();
     const [applications, setApplications] = useState<Intern []>();
     const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +19,6 @@ const Applications = () => {
 
      // GET ALL DATA FROM DATABASE
      const getData = async () => {
-
       try {
         
         const applicationsData = await ApplicationService.getApplications(axiosPrivate);
@@ -33,14 +27,16 @@ const Applications = () => {
         const teamsData = await TeamService.getTeams(axiosPrivate);
         setTeams(teamsData);
 
-      } catch (error: any) {
+      } 
+        catch (error: any) {
+console.log(error);
         if (!error?.response) {
           giveMessage("error", "No server response");
-        }  else {
+        }
+            else {
           giveMessage("error", "Error while fetchind data");
         }
       }
-
     };
     
     useEffect(() => {
@@ -69,7 +65,8 @@ const Applications = () => {
         console.log(error);
         if (!error?.response) {
           giveMessage("error", "No server response");
-        }  else {
+        }  
+            else {
           giveMessage("error", "Error while fetchind data");
         }
       }
@@ -89,9 +86,11 @@ const Applications = () => {
         
         giveMessage("success", "Archieve emptied");
       } catch (error: any) {
+console.log(error);
         if (!error?.response) {
           giveMessage("error", "No server response");
-        } else {
+        } 
+            else {
           giveMessage("error", "Error while emptying archieve!");
         }
       } finally {
@@ -100,10 +99,10 @@ const Applications = () => {
     }
 
 
-
     return (
       <>
-        {isLoading ? <Loading /> : <>
+        {isLoading ? <Loading /> :
+        <>
 
         <br />
 

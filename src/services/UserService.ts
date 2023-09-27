@@ -1,14 +1,11 @@
-import axios from '../axios';
+import axios from '../utils/axios';
 import { User } from "../models/User";
 
 const addUser = async (axiosInstance: any, user: User) => {
     try {
-        const response = await axiosInstance.post('/api/users', user, {
-          headers: {'Content-Type': 'application/json'},
-          withCredentials: true,
-        });
-    
-      } catch (error: any) {
+        await axiosInstance.post('/api/users', user);
+    }
+    catch (error: any) {
         throw error;
       }
 
@@ -16,12 +13,9 @@ const addUser = async (axiosInstance: any, user: User) => {
 
 const updateUser = async (axiosInstance: any, user: User) => {
   try {
-      const response = await axiosInstance.put('/api/users', user, {
-        headers: {'Content-Type': 'application/json'},
-        withCredentials: true,
-      });
-  
-    } catch (error: any) {
+      await axiosInstance.put('/api/users', user);
+    } 
+    catch (error: any) {
       throw error;
     }
 
@@ -29,56 +23,48 @@ const updateUser = async (axiosInstance: any, user: User) => {
 
 const getUsers = async (axiosInstance: any) => {
   try {
-      const response = await axiosInstance.get('/api/users', {
-        headers: {'Content-Type': 'application/json'},
-        withCredentials: true,
-      });
+      const response = await axiosInstance.get('/api/users');
       
       return response.data;
-    } catch (error: any) {
+    }
+    catch (error: any) {
       throw error;
     }
 
 }
 
 
-
-
 const login = async (axiosInstance: any, user: User) => {
 
     try {
-        const response = await axiosInstance.post('/auth', user, {
-          headers: {'Content-Type': 'application/json'},
-          withCredentials: true,
-        });
+        const response = await axiosInstance.post('/auth', user);
     
         return response.data;
-      } catch (error: any) {
+      }
+    catch (error: any) {
         throw error;
       }
 
 }
 
 const logout = async () => {
-
   try {
-      const response = await axios.get('/logout', {
+      await axios.get('/logout', {
         headers: {'Content-Type': 'application/json'},
         withCredentials: true,
       });
-    } catch (error: any) {
+    }
+    catch (error: any) {
       throw error;
     }
 }
 
 const deleteUser = async (axiosInstance: any, user_id: number) => {
   try {
-    const response = await axiosInstance.delete(`/api/users/${user_id}`, {
-      headers: {'Content-Type': 'application/json'},
-      withCredentials: true,
-    });
+    await axiosInstance.delete(`/api/users/${user_id}`);
     return;
-  } catch (error: any) {
+  }
+    catch (error: any) {
     throw error;
   }
 }

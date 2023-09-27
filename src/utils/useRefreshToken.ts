@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import axios from "../axios";
+import axios from "./axios";
 import useAuth from "./useAuth";
 import { NoticeType } from "antd/es/message/interface";
 import { message } from "antd";

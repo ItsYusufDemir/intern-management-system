@@ -5,7 +5,7 @@ import Loading from "./Loading";
 import TeamService from "../services/TeamService";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { Team } from "../models/Team";
-import { Result, Steps } from "antd";
+import { Result } from "antd";
 
 const ApplyPage = () => {
 
@@ -36,9 +36,9 @@ const ApplyPage = () => {
         return <Loading /> 
     }
 
-
     return (
         <>
+
         <div className="page" >
 
         <Header style={{marginBottom: "50px",alignItems: "center", display: "flex", justifyContent: "center", height: "100px", borderRadius: "10px"}}>
@@ -47,23 +47,16 @@ const ApplyPage = () => {
 
         
 
-        {!isDone && <>
-
-            
-
+        {!isDone &&
         <div style={{ margin: "auto", boxShadow: "rgba(0,0,0,0.25) 0 25px 50px -12px" ,background: "white", width: "900px", borderRadius: "10px"}}>     
-            
-            <InternAddingForm setIsDone={setIsDone} teams={teams!} apply={true}/>
+                        <InternAddingForm setIsDone={setIsDone} teams={teams!} apply={true}/>
         </div>
-
-
-
-
-        </>}
+}
 
         </div>
 
-        {isDone && <div>
+        {isDone &&
+        <div>
             <Result
             status="success"
             title="You have successfully applied!"

@@ -1,52 +1,37 @@
-import { Button, Divider, Form, Input, Modal, Select, Space, Table, message, theme } from "antd";
+import { Divider, Form, Space, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserService from "../services/UserService";
-import { User } from "../models/User"
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { NoticeType } from "antd/es/message/interface";
 import { Team } from "../models/Team";
 import TeamService from "../services/TeamService";
 import Loading from "./Loading";
-import { ColumnsType } from "antd/es/table";
 import UserTable from "./tables/UserTable";
 import TeamTable from "./tables/TeamTable";
 import AddTeamForm from "./forms/AddTeamForm";
 import AddUserForm from "./forms/AddUserForm";
 
-const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
 interface DataType {
     user_id: number;
     username: string;
+email: string;
     role: number;
-    team?: string;
+    team_id: number;
   }
 
 
 const AddPage = () => {
 
-    const navigate = useNavigate();
-    const [form] = Form.useForm();
-    const [form2] = Form.useForm();
-
-    const [user, setUser] = useState("");
-
-    const [pwd, setPwd] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const [role, setRole] = useState();
+    
+        const [isModalOpen, setIsModalOpen] = useState(false);
     const axiosPrivate = useAxiosPrivate();
-
     const [isLoading, setIsLoading] = useState(true);
     const [teams, setTeams] = useState<Team []>([]);
     const [users, setUsers] = useState<DataType []>([]);
-
     const [isDone, setIsDone] = useState(false);
-    const [doesPressed, setDoesPressed] = useState(false);
-
-
+    
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
         try {
@@ -56,14 +41,15 @@ const AddPage = () => {
             const userData = await UserService.getUsers(axiosPrivate);
             setUsers(userData);
         } catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
-              }  else {
+              } 
+            else {
                 giveMessage("error", "Error while fetchind data");
               }
         }
-        
-    };
+            };
     
     useEffect(() => {
         if(isLoading){
@@ -71,10 +57,10 @@ const AddPage = () => {
         }
     }, [isLoading]);
     
+
     useEffect(() => {
       if(teams && users) {
-        console.log("users", users);
-        setIsLoading(false);
+                setIsLoading(false);
       }
     }, [teams, users])
 
@@ -88,12 +74,9 @@ const AddPage = () => {
     useEffect(()=> {
         if(isDone) {
              setIsModalOpen(false);
-             
-             getData();
-             
-             setIsDone(false);
-             setDoesPressed(false);
-        }
+                          getData();
+                          setIsDone(false);
+                     }
      }, [isDone])
 
 

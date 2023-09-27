@@ -1,4 +1,4 @@
-import { DatePicker, Form, Input, InputNumber, message } from "antd";
+import { Button, DatePicker, Form, Input, InputNumber, message } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { Assignment } from "../../models/Assignment";
 import { useEffect } from "react";
@@ -13,12 +13,10 @@ import moment from "moment";
 interface PropType {
     assignment?: Assignment,
     setIsDone: React.Dispatch<React.SetStateAction<boolean>>
-    doesPressed: boolean
-    setDoesPressed: React.Dispatch<React.SetStateAction<boolean>>,
-    intern_id?: number,
+        intern_id?: number,
 }
 
-const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPressed, setDoesPressed, intern_id}) => {
+const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, intern_id}) => {
 
 
     const [form] = useForm();
@@ -78,6 +76,7 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
             await AssignmentService.addAssignment(axiosPrivate, newAssignment);
 
             giveMessage("success", "Assignment added");
+setIsDone(true);
         } catch (error: any) {
             if (!error?.response) {
                 giveMessage("error", "No server response");
@@ -85,16 +84,14 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
                 giveMessage("error", "Error while adding assignment");
               }
         }
-        finally {
-            setIsDone(true);
-        }
-    }
+            }
 
     const updateAssignment = async (newAssignment: Assignment) => {
         try {
             await AssignmentService.updateAssignment(axiosPrivate, newAssignment);
 
             giveMessage("success", "Assignment updated");
+setIsDone(true);
         } catch (error: any) {
             if (!error?.response) {
                 giveMessage("error", "No server response");
@@ -102,22 +99,7 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
                 giveMessage("error", "Error while updating assignment");
               }
         }
-        finally {
-            setIsDone(true);
-        }
-    }
-
-
-
-    useEffect(() => {
-        if(doesPressed) {
-            form.submit();
-        }
-    }, [doesPressed])
-
-    const handleSubmitFailed = () => {
-        setDoesPressed(false);
-    }
+            }
 
     const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
@@ -133,8 +115,7 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
             onFinish={onFinish}
             labelCol={{span: 6}}
             wrapperCol={{span: 14}}
-            onFinishFailed={handleSubmitFailed}
-            form={form}>
+                        form={form}>
 
             <Form.Item label="Description" name="description" rules={[{required: true, message: "Describe the assignment!"}]}>
                 <Input.TextArea showCount
@@ -154,7 +135,9 @@ const AddAssignmentForm: React.FC<PropType> = ({assignment, setIsDone, doesPress
                 <InputNumber />
             </Form.Item>}
 
-
+<Form.Item wrapperCol={{span: 16}}>
+                <Button block type="primary" htmlType="submit">{assignment ? <>Update Assignment</> : <>Add Assignment</>}</Button>
+            </Form.Item>
         </Form>
         
         </>

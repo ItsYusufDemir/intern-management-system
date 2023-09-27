@@ -1,16 +1,9 @@
-import { useEffect } from "react";
-import axios from "../axios";
 import { Intern } from "../models/Intern";
-import useAxiosPrivate from "../utils/useAxiosPrivate";
-const controller = new AbortController();
-
 
 const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => {
 
     try {
-        const response = await axiosInstance.get("/api/interns", {
-          signal: controller.signal
-        })
+        const response = await axiosInstance.get("/api/interns")
         const data: Intern[] = response.data
         const internsData: Intern[] = data.map((intern: any) => ({
           ...intern,
@@ -21,7 +14,8 @@ const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => 
           overall_success: intern.overall_success ? parseFloat(intern.overall_success) : null,
         }));
         return internsData;
-      } catch (error) {
+      }
+    catch (error) {
           throw error;
       }
 }
@@ -29,34 +23,24 @@ const getInterns = async (axiosInstance: any): Promise<Intern[] | undefined> => 
 
 const addIntern = async (axiosInstance: any, newIntern: Intern): Promise<Intern | undefined> => {
   try {
-    const response = await axiosInstance.post("/api/interns", newIntern, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
-      }
-    });
-
+    const response = await axiosInstance.post("/api/interns", newIntern);
 
     const addedIntern: Intern = response.data;
     console.log("added intern: ", addedIntern);
 
     return addedIntern;
-  } catch (error: any) {
+  }
+    catch (error: any) {
       throw error;
   }
-
 }
 
 
 const updateIntern = async (axiosInstance: any, updatedIntern: Intern) => {
   try {
-    console.log()
-    const response = await axiosInstance.put(`/api/interns/${updatedIntern.intern_id}`, updatedIntern, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
+    await axiosInstance.put(`/api/interns/${updatedIntern.intern_id}`, updatedIntern);
       }
-    });
-
-  } catch (error) {
+    catch (error) {
       throw error;
   }
 }
@@ -66,19 +50,15 @@ const updateIntern = async (axiosInstance: any, updatedIntern: Intern) => {
 const deleteIntern = async (axiosInstance: any, deletedIntern: Intern) => {
   try {
     const id = deletedIntern.intern_id;
-    await axiosInstance.delete(`/api/interns/${id}`, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
+    await axiosInstance.delete(`/api/interns/${id}`);
       }
-    });
-
-  } catch (error) {
+    catch (error) {
     throw error;
   }
 }
+
 const getIntern = async (axiosInstance: any, username: number) => {
   try {
-
     const response = await axiosInstance.get(`/api/interns/${username}`);
     const intern = response.data;
 
@@ -89,8 +69,8 @@ const getIntern = async (axiosInstance: any, username: number) => {
     intern.overall_success = intern.overall_success ? parseFloat(intern.overall_success) : null;
 
     return response.data;
-
-  } catch (error) {
+}
+    catch (error) {
     throw error;
   }
 }
@@ -100,13 +80,11 @@ const getDocuments = async (axiosInstance: any, intern_id: number) => {
     const response = await axiosInstance.get(`/api/interns/${intern_id}/documents`);
 
     return response.data;
-  } catch (error) {
+  }
+    catch (error) {
       throw error;
   }
 }
-
-
-
 
 
 const InternService  = {

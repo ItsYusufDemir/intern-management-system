@@ -24,8 +24,7 @@ import useAuth from "../utils/useAuth";
 function HomePage() {
 
     const axiosPrivate = useAxiosPrivate();
-    const controller = new AbortController();
-    const [interns, setInterns] = useState<Intern []>();
+        const [interns, setInterns] = useState<Intern []>();
     const [teams, setTeams] = useState<Team []>();
     const [applications, setApplications] = useState<Intern []>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -33,9 +32,7 @@ function HomePage() {
     const [specialDays, setSpecialDays] = useState<SpecialDay []>();
     const [importantDays, setImportantDays] = useState<SpecialDay []>([]);
     const browserLocale = navigator.language.toLowerCase();
-    const { auth }: any = useAuth();
-
-
+    
     // GET ALL DATA FROM DATABASE
     const getData = async () => {
         try {
@@ -57,7 +54,7 @@ function HomePage() {
           local = "en.usa";
           holidayCheck = "Public holiday"
         }
-        const specialDaysData = await AttendanceService.getSpecialDays(local, dayjs().year());
+        const specialDaysData = await AttendanceService.getSpecialDays(local);
         const specialDaysArray = specialDaysData.items;
 
         const newSpecialDays: SpecialDay [] = [] 
@@ -210,8 +207,7 @@ function HomePage() {
         }
 
         return badges.length > 0 ? badges : null;
-          
-    };
+              };
 
 
     
@@ -220,18 +216,14 @@ function HomePage() {
             <Loading />
         )
     }
-    else{
-        return (
-
+    
+return (
             <>
 
             <Divider orientation="left">
                 <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Teams</h2>
             </Divider>
 
-
-            {/*isLoading ? <Loading /> : <TeamTable teams={teams!} interns={interns} isDashboard={true}/>
-            */}
 
             <Space size={[30, 32]} wrap style={{display: "flex", justifyContent: "center"}}>
 
@@ -262,23 +254,10 @@ function HomePage() {
             </div>
             </div>
 
-            <br /><br />
-
-            
-
-            
-                
-
-
-
-            
-            
-
-            
-            <br /><br /><br />
+            <br /><br /><br /><br /><br />
             </>
         );
-    }
+    
 }
 
 export default HomePage;
