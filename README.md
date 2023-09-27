@@ -1,52 +1,73 @@
-# intern-management-system
-Intern Management System (IMS) is an easy way to follow up interns and see their progress easily.
+# Intern Mangement System
 
-## Before Running
-Install all the packages by `npm install`.
+Intern Management System is an React web application to manage internships in a company. It is used by HR, supervisors and interns. It makes internship manament easy for all three roles which can be efficient for both companies and interns.
 
-# Getting Started with Create React App
+**Used Tecnologies** 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+-React.js with TypeScript (created by create-react-app)\
+-Node.js\
+-PostgreSQL\
+-Nginx
 
-## Available Scripts
+You can watch the demo on YouTube: https://www.youtube.com/watch?v=2LeFBxvI2jw
 
-In the project directory, you can run:
+## How to run?
 
-### `npm start`
+Before running this project, go to https://github.com/ItsYusufDemir/intern-management-system-backend first, and run the backend. After that, follow these instructions;
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Clone the repository
+2. Run **npm install** to install all libraries
+3. Create a .env file in the source directory and add these:\
+   REACT_APP_API_KEY=AIzaSyChuSGkJ96STFxFGYKwEJhRLb5b1w820n4\
+   REACT_APP_PROXY=http://localhost:5000
+4. Run the project by **npm run start**
+5. You can now access to the project from http://localhost:3000
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## About the Project
 
-### `npm test`
+The project has three roles as I mentioned above. Each role has its own panels and features in the system.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Admin
 
-### `npm run build`
+Admin handles internship applications and can see the progress of interns. In the home page, there is team part which shows current teams and its details like number of interns and supervisor. Below that there is a calendar part which shows special days like internship starting or endding dates and holidays.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+![home teams](https://github.com/ItsYusufDemir/intern-management-system-frontend/assets/104091838/a05086b2-f85a-4ba5-99f8-34f0333f2522)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Admin can see all the interns in the interns page. Interns are seperated by their teams. Admin can see the intern's information like university, department, email etc. Adminc can also see intern's CV or other uploaded documents. Ther is a assignments panel which shows the current and completed assignments which are given by her/his supervisor. There is also a attendance calendar which shows the atteandance of the intern.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+![interns page](https://github.com/ItsYusufDemir/intern-management-system-frontend/assets/104091838/033cc34d-01b2-4b2e-8322-faf25e579b65)
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Inten candidates can apply for internship in apply page. They enter their personal and educational data and upload their CV and photo to make the application. Admin can see those application in the applications page with a notification. She/he can see the profile of the candidate and can accept or reject the application. If the application is accepted, intern recieves an email about the succesfull application and login details.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+![applications page](https://github.com/ItsYusufDemir/intern-management-system-frontend/assets/104091838/69745540-3f2d-44b9-b482-422a74440944)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Admin can add user or team to the company in the add page. There is also a intern adding page which adds manually just in case. Interns might be requested some documents and those document are customized in the document request page by the admin. Each role can change their passwords in change password page.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+![add page](https://github.com/ItsYusufDemir/intern-management-system-frontend/assets/104091838/9b10eb86-cc70-4bf0-87c5-dd8843db4ada)
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Supervisor
+Supervisor can see interns that in her/his team. Supervisor can give new assignments, or can grade them, and they can take attendance.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+![new assignment](https://github.com/ItsYusufDemir/intern-management-system-frontend/assets/104091838/5a466e60-b9ca-4ddf-8be3-56d379da3719)
+
+
+### Intern
+
+Intern can see their own profile, given assignments and attendance. Intern can also upload requested documents from HR.
+
+![document request](https://github.com/ItsYusufDemir/intern-management-system-frontend/assets/104091838/2ae57f79-0b32-4e66-a308-c5d1714b0722)
+
+
+
+
+
+
+
+
+
+
+
+
+
