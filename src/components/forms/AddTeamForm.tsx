@@ -1,28 +1,23 @@
-import { Button, Form, Input, Modal, message } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { Team } from "../../models/Team";
 import useAxiosPrivate from "../../utils/useAxiosPrivate";
 import TeamService from "../../services/TeamService";
-import form from "antd/es/form";
 import { NoticeType } from "antd/es/message/interface";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { isDocument } from "@testing-library/user-event/dist/utils";
-
 
 
 interface Prop {
     team?: Team
-    doesPressed?: boolean;
-    setDoesPressed?: React.Dispatch<React.SetStateAction<boolean>>,
-    setIsDone?: React.Dispatch<React.SetStateAction<boolean>>,
+        setIsDone?: React.Dispatch<React.SetStateAction<boolean>>,
     getData: () => void;
 }
 
-const AddTeamForm: React.FC<Prop> = ({team, getData, doesPressed, setDoesPressed, setIsDone}) => {
+const AddTeamForm: React.FC<Prop> = ({team, getData, setIsDone}) => {
 
     const [form] = Form.useForm();
     const axiosPrivate = useAxiosPrivate();
-    const navigate = useNavigate();
+    
 
 const onFinish = () => {
     if(team){
@@ -32,16 +27,7 @@ const onFinish = () => {
     else{
         addTeam();
     }
-
-    
 }
-
-useEffect(() => {
-    if(doesPressed){
-        form.submit();
-    }
-}, [doesPressed])
-
 
 
 useEffect(() => {
@@ -54,7 +40,7 @@ useEffect(() => {
 
 const updateTeam = async (team: Team) => {
     try {
-        const response = await TeamService.updateTeam(axiosPrivate, team);
+        await TeamService.updateTeam(axiosPrivate, team);
 
         giveMessage("success", "Team updated");
       } catch (error: any) {
@@ -86,7 +72,13 @@ const addTeam = async () => {
        giveMessage("success", "Team added");
        getData();
        
-    } catch (error: any) {
+    if(setIsDone){
+                setIsDone(true);
+            }
+        
+        }
+        catch (error: any) {
+console.log(error);
         if (!error?.response) {
             giveMessage("error", "No server response");
           } else if (error.response?.status === 409) {
@@ -94,15 +86,8 @@ const addTeam = async () => {
           } else {
             giveMessage("error", "Error while adding team");
           }
-    } finally {
-        if(setIsDone){
-            setIsDone(true);
-        } else{
-            getData();
-        }
+            }
     }
-}
-
 
 
 const giveMessage = (type: NoticeType, mssge: string) => {
@@ -111,11 +96,6 @@ const giveMessage = (type: NoticeType, mssge: string) => {
       content: mssge,
     });
 };
-
-const handleSubmitFailed = () => {
-    if(setDoesPressed)
-        setDoesPressed(false);
-}
 
 
     return (
@@ -127,23 +107,21 @@ const handleSubmitFailed = () => {
             labelCol={{span: 10}}
             wrapperCol={{span: 14}}
             form={form}
-            onFinishFailed={handleSubmitFailed}
-            >
+                        >
                 <Form.Item label="Team Name" name="team_name" rules={[{required: true, message: "Role is required!"}]}>
                 <Input />
                 </Form.Item>
 
-                {!team && <Form.Item wrapperCol={{span: 24}}>
-                    <Button  htmlType='submit' type='primary' block>Add Team</Button>
-                </Form.Item>}
+                <Form.Item wrapperCol={{span: 24}}>
+                    <Button  htmlType='submit' type='primary' block>{team ?  <>Update Team</> : <>Add Team</>}</Button>
+                </Form.Item>
             </Form>
         </div>
 
             
         </>
-
-
       );
+
 }
  
 export default AddTeamForm;

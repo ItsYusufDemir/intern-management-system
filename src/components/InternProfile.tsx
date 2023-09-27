@@ -53,7 +53,7 @@ const InternProfile: React.FC<PropType> = ({intern, teams, apply}) => {
 
     const addAccessToken = (url: string) => {
         const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}access_token=${auth.accessToken}`;
+        return `${process.env.REACT_APP_PROXY}${url}${separator}access_token=${auth.accessToken}`;
     }
 
     const giveMessage = (type: NoticeType, mssge: string) => {
@@ -66,7 +66,7 @@ const InternProfile: React.FC<PropType> = ({intern, teams, apply}) => {
     return (
         <>
             <Image width={150} height={180} style={{border: "2px solid black", borderRadius: "10px"}}
-        src={intern.photo_url !== null ? addAccessToken(intern.photo_url) : addAccessToken("http://localhost:5000/uploads/photos/no-photo.png")}/>
+        src={intern.photo_url !== null ? addAccessToken(intern.photo_url) : addAccessToken("/uploads/photos/no-photo.png")}/>
 
         {!apply && <Space wrap style={{float: 'right'}}>
             <Progress type="circle" percent={completePercentage} format={(percent) => `${percent}% Complete`} size={100}></Progress>  

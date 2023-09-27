@@ -13,6 +13,8 @@ const ChangePassword = () => {
     const [form] = Form.useForm();
     const passwordErrorMessage = "Password must be between 8 and 24 characters in length and contain at least one letter and one digit."
     const axiosPrivate = useAxiosPrivate();
+    const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).{8,24}$/;
+
 
     const onFinish = () => {
         updatePassword();
@@ -20,7 +22,6 @@ const ChangePassword = () => {
 
     const updatePassword = async () => {
         try {
-
             const newUser: User = {
                 user_id: auth.user_id,
                 username: auth.username,
@@ -65,14 +66,15 @@ const ChangePassword = () => {
                 form={form}
                 labelCol={{span: 10}}
                 wrapperCol={{span: 14}}
-                autoComplete="off">
+                autoComplete="off"
+                >
 
                 <Form.Item
                 label="Password"
                 name="password"
                 rules={[{ required: true,
                     message: passwordErrorMessage,
-                    pattern: /^(?=.*[a-zA-Z])(?=.*\d).{8,24}$/ }]}
+                    pattern: PASSWORD_REGEX }]}
                     hasFeedback
                 >
                     <Input.Password onChange={(e) => setPassword(e.target.value)}/>
@@ -99,9 +101,9 @@ const ChangePassword = () => {
                 </Form.Item>
 
 
-                { <Form.Item wrapperCol={{span: 24}}>
+                <Form.Item wrapperCol={{span: 24}}>
                     <Button block type="primary" htmlType="submit">Change Password</Button>
-                </Form.Item>}
+                </Form.Item>
                 
 
                 </Form>

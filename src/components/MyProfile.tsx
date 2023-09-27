@@ -7,7 +7,7 @@ import { SpecialDay } from "../models/SpecialDay";
 import dayjs from "dayjs";
 import AttendanceService from "../services/AttendanceService";
 import { NoticeType } from "antd/es/message/interface";
-import { Divider, message } from "antd";
+import { message } from "antd";
 import Loading from "./Loading";
 import InternService from "../services/InternService";
 import useAuth from "../utils/useAuth";
@@ -15,10 +15,6 @@ import CVComponent from "./CVComponent";
 import AssignmentService from "../services/AssignmentService";
 import { Assignment } from "../models/Assignment";
 import { Attendance } from "../models/Attendance";
-
-
-
-
 
 
 const MyProfile = () => {
@@ -58,7 +54,7 @@ const MyProfile = () => {
                 local = "en.usa";
                 holidayCheck = "Public holiday"
             }
-            const specialDaysData = await AttendanceService.getSpecialDays(local, dayjs().year());
+            const specialDaysData = await AttendanceService.getSpecialDays(local);
             const specialDaysArray = specialDaysData.items;
     
             const newSpecialDays: SpecialDay [] = [] 
@@ -78,7 +74,9 @@ const MyProfile = () => {
     
             setSpecialDays(newSpecialDays);
     
-            } catch (error: any) {
+            } 
+        catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
             }  else {
@@ -100,13 +98,14 @@ const MyProfile = () => {
     }, [specialDays, teams, intern])
 
 
-
     const refetchData = async () => {
         try {
             const assignmentsData = await AssignmentService.getAssignmentsForIntern(axiosPrivate, intern?.intern_id!);
             setAssignments(assignmentsData);
     
-            } catch (error: any) {
+            } 
+        catch (error: any) {
+console.log(error);
                 if (!error?.response) {
                     giveMessage("error", "No server response");
                 }  else {
@@ -114,8 +113,6 @@ const MyProfile = () => {
                 }
             }  
     };
-
-
 
     const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
@@ -127,7 +124,6 @@ const MyProfile = () => {
     if(isLoading) {
         return <Loading />
     }
-
 
     return (
         <>

@@ -11,28 +11,18 @@ import { NoticeType } from 'antd/es/message/interface';
 function Login() {
 
     const { auth, setAuth }:any = useAuth();
-
     const navigate = useNavigate();
     const location = useLocation();
-    
-
-    
-
-
-    const [form] = Form.useForm();
+        const [form] = Form.useForm();
     const axiosPrivate = useAxiosPrivate();
     const [shouldNavigate, setShouldNavigate] = useState<boolean>();
   
-
     const onFinish = () => {
         login();    
     }
 
-
-
     const login = async () => {
         const formValues = form.getFieldsValue();
-
 
         const user: User = {
             username:formValues.username,
@@ -54,11 +44,10 @@ function Login() {
                 setAuth({user_id, username, role, team_id, accessToken, intern_id});
                 giveMessage("success", "Login successfull");
                 
-
                 form.resetFields();
-                
-            }
+                            }
         } catch (error:any ) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
               } else if (error.response?.status === 401) {
@@ -100,12 +89,12 @@ function Login() {
 
 
     return(
-        <>
+        
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',}}>
 
             <div style={{boxShadow: "rgba(0,0,0,0.25) 0 25px 50px -12px", background: "white", padding: "10px", paddingTop: "50px" , borderRadius: "10px" }}>
                 <Form
-                    name="basic"
+                    name="login"
                     labelCol={{ span: 8 }}
                     wrapperCol={{ span: 16 }}
                     style={{ maxWidth: 600 }}
@@ -117,7 +106,7 @@ function Login() {
                     <Form.Item
                         label="Username"
                         name="username"
-                        rules={[{ required: true, message: 'Please input your username!' }]}
+                        rules={[{ required: true, message: 'Please enter your username!' }]}
                         >
                         <Input />
                     </Form.Item>
@@ -125,33 +114,23 @@ function Login() {
                     <Form.Item
                         label="Password"
                         name="password"
-                        rules={[{ required: true, message: 'Please input your password!' }]}
+                        rules={[{ required: true, message: 'Please enter your password!' }]}
                         >
                         <Input.Password />
                     </Form.Item>
 
                     
 
-                    <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                        <Button type="primary" htmlType="submit">
+                    <Form.Item wrapperCol={{ offset: 5, span: 16 }}>
+                        <Button type="primary" htmlType="submit" block>
                             Login
                         </Button>
                     </Form.Item>
+
                 </Form>
              </div>
 
         </div>
-
-        </>
-        
-        
-        
-        
-        
-        
-        
-        
-       
     )
 }
 

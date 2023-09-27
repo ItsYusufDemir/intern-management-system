@@ -1,14 +1,12 @@
-import axios from "../axios";
+import axios from "../utils/axios";
 import { Intern } from "../models/Intern";
 
 
 const addApplication = async (application: Intern) => {
     try {
-        await axios.post("/api/applications", application, {
-            headers: {'Content-Type': 'application/json'},
-            withCredentials: true,
-        })
-    } catch (error) {
+        await axios.post("/api/applications", application)
+    } 
+    catch (error) {
         throw error;
     }
 }
@@ -18,7 +16,8 @@ const getApplications = async (axiosInstance: any) => {
         const response = await axiosInstance.get('/api/applications');
         
         return response.data;
-      } catch (error: any) {
+      } 
+    catch (error: any) {
         throw error;
       }
   
@@ -27,7 +26,8 @@ const getApplications = async (axiosInstance: any) => {
 const acceptApplication = async (axiosInstance: any, application_id: number) => {
     try {
         await axiosInstance.post(`/api/applications/accept/${application_id}`)
-    } catch (error) {
+    } 
+    catch (error) {
         throw error;
     }
 }
@@ -35,7 +35,8 @@ const acceptApplication = async (axiosInstance: any, application_id: number) => 
 const rejectApplication = async (axiosInstance: any, application_id: number) => {
     try {
         await axiosInstance.post(`/api/applications/reject/${application_id}`)
-    } catch (error) {
+    } 
+    catch (error) {
         throw error;
     }
 }
@@ -43,7 +44,8 @@ const rejectApplication = async (axiosInstance: any, application_id: number) => 
 const emptyArchieve = async (axiosInstance: any) => {
     try {
         await axiosInstance.delete("/api/applications");
-    } catch (error) {
+    } 
+    catch (error) {
         throw error;
     }
 }
@@ -51,12 +53,11 @@ const emptyArchieve = async (axiosInstance: any) => {
 const deleteApplication = async (axiosInstance: any, application_id: number) => {
     try {
         await axiosInstance.delete(`/api/applications/${application_id}`);
-    } catch (error) {
+    } 
+    catch (error) {
         throw error;
     }
 }
-
-
 
 
 const ApplicationService = {

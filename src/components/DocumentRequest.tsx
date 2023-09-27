@@ -25,10 +25,13 @@ const DocumentRequest = () => {
         try {
             const documentsData = await DocumentReqeustService.getDocuments(axiosPrivate);
             setDocuments(documentsData);
-        } catch (error: any) {
+        } 
+        catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
-            }  else {
+            }
+            else {
                 giveMessage("error", "Error while fetchind data");
             }
         }
@@ -63,10 +66,13 @@ const DocumentRequest = () => {
 
             giveMessage("success", "Document added");
             getData();
-        } catch (error: any) {
+        } 
+        catch (error: any) {
+console.log(error);
             if (!error?.response) {
                 giveMessage("error", "No server response");
-            } else if (error?.response.status === 403) {
+            } 
+            else if (error?.response.status === 403) {
                 giveMessage("error", "Document is already exists");
             } 
             else {
@@ -77,7 +83,9 @@ const DocumentRequest = () => {
 
     return (
         <>
-        {isLoading ? <Loading /> : <div>
+        
+        {isLoading ? <Loading /> :
+        <div>
             <Divider orientation="left">
                 <h2 style={{fontWeight: "normal", textAlign: "center", fontSize: "25px"}}>Document Request</h2>
             </Divider>
@@ -101,15 +109,13 @@ const DocumentRequest = () => {
             </div>
 
             <br />
-            <DocumentRequestTable documents={documents!} getData={getData}  />
 
+            <DocumentRequestTable documents={documents!} getData={getData}  />
 
         </div>}
 
         </>
-        
-        
-      );
+              );
 }
  
 export default DocumentRequest;

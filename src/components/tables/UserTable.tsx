@@ -23,7 +23,9 @@ interface ChildProps {
 interface DataType {
     user_id: number;
     username: string;
+email: string;
     role: number;
+team_id: number;
   }
 
 type DataIndex = keyof DataType;
@@ -34,16 +36,13 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef<InputRef>(null);
-    const [sortedInfo, setSortedInfo] = useState<SorterResult<DataType>>({});
-    const navigate = useNavigate();
-    const axiosPrivate = useAxiosPrivate();
+        const axiosPrivate = useAxiosPrivate();
 
     const [user, setUser] = useState<DataType>();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [isDone, setIsDone] = useState(false);
-    const [doesPressed, setDoesPressed] = useState(false);
-
+    
 
       const handleSearch = (
         selectedKeys: string[],
@@ -156,13 +155,13 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
           dataIndex: 'role',
           key: 'role',
           width: '10%',
-          render: (role) => {
+          render: (_,record) => {
             let roleAsString = "";
-            if(role === 2001) {
+            if(record.role === 2001) {
               roleAsString = "Intern"
             }
-            else if (role === 1984) {
-              roleAsString = "Supervisor";
+            else if (record.role === 1984) {
+              roleAsString = "Supervisor" + " (" + teams.find(team => team.team_id === record?.team_id)?.team_name + ")";
             }
             else {
               roleAsString = "Admin";
@@ -193,8 +192,6 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
       ];
 
       
-
-
       const handleDeleteUser = async (user_id: number) => {
         try {
           const response = await UserService.deleteUser(axiosPrivate, user_id);
@@ -213,6 +210,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
       
       }
 
+
       const giveMessage = (type: NoticeType, mssge: string) => {
         message.open({
           type: type,
@@ -221,8 +219,10 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
       };
 
   
+
       const handleUpdateUser = (user: DataType) => {
         setUser(user);
+console.log(users);
         showModal();
       }
 
@@ -230,14 +230,7 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
         setIsModalOpen(true);
       };
     
-      const handleOk = () => {
-        setDoesPressed(true);
-      };
-    
-      const handleCancel = () => {
-        setIsModalOpen(false);
-      };
-      
+            
       useEffect(()=> {
         if(isDone) {
              setIsModalOpen(false);
@@ -245,19 +238,17 @@ const UserTable: React.FC<ChildProps> = ({users, teams, getData}) => {
              getData();
              
              setIsDone(false);
-             setDoesPressed(false);
-        }
+                     }
      }, [isDone])
-
 
 
     return (
           <>
-            <Table size='middle' columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 200}} pagination={{hideOnSinglePage: true}}/>
+            <Table size='middle' columns={columns} dataSource={users} style={{width: "600px", top: "0"}} scroll={{y: 250}} pagination={{hideOnSinglePage: true}}/>
        
-            <Modal title="Edit User" open={isModalOpen} onCancel={handleCancel} onOk={handleOk}>
-              <AddUserForm doesPressed={doesPressed} setIsDone={setIsDone} setDoesPressed={setDoesPressed} teams={teams} userToUpdate={user} getData={getData}/>
-            </Modal>
+            {isModalOpen && <Modal title="Edit User" open={isModalOpen} onCancel={() => setIsModalOpen(false)} footer={null}>
+              <AddUserForm  setIsDone={setIsDone} teams={teams} userToUpdate={user} getData={getData}/>
+            </Modal>}
 
           </>
     )

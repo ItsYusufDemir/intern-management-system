@@ -1,5 +1,4 @@
 import InternAddingForm from "./forms/InternAddingForm";
-import {Intern} from "../models/Intern";
 import { Team } from "../models/Team";
 import { useEffect, useState } from "react";
 import TeamService from "../services/TeamService";
@@ -8,11 +7,9 @@ import Loading from "./Loading";
 
 const AddInternPage = () => {
 
-
     const [teams, setTeams] = useState<Team []>();
     const axiosPrivate = useAxiosPrivate();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-
 
     // GET ALL DATA FROM DATABASE
     const getData = async () => {

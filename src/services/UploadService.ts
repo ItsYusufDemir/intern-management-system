@@ -1,5 +1,5 @@
 
-const uploadPhoto = async (axiosInstance: any, options: any): Promise<string | null> => {
+const uploadPhoto = async (axiosInstance: any, options: any): Promise<string> => {
 
     const { file, onSuccess, onError } = options; 
 
@@ -11,29 +11,22 @@ const uploadPhoto = async (axiosInstance: any, options: any): Promise<string | n
         headers: { 'Content-Type': 'multipart/form-data' },
       });
   
-      if (response.status === 200) {
-        // File uploaded successfully
+      
         onSuccess();
-        console.log('Photo uploaded successfully');
-  
+          
         const photo_url = response.data.photo_url;
   
         return photo_url;
-      } else {
-        // File upload failed
-        onError(new Error('Upload failed'));
-        console.log('Failed to upload Photo');
-  
-        return null;
-      }
-    } catch (error) {
-      console.log("Error: ", error);
-      return null;
+      
+    } 
+    catch (error) {
+                onError(new Error('Upload failed'));
+        throw error;
     }
   }
 
   
-const uploadCv = async (axiosInstance: any, options: any): Promise<string | null> => {
+const uploadCv = async (axiosInstance: any, options: any): Promise<string> => {
 
     const { file, onSuccess, onError } = options; 
 
@@ -45,24 +38,14 @@ const uploadCv = async (axiosInstance: any, options: any): Promise<string | null
         headers: { 'Content-Type': 'multipart/form-data' },
       });
   
-      if (response.status === 200) {
-        // File uploaded successfully
+      
         onSuccess();
-        console.log('CV uploaded successfully');
-  
-        const cv_url = response.data.cv_url;
-        
-        return cv_url;
-      } else {
-        // File upload failed
-        onError(new Error('Upload failed'));
-        console.log('Failed to upload CV');
-  
-        return null;
-      }
-    } catch (error) {
-      console.log("Error: ", error);
-      return null;
+                const cv_url = response.data.cv_url;
+                return cv_url;
+      } 
+    catch (error) {
+                onError(new Error('Upload failed'));
+        throw error;
     }
   }
 
@@ -83,27 +66,25 @@ const uploadDocument = async (axiosInstance: any, options: any, intern_id: strin
         headers: { 'Content-Type': 'multipart/form-data' },
       });
   
-      if (response.status === 200) {
+      
         onSuccess();
-        console.log('Document uploaded successfully');
-
+        
         return response.data.document_url;
-      } else {
+      
+    } 
+    catch (error) {
         onError(new Error('Upload failed'));
-        console.log('Failed to upload document');
-      }
-    } catch (error) {
-      throw error;
+              throw error;
     }
   
 }
 
+
 const deleteDocument = async (axiosInstance: any, fileName: string) => {
   try {
     await axiosInstance.delete(`/uploads/documents/${fileName}`);
-
-    
-  } catch (error) {
+}
+    catch (error) {
     throw error;
   }
 }
@@ -111,14 +92,13 @@ const deleteDocument = async (axiosInstance: any, fileName: string) => {
 
 const deleteCv = async (axiosInstance: any, uid: string, from: "garbage" | "cv") => {
   try {
-    const response = await axiosInstance.delete(`/uploads/${from}/${uid}`, {
+    await axiosInstance.delete(`/uploads/${from}/${uid}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
     });
-
-    
-  } catch (error) {
+}
+    catch (error) {
     throw error;
   }
 }
@@ -126,21 +106,17 @@ const deleteCv = async (axiosInstance: any, uid: string, from: "garbage" | "cv")
 
 const deletePhoto = async (axiosInstance: any, uid: string, from: "garbage" | "photos") => {
   try {
-    const response = await axiosInstance.delete(`/uploads/${from}/${uid}`, {
+    await axiosInstance.delete(`/uploads/${from}/${uid}`, {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
     });
 
-    
-  } catch (error) {
-    console.log("Error: ", error);
-    throw error;
+    }
+    catch (error) {
+        throw error;
   }
 }
-
-
-  
 
 
   const UploadService = {
@@ -151,5 +127,6 @@ const deletePhoto = async (axiosInstance: any, uid: string, from: "garbage" | "p
     uploadDocument: uploadDocument,
     deleteDocument: deleteDocument,
   }
+
 
   export default UploadService;

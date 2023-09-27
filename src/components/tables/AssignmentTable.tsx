@@ -41,8 +41,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
     const [isModalOpen2, setIsModalOpen2] = useState(false);
     const [form] = useForm();
     const {auth }: any = useAuth();
-    const [doesPressed, setDoesPressed] = useState(false);
-    const [isDone, setIsDone] = useState(false);
+        const [isDone, setIsDone] = useState(false);
     const [assignment, setAssignment] = useState<Assignment>();
 
     
@@ -52,8 +51,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
           getAssignments!();
           refetchData!();
           setIsDone(false);
-          setDoesPressed(false);
-        }
+                  }
     }, [isDone])
     
 
@@ -307,18 +305,7 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
         setIsModalOpen(true);
       };
     
-      const handleOk = () => {
-        setDoesPressed(true);
-      };
-    
-      const handleCancel = () => {
-        setIsModalOpen(false);
-      };
-
-
-
-
-      const showModal2 = () => {
+            const showModal2 = () => {
         setIsModalOpen2(true);
       };
     
@@ -377,10 +364,9 @@ const AssignmentTable: React.FC<ChildProps> = ({assignments, refetchData, getAss
         <>
             <Table size="middle" columns={columns} dataSource={assignments} style={{ top: "0"}} scroll={{y: 400}} pagination={{hideOnSinglePage: true}}/>
 
-            <Modal title="Edit Assignment" open={isModalOpen} onCancel={handleCancel} onOk={handleOk} width={600}>
-              <AddAssignmentForm setDoesPressed={setDoesPressed} doesPressed={doesPressed} assignment={assignment} setIsDone={setIsDone} />
-              {doesPressed && <LoadingContainer />}
-            </Modal>
+            <Modal title="Edit Assignment" open={isModalOpen} width={600} onCancel={() => setIsModalOpen(false)} footer={null}>
+              <AddAssignmentForm assignment={assignment} setIsDone={setIsDone} />
+                          </Modal>
 
             <Modal title="Grade" open={isModalOpen2} onCancel={handleCancel2} onOk={handleOk2}>
               <div>
